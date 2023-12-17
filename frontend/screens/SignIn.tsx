@@ -57,7 +57,7 @@ export const Signin: FC<{}> = ({}) => {
       responseType: ResponseType.Code,
       scopes: ["openid", "profile", "email"],
       redirectUri:
-        "https://1788-2003-ca-5f3a-3500-9125-c037-490c-b88d.ngrok-free.app/oauthcallback",
+        "https://2e5d-2003-ca-5f3a-3500-9125-c037-490c-b88d.ngrok-free.app/api/google-oauthcallback",
       codeChallenge: codeChallenge,
       state: state,
       codeChallengeMethod: CodeChallengeMethod.S256,

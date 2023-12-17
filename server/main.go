@@ -1,31 +1,55 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"strings"
+	"os"
+	"runtime"
+	"spaces-p/controllers"
+	"spaces-p/middlewares"
+	"spaces-p/zerologger"
+	"time"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
+	"github.com/rs/zerolog"
 )
 
-const oauthCallbackPath = "/oauthcallback"
-
 func main() {
-	m := http.NewServeMux()
-	m.HandleFunc(oauthCallbackPath, func(w http.ResponseWriter, r *http.Request) {
-		authCode := r.URL.Query().Get("code")
-		state := r.URL.Query().Get("state")
-		if authCode == "" || state == "" {
-			http.Error(w, "Authorization code not found", http.StatusBadRequest)
-			return
-		}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	panic("Error loading .env file")
+	// }
 
-		customSchemeURI := strings.Replace(r.URL.String(), oauthCallbackPath, "tryout-expo://", 1)
-		fmt.Println("customSchemeURI :>>", customSchemeURI)
+	// Zerolog configuration
+	logFile, err := os.Create("logfile.log")
+	if err != nil {
+		panic("Error creating logfile.log: >> " + err.Error())
+	}
+	defer logFile.Close()
 
-		// Redirect to your app's custom scheme URI
-		http.Redirect(w, r, customSchemeURI, http.StatusFound)
+	consoleWriter := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC3339,
+	}
+	multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
+	logger := zerologger.New(multi)
+
+	logger.Info("GOMAXPROCS: >> ", runtime.GOMAXPROCS(0))
+
+	cors := cors.New(cors.Config{
+		// todo AllowOrigins based on production or development environment
+		AllowOrigins:     []string{"http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	})
 
-	log.Println("Starting server on :8080")
-	log.Fatal(http.ListenAndServe(":8080", m))
+	userController := controllers.NewUserController(logger)
+
+	router := gin.New()
+	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
+	api := router.Group("/api")
+
+	api.GET("/google-oauthcallback", userController.GoogleOAuthCallback)
+
+	router.Run()
 }
