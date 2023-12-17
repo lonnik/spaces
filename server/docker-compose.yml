@@ -1,0 +1,40 @@
+version: "3.9"
+
+services:
+  redis:
+    image: redis/redis-stack:latest
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+      
+  server_dev:
+    profiles:
+      - dev
+    depends_on:
+      - redis
+    build:
+      dockerfile: Dockerfile
+      context: ./
+      target: dependencies
+    volumes:
+      - ./:/app
+    environment:
+      - PORT=8080
+    ports:
+      - 8080:8080
+    command: /bin/bash -c
+      "make develop"
+
+  server_build:
+    profiles:
+      - build
+    depends_on:
+      - redis
+    build:
+      dockerfile: Dockerfile
+      context: ./
+    environment:
+      - PORT=8080
+    ports:
+      - 8080:8080
+    command: ./tmp/main
