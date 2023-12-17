@@ -1,6 +1,6 @@
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { NavigationContainer } from "@react-navigation/native";
 import { Signin } from "./screens/SignIn";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function App() {
   return (

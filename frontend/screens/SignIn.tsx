@@ -11,11 +11,12 @@ import {
   digestStringAsync,
   CryptoDigestAlgorithm,
   getRandomBytesAsync,
+  getRandomBytes,
 } from "expo-crypto";
 import { Buffer } from "buffer";
 
-const generateRandomURLSafeString = async (length: number) => {
-  const randomBytes = await getRandomBytesAsync(length);
+const generateRandomURLSafeString = (length: number) => {
+  const randomBytes = getRandomBytes(length);
   return Buffer.from(randomBytes)
     .toString("base64")
     .replace(/\+/g, "-")
@@ -30,20 +31,15 @@ const generateCodeChallenge = async (codeVerifier: string) => {
 maybeCompleteAuthSession();
 
 export const Signin: FC<{}> = ({}) => {
-  const [state, setState] = useState("");
+  const [state, setState] = useState(generateRandomURLSafeString(32));
   const [codeVerifier, setCodeVerifier] = useState("");
   const [codeChallenge, setCodeChallenge] = useState("");
 
   useEffect(() => {
-    generateRandomURLSafeString(32)
-      .then((newState) => setState(newState))
-      .catch((err: any) => console.error(err));
+    const newCodeVerifier = generateRandomURLSafeString(43);
 
-    generateRandomURLSafeString(43)
-      .then((newCodeVerifier) => {
-        setCodeVerifier(newCodeVerifier);
-        return generateCodeChallenge(newCodeVerifier);
-      })
+    setCodeVerifier(newCodeVerifier);
+    generateCodeChallenge(newCodeVerifier)
       .then((newCodeChallenge) => setCodeChallenge(newCodeChallenge))
       .catch((err: any) => console.error(err));
   }, []);
