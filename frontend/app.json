@@ -12,12 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "plugins": ["expo-apple-authentication"],
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.tryoutexpo"
+      "bundleIdentifier": "com.anonymous.tryoutexpo",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {

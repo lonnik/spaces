@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Button, View } from "react-native";
+import { Button, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { maybeCompleteAuthSession } from "expo-web-browser";
 import {
@@ -10,10 +10,16 @@ import {
 import {
   digestStringAsync,
   CryptoDigestAlgorithm,
-  getRandomBytesAsync,
   getRandomBytes,
 } from "expo-crypto";
 import { Buffer } from "buffer";
+import {
+  AppleAuthenticationButton,
+  AppleAuthenticationButtonStyle,
+  AppleAuthenticationButtonType,
+  AppleAuthenticationScope,
+  signInAsync,
+} from "expo-apple-authentication";
 
 const generateRandomURLSafeString = (length: number) => {
   const randomBytes = getRandomBytes(length);
@@ -51,7 +57,7 @@ export const Signin: FC<{}> = ({}) => {
       responseType: ResponseType.Code,
       scopes: ["openid", "profile", "email"],
       redirectUri:
-        "https://1f26-2003-ca-5f3a-3500-9125-c037-490c-b88d.ngrok-free.app/oauthcallback", // maybe com.anonymous.tryoutexpo:/oauthredirect
+        "https://1788-2003-ca-5f3a-3500-9125-c037-490c-b88d.ngrok-free.app/oauthcallback",
       codeChallenge: codeChallenge,
       state: state,
       codeChallengeMethod: CodeChallengeMethod.S256,
@@ -78,11 +84,36 @@ export const Signin: FC<{}> = ({}) => {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ paddingTop: insets.top }}>
-      <Button
-        title="Log in with Google"
-        onPress={() => {
-          promptAsync();
+    <View style={{ paddingTop: insets.top, flex: 1, alignItems: "center" }}>
+      <View style={{ marginTop: 25 }}>
+        <Button
+          title="Log in with Google"
+          onPress={() => {
+            promptAsync();
+          }}
+        />
+      </View>
+      <AppleAuthenticationButton
+        buttonType={AppleAuthenticationButtonType.SIGN_IN}
+        buttonStyle={AppleAuthenticationButtonStyle.BLACK}
+        cornerRadius={10}
+        style={{ height: 50, width: "60%", marginTop: 25 }}
+        onPress={async () => {
+          try {
+            const credential = await signInAsync({
+              requestedScopes: [
+                AppleAuthenticationScope.FULL_NAME,
+                AppleAuthenticationScope.EMAIL,
+              ],
+            });
+            console.log("credential :>> ", credential);
+          } catch (e: any) {
+            if (e.code === "ERR_REQUEST_CANCELED") {
+              // handle that the user canceled the sign-in flow
+            } else {
+              // handle other errors
+            }
+          }
         }}
       />
     </View>
