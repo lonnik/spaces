@@ -7,11 +7,6 @@ import {
   ResponseType,
   useAuthRequest,
 } from "expo-auth-session";
-import {
-  digestStringAsync,
-  CryptoDigestAlgorithm,
-  getRandomBytes,
-} from "expo-crypto";
 import { Buffer } from "buffer";
 import {
   AppleAuthenticationButton,
@@ -20,9 +15,11 @@ import {
   AppleAuthenticationScope,
   signInAsync,
 } from "expo-apple-authentication";
+import { getRandomBytes } from "expo-crypto";
 
 const generateRandomURLSafeString = (length: number) => {
   const randomBytes = getRandomBytes(length);
+
   return Buffer.from(randomBytes)
     .toString("base64")
     .replace(/\+/g, "-")
@@ -30,27 +27,36 @@ const generateRandomURLSafeString = (length: number) => {
     .replace(/=/g, "");
 };
 
-const generateCodeChallenge = async (codeVerifier: string) => {
-  return await digestStringAsync(CryptoDigestAlgorithm.SHA256, codeVerifier);
+const signUpGoogle = async (authCode: string, codeVerifier: string) => {
+  try {
+    const request = new Request(
+      "http://localhost:8080/api/users/provider/google",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          codeVerifier,
+          authCode,
+        }),
+      }
+    );
+
+    const response = await fetch(request);
+    const json = await response.json();
+    console.log("json :>> ", json);
+  } catch (error: any) {
+    console.error(error);
+  }
 };
 
 maybeCompleteAuthSession();
 
 export const Signin: FC<{}> = ({}) => {
   const [state, setState] = useState(generateRandomURLSafeString(32));
-  const [codeVerifier, setCodeVerifier] = useState("");
-  const [codeChallenge, setCodeChallenge] = useState("");
+  const [codeChallenge, setCodeChallenge] = useState(
+    generateRandomURLSafeString(32)
+  );
 
-  useEffect(() => {
-    const newCodeVerifier = generateRandomURLSafeString(43);
-
-    setCodeVerifier(newCodeVerifier);
-    generateCodeChallenge(newCodeVerifier)
-      .then((newCodeChallenge) => setCodeChallenge(newCodeChallenge))
-      .catch((err: any) => console.error(err));
-  }, []);
-
-  const [_, response, promptAsync] = useAuthRequest(
+  const [request, response, promptAsync] = useAuthRequest(
     {
       clientId:
         "761033409352-qg2008kkuf6f2jlm9vbh025qj3emih95.apps.googleusercontent.com",
@@ -72,8 +78,9 @@ export const Signin: FC<{}> = ({}) => {
         return;
       }
 
-      // TODO: create endpoint and send code and code verifier to it
-      console.log("response.params.code :>> ", response.params.code);
+      if (request?.codeVerifier) {
+        signUpGoogle(response.params.code, request.codeVerifier);
+      }
     }
 
     if (response?.type === "error") {

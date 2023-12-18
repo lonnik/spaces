@@ -5,6 +5,7 @@ import (
 	"runtime"
 	"spaces-p/controllers"
 	"spaces-p/middlewares"
+	"spaces-p/services"
 	"spaces-p/zerologger"
 	"time"
 
@@ -43,13 +44,19 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	})
 
-	userController := controllers.NewUserController(logger)
+	// set up services
+	userService := services.NewUserService(logger)
+
+	// set up controllers
+	userController := controllers.NewUserController(logger, userService)
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
 	api := router.Group("/api")
 
 	api.GET("/google-oauthcallback", userController.GoogleOAuthCallback)
+	api.POST("/users/provider/:provider", userController.Signup)
+	api.PUT("/users/:userid")
 
 	router.Run()
 }
