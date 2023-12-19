@@ -4,6 +4,7 @@ import (
 	"os"
 	"runtime"
 	"spaces-p/controllers"
+	"spaces-p/firebase"
 	"spaces-p/middlewares"
 	"spaces-p/services"
 	"spaces-p/zerologger"
@@ -33,8 +34,12 @@ func main() {
 	}
 	multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
 	logger := zerologger.New(multi)
-
 	logger.Info("GOMAXPROCS: >> ", runtime.GOMAXPROCS(0))
+
+	// initialize firebase auth client
+	if err := firebase.InitAuthClient(); err != nil {
+		panic(err)
+	}
 
 	cors := cors.New(cors.Config{
 		// todo AllowOrigins based on production or development environment

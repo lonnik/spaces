@@ -60,7 +60,7 @@ func (us *UserController) Signup(c *gin.Context) {
 		}
 
 		var err error
-		newUser, err = us.userService.SignUpGoogle(body.AuthCode, body.CodeVerifier)
+		newUser, err = us.userService.SignUpGoogle(c.Request.Context(), body.AuthCode, body.CodeVerifier)
 		if err != nil {
 			utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), us.logger)
 			return
