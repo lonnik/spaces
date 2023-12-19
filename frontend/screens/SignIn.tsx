@@ -2,12 +2,7 @@ import { FC, useEffect, useState } from "react";
 import { Button, Text, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { maybeCompleteAuthSession } from "expo-web-browser";
-import {
-  CodeChallengeMethod,
-  ResponseType,
-  useAuthRequest,
-} from "expo-auth-session";
-import { Buffer } from "buffer";
+import { useAuthRequest } from "expo-auth-session/providers/google";
 import {
   AppleAuthenticationButton,
   AppleAuthenticationButtonStyle,
@@ -15,72 +10,45 @@ import {
   AppleAuthenticationScope,
   signInAsync,
 } from "expo-apple-authentication";
-import { getRandomBytes } from "expo-crypto";
-
-const generateRandomURLSafeString = (length: number) => {
-  const randomBytes = getRandomBytes(length);
-
-  return Buffer.from(randomBytes)
-    .toString("base64")
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=/g, "");
-};
-
-const signUpGoogle = async (authCode: string, codeVerifier: string) => {
-  try {
-    const request = new Request(
-      "http://localhost:8080/api/users/provider/google",
-      {
-        method: "POST",
-        body: JSON.stringify({
-          codeVerifier,
-          authCode,
-        }),
-      }
-    );
-
-    const response = await fetch(request);
-    const json = await response.json();
-    console.log("json :>> ", json);
-  } catch (error: any) {
-    console.error(error);
-  }
-};
+import { auth } from "../firebase";
+import {
+  GoogleAuthProvider,
+  onAuthStateChanged,
+  signInWithCredential,
+  signOut,
+} from "firebase/auth";
+import { fetchApi } from "../utils/fetch_api";
 
 maybeCompleteAuthSession();
 
 export const Signin: FC<{}> = ({}) => {
-  const [state, setState] = useState(generateRandomURLSafeString(32));
-  const [codeChallenge, setCodeChallenge] = useState(
-    generateRandomURLSafeString(32)
-  );
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const [request, response, promptAsync] = useAuthRequest(
-    {
-      clientId:
-        "761033409352-qg2008kkuf6f2jlm9vbh025qj3emih95.apps.googleusercontent.com",
-      responseType: ResponseType.Code,
-      scopes: ["openid", "profile", "email"],
-      redirectUri:
-        "https://2e5d-2003-ca-5f3a-3500-9125-c037-490c-b88d.ngrok-free.app/api/google-oauthcallback",
-      codeChallenge: codeChallenge,
-      state: state,
-      codeChallengeMethod: CodeChallengeMethod.S256,
-    },
-    { authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth" }
-  );
+  const [_, response, promptAsync] = useAuthRequest({
+    iosClientId:
+      "761033409352-fdpgjau25frqd1m6kfe6sgomp3fri02n.apps.googleusercontent.com",
+    androidClientId:
+      "761033409352-fe1oamggqthk97q8hck63dtqsr0bl6at.apps.googleusercontent.com",
+  });
 
   useEffect(() => {
     if (response?.type === "success") {
-      if (response.params?.state !== state) {
-        console.error("State mismatch. Potential CSRF attack.");
-        return;
-      }
+      const { id_token: idToken } = response.params;
+      const credential = GoogleAuthProvider.credential(idToken);
 
-      if (request?.codeVerifier) {
-        signUpGoogle(response.params.code, request.codeVerifier);
-      }
+      signInWithCredential(auth, credential)
+        .then(() => {
+          return fetchApi("/users", {
+            method: "POST",
+            body: JSON.stringify({ idToken }),
+          });
+        })
+        .catch((error) => {
+          console.error("error :>>", error);
+
+          return signOut(auth);
+        })
+        .catch((error) => console.error("error :>>", error));
     }
 
     if (response?.type === "error") {
@@ -88,15 +56,31 @@ export const Signin: FC<{}> = ({}) => {
     }
   }, [response]);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        return;
+      }
+
+      setIsLoggedIn(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   const insets = useSafeAreaInsets();
 
   return (
     <View style={{ paddingTop: insets.top, flex: 1, alignItems: "center" }}>
+      <Text style={{ fontSize: 30 }}>
+        {isLoggedIn ? "is logged in" : "is not logged in"}
+      </Text>
       <View style={{ marginTop: 25 }}>
         <Button
           title="Log in with Google"
           onPress={() => {
-            promptAsync();
+            promptAsync().catch((error) => console.error("error :>>", error));
           }}
         />
       </View>
@@ -123,6 +107,14 @@ export const Signin: FC<{}> = ({}) => {
           }
         }}
       />
+      <View style={{ marginTop: 25 }}>
+        <Button
+          title="sign out"
+          onPress={() => {
+            signOut(auth).catch((error) => console.error("error :>>", error));
+          }}
+        />
+      </View>
     </View>
   );
 };
