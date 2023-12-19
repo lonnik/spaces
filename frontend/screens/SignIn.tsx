@@ -26,9 +26,9 @@ export const Signin: FC<{}> = ({}) => {
 
   const [_, response, promptAsync] = useAuthRequest({
     iosClientId:
-      "761033409352-fdpgjau25frqd1m6kfe6sgomp3fri02n.apps.googleusercontent.com",
+      "717063629448-ctoeh0a3vdaknng6cvmb2d23v1mjttk1.apps.googleusercontent.com",
     androidClientId:
-      "761033409352-fe1oamggqthk97q8hck63dtqsr0bl6at.apps.googleusercontent.com",
+      "717063629448-u808b96qbshbccogqoq7fnvf86fv33ne.apps.googleusercontent.com",
   });
 
   useEffect(() => {
@@ -37,10 +37,19 @@ export const Signin: FC<{}> = ({}) => {
       const credential = GoogleAuthProvider.credential(idToken);
 
       signInWithCredential(auth, credential)
-        .then(() => {
+        .then((userCredential) => {
+          const firebaseIdToken = (userCredential as any)?._tokenResponse
+            ?.idToken as string;
+
+          if (!firebaseIdToken) {
+            throw new Error("firebaseIdToken is undefined");
+          }
+
           return fetchApi("/users", {
             method: "POST",
-            body: JSON.stringify({ idToken }),
+            body: JSON.stringify({
+              idToken: firebaseIdToken,
+            }),
           });
         })
         .catch((error) => {
