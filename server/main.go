@@ -67,9 +67,14 @@ func main() {
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
 	api := router.Group("/api")
 
-	api.POST("/users", userController.CreateUser)
+	// USERS
+	api.POST("/users", userController.CreateUserFromIdToken)
 	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, true), userController.GetUser)
+
+	// AUTHENTICATED USER
 	api.GET("/user", middlewares.EnsureAuthenticated(logger, redisRepo, false, false), userController.GetAuthedUser)
+	api.PUT("/user", middlewares.EnsureAuthenticated(logger, redisRepo, true, false)) // TODO
+	api.DELETE("/user")                                                               // TODO
 
 	router.Run()
 }

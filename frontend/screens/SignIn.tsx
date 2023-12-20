@@ -1,5 +1,5 @@
 import { FC, useEffect, useState } from "react";
-import { Button, Text, View } from "react-native";
+import { Button, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { maybeCompleteAuthSession } from "expo-web-browser";
 import { useAuthRequest } from "expo-auth-session/providers/google";
@@ -16,6 +16,11 @@ import {
   onAuthStateChanged,
   signInWithCredential,
   signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  deleteUser,
+  User,
 } from "firebase/auth";
 import { fetchApi } from "../utils/fetch_api";
 
@@ -50,12 +55,15 @@ export const Signin: FC<{}> = ({}) => {
             body: JSON.stringify({
               idToken: firebaseIdToken,
             }),
-          });
-        })
-        .catch((error) => {
-          console.error("error :>>", error);
+          })
+            .then((user) => {
+              console.log("user :>> ", user);
+            })
+            .catch((error) => {
+              console.error("error :>>", error);
 
-          return signOut(auth);
+              return signOut(auth);
+            });
         })
         .catch((error) => console.error("error :>>", error));
     }
@@ -116,6 +124,8 @@ export const Signin: FC<{}> = ({}) => {
           }
         }}
       />
+      <EmailSignIn />
+      <EmailSignUp />
       <View style={{ marginTop: 25 }}>
         <Button
           title="sign out"
@@ -124,6 +134,117 @@ export const Signin: FC<{}> = ({}) => {
           }}
         />
       </View>
+    </View>
+  );
+};
+
+const EmailSignIn: FC<{}> = ({}) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignIn = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        console.log("userCredential.user :>> ", userCredential.user);
+      })
+      .catch((error) => {
+        console.log("error :>> ", error);
+      });
+  };
+
+  return (
+    <View style={{ marginTop: 30 }}>
+      <TextInput
+        onChangeText={(newText) => setEmail(newText)}
+        style={{
+          borderWidth: 1,
+          height: 40,
+          width: 250,
+          marginBottom: 10,
+          padding: 5,
+          fontSize: 20,
+        }}
+        placeholder="email"
+      />
+      <TextInput
+        onChangeText={(newPassword) => setPassword(newPassword)}
+        style={{
+          borderWidth: 1,
+          height: 40,
+          width: 250,
+          padding: 5,
+          fontSize: 20,
+        }}
+        placeholder="password"
+      />
+      <Button title="sign in with email" onPress={handleSignIn} />
+    </View>
+  );
+};
+
+const EmailSignUp: FC<{}> = ({}) => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleSignUp = () => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in
+        const user = userCredential.user;
+        const firebaseIdToken = (userCredential as any)?._tokenResponse
+          ?.idToken as string;
+
+        if (!firebaseIdToken) {
+          throw new Error("firebaseIdToken is undefined");
+        }
+
+        // email verification
+        sendEmailVerification(user).then(() => {
+          console.log("sent email verification");
+        });
+
+        return fetchApi("/users", {
+          method: "POST",
+          body: JSON.stringify({
+            idToken: firebaseIdToken,
+          }),
+        })
+          .then((user) => {
+            console.log("user :>> ", user);
+          })
+          .catch(() => deleteUser(auth.currentUser as User));
+      })
+      .catch((error) => {
+        console.error("error :>> ", error);
+      });
+  };
+
+  return (
+    <View style={{ marginTop: 30 }}>
+      <TextInput
+        onChangeText={(newText) => setEmail(newText)}
+        style={{
+          borderWidth: 1,
+          height: 40,
+          width: 250,
+          marginBottom: 10,
+          padding: 5,
+          fontSize: 20,
+        }}
+        placeholder="email"
+      />
+      <TextInput
+        onChangeText={(newPassword) => setPassword(newPassword)}
+        style={{
+          borderWidth: 1,
+          height: 40,
+          width: 250,
+          padding: 5,
+          fontSize: 20,
+        }}
+        placeholder="password"
+      />
+      <Button title="sign up with email" onPress={handleSignUp} />
     </View>
   );
 };

@@ -19,7 +19,7 @@ func NewUserController(logger common.Logger, userService *services.UserService) 
 	return &UserController{userService, logger}
 }
 
-func (uc *UserController) CreateUser(c *gin.Context) {
+func (uc *UserController) CreateUserFromIdToken(c *gin.Context) {
 	const op errors.Op = "controllers.UserController.CreateUser"
 	var ctx = c.Request.Context()
 	var body struct {
@@ -31,7 +31,7 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.userService.CreateUser(ctx, body.IdToken)
+	user, err := uc.userService.CreateUserFromIdToken(ctx, body.IdToken)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return

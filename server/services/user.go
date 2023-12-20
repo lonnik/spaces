@@ -22,7 +22,7 @@ func NewUserService(logger common.Logger, cacheRepo common.CacheRepository) *Use
 // CreateUser verifies the id token for its valicity, verifies that the user's email is verifies.
 // It creates a new user with the information extracted from the id token in case there is no user yet with the same UID and returns that newly created user.
 // In case a user already exists, CreateUser basically becomes a no-op and returns that existing user.
-func (us *UserService) CreateUser(ctx context.Context, idToken string) (*models.User, error) {
+func (us *UserService) CreateUserFromIdToken(ctx context.Context, idToken string) (*models.User, error) {
 	const op errors.Op = "services.UserService.CreateUser"
 
 	token, err := firebase.AuthClient.VerifyIDToken(ctx, idToken)
@@ -30,12 +30,26 @@ func (us *UserService) CreateUser(ctx context.Context, idToken string) (*models.
 		return nil, errors.E(op, err, http.StatusBadRequest)
 	}
 
+	// extract signInProvider from token claims
+	firebaseMap, ok := token.Claims["firebase"].(map[string]any)
+	if !ok {
+		errNoFirebaseMap := errors.New("there is no firebase claim as map value")
+		return nil, errors.E(op, errNoFirebaseMap, http.StatusBadRequest)
+	}
+	signInProvider, ok := firebaseMap["sign_in_provider"].(string)
+	if !ok {
+		errNoSignInProvider := errors.New("there is no sign-in provider as string value")
+		return nil, errors.E(op, errNoSignInProvider, http.StatusBadRequest)
+	}
+
+	// extract isVerified from token claims
 	isVerified, ok := token.Claims["email_verified"].(bool)
-	switch {
-	case !ok:
-		errNoVerifiedClaim := errors.New("there is no is_verified claim with bool value")
+	if !ok {
+		errNoVerifiedClaim := errors.New("there is no is_verified claim as bool value")
 		return nil, errors.E(op, errNoVerifiedClaim, http.StatusBadRequest)
-	case !isVerified:
+	}
+
+	if !isVerified && signInProvider != "password" {
 		errNotVerified := errors.New("email is not verified")
 		return nil, errors.E(op, errNotVerified, http.StatusBadRequest)
 	}
@@ -76,11 +90,17 @@ func (us *UserService) GetUser(ctx context.Context, userId string) (*models.User
 func (us *UserService) createNewUserFromTokenClaims(ctx context.Context, id string, tokenClaims map[string]any) error {
 	const op errors.Op = "services.UserService.createNewUserFromTokenClaims"
 
-	avatarUrl := tokenClaims["picture"].(string)
-	name := tokenClaims["name"].(string)
-	nameArr := strings.Split(name, " ")
-	firstName := nameArr[0]
-	lastName := strings.Join(nameArr[1:], " ")
+	avatarUrl, _ := tokenClaims["picture"].(string)
+	var firstName string
+	var lastName string
+	name, ok := tokenClaims["name"].(string)
+	if ok {
+		nameArr := strings.Split(name, " ")
+		firstName = nameArr[0]
+		if len(nameArr) > 1 {
+			lastName = strings.Join(nameArr[1:], " ")
+		}
+	}
 
 	var newUser = models.NewUser{
 		ID:        id,

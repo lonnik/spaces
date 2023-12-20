@@ -2,7 +2,6 @@ package redis_repo
 
 import (
 	"context"
-	"reflect"
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/models"
@@ -26,7 +25,7 @@ func (repo *RedisRepository) GetUserById(ctx context.Context, id string) (*model
 	user.LastName = r[userFields.userLastNameField]
 	user.Username = r[userFields.userUsernameField]
 	user.AvatarUrl = r[userFields.userAvatarUrlField]
-	user.IsSignedUp = len(r) == reflect.TypeOf(userFields).NumField()
+	user.IsSignedUp = user.FirstName != "" && user.LastName != "" && user.Username != "" && user.AvatarUrl != ""
 
 	return &user, nil
 }
@@ -35,18 +34,11 @@ func (repo *RedisRepository) SetUser(ctx context.Context, newUser models.NewUser
 	const op errors.Op = "redis_repo.RedisRepository.SetUser"
 	var userKey = getUserKey(newUser.ID)
 
-	v := map[string]interface{}{}
-	if newUser.FirstName != "" {
-		v[userFields.userFirstNameField] = newUser.FirstName
-	}
-	if newUser.LastName != "" {
-		v[userFields.userLastNameField] = newUser.LastName
-	}
-	if newUser.Username != "" {
-		v[userFields.userUsernameField] = newUser.Username
-	}
-	if newUser.AvatarUrl != "" {
-		v[userFields.userAvatarUrlField] = newUser.AvatarUrl
+	v := map[string]interface{}{
+		userFields.userFirstNameField: newUser.FirstName,
+		userFields.userLastNameField:  newUser.LastName,
+		userFields.userUsernameField:  newUser.Username,
+		userFields.userAvatarUrlField: newUser.AvatarUrl,
 	}
 
 	if err := repo.redisClient.HSet(ctx, userKey, v).Err(); err != nil {
