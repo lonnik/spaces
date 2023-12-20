@@ -63,15 +63,13 @@ func main() {
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
 
-	// middlewares
-	// userIsAuthenticatedAndSignedUpMiddleware := middlewares.EnsureAuthenticatedAndSignedUp(logger, redisRepo)
-
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
 	api := router.Group("/api")
 
 	api.POST("/users", userController.CreateUser)
-	// api.GET("/users/:userid")
+	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, true), userController.GetUser)
+	api.GET("/user", middlewares.EnsureAuthenticated(logger, redisRepo, false, false), userController.GetAuthedUser)
 
 	router.Run()
 }

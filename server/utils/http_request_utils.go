@@ -6,23 +6,10 @@ import (
 	"spaces-p/models"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 )
 
-func getUuidFromPath(c *gin.Context, segment string) (uuid.UUID, error) {
-	const op errors.Op = "utils.getUuidFromPath"
-
-	segmentValue := c.Param(segment)
-	uuidValue, err := uuid.Parse(segmentValue)
-	if err != nil {
-		return uuid.Nil, errors.E(op, err)
-	}
-
-	return uuidValue, nil
-}
-
-func GetUserIdFromPath(c *gin.Context) (userId uuid.UUID, err error) {
-	return getUuidFromPath(c, "userid")
+func GetUserIdFromPath(c *gin.Context) string {
+	return c.Param("userid")
 }
 
 func GetUserFromContext(c *gin.Context) (user *models.User, err error) {
@@ -30,7 +17,7 @@ func GetUserFromContext(c *gin.Context) (user *models.User, err error) {
 
 	userContext, userExists := c.Get("user")
 	if !userExists {
-		err := fmt.Errorf("no user in context")
+		err := errors.New("no user in context")
 		return nil, errors.E(op, err)
 	}
 

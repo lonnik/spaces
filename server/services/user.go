@@ -59,6 +59,20 @@ func (us *UserService) CreateUser(ctx context.Context, idToken string) (*models.
 	return user, nil
 }
 
+func (us *UserService) GetUser(ctx context.Context, userId string) (*models.User, error) {
+	const op errors.Op = "services.UserService.GetUser"
+
+	user, err := us.cacheRepo.GetUserById(ctx, userId)
+	switch {
+	case err != nil:
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	case !user.IsSignedUp:
+		return nil, errors.E(op, common.ErrUserNotSignedUp, http.StatusNotFound)
+	}
+
+	return user, nil
+}
+
 func (us *UserService) createNewUserFromTokenClaims(ctx context.Context, id string, tokenClaims map[string]any) error {
 	const op errors.Op = "services.UserService.createNewUserFromTokenClaims"
 

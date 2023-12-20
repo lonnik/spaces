@@ -10,22 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func EnsureAuthenticatedAndSignedUp(logger common.Logger, cacheRepo common.CacheRepository) gin.HandlerFunc {
-	const op errors.Op = "middlewares.EnsureAuthenticatedAndSignedUp"
+func EnsureAuthenticated(
+	logger common.Logger,
+	cacheRepo common.CacheRepository,
+	emailIsVerified, isSignedUp bool,
+) gin.HandlerFunc {
+	const op errors.Op = "middlewares.EnsureAuthenticated"
 
 	return func(c *gin.Context) {
 		var ctx = c.Request.Context()
 
-		// validate bearer token
-		const bearerPrefix = "Bearer "
-		authHeaderValue := c.Request.Header.Get("Authorization")
-		if !strings.HasPrefix(authHeaderValue, bearerPrefix) {
-			errNoBearerPrefix := errors.New("no bearer prefix")
-			abortAndWriteError(c, errors.E(op, errNoBearerPrefix, http.StatusBadRequest), logger)
+		bearerToken, err := extractBearerToken(c)
+		if err != nil {
+			abortAndWriteError(c, errors.E(op, err, http.StatusBadRequest), logger)
 			return
 		}
-
-		bearerToken := authHeaderValue[len(bearerPrefix):]
 
 		token, err := firebase.AuthClient.VerifyIDToken(ctx, bearerToken)
 		if err != nil {
@@ -34,19 +33,21 @@ func EnsureAuthenticatedAndSignedUp(logger common.Logger, cacheRepo common.Cache
 		}
 
 		// verify that user's email is verified
-		isVerified, ok := token.Claims["email_verified"].(bool)
-		switch {
-		case !ok:
-			errNoVerifiedClaim := errors.New("there is no is_verified claim with bool value")
-			abortAndWriteError(c, errors.E(op, errNoVerifiedClaim, http.StatusBadRequest), logger)
-			return
-		case !isVerified:
-			errNotVerified := errors.New("email is not verified")
-			abortAndWriteError(c, errors.E(op, errNotVerified, http.StatusUnauthorized), logger)
-			return
+		if emailIsVerified {
+			isVerified, ok := token.Claims["email_verified"].(bool)
+			switch {
+			case !ok:
+				errNoVerifiedClaim := errors.New("there is no is_verified claim with bool value")
+				abortAndWriteError(c, errors.E(op, errNoVerifiedClaim, http.StatusBadRequest), logger)
+				return
+			case !isVerified:
+				errNotVerified := errors.New("email is not verified")
+				abortAndWriteError(c, errors.E(op, errNotVerified, http.StatusUnauthorized), logger)
+				return
+			}
 		}
 
-		// verify that user exists and is signed up
+		// verify that user exists
 		user, err := cacheRepo.GetUserById(ctx, token.UID)
 		switch {
 		case errors.Is(err, common.ErrNotFound):
@@ -55,9 +56,11 @@ func EnsureAuthenticatedAndSignedUp(logger common.Logger, cacheRepo common.Cache
 		case err != nil:
 			abortAndWriteError(c, errors.E(op, err, http.StatusInternalServerError), logger)
 			return
-		case !user.IsSignedUp:
-			errNotSignedUp := errors.New("user is not fully signed up yet")
-			abortAndWriteError(c, errors.E(op, errNotSignedUp, http.StatusUnauthorized), logger)
+		}
+
+		// verify that user is signed up
+		if isSignedUp && !user.IsSignedUp {
+			abortAndWriteError(c, errors.E(op, common.ErrUserNotSignedUp, http.StatusUnauthorized), logger)
 			return
 		}
 
@@ -65,4 +68,17 @@ func EnsureAuthenticatedAndSignedUp(logger common.Logger, cacheRepo common.Cache
 
 		c.Next()
 	}
+}
+
+func extractBearerToken(c *gin.Context) (string, error) {
+	const op errors.Op = "middlewares.extractBearerToken"
+
+	const bearerPrefix = "Bearer "
+	authHeaderValue := c.Request.Header.Get("Authorization")
+	if !strings.HasPrefix(authHeaderValue, bearerPrefix) {
+		errNoBearerPrefix := errors.New("no bearer prefix")
+		return "", errors.E(op, errNoBearerPrefix)
+	}
+
+	return authHeaderValue[len(bearerPrefix):], nil
 }

@@ -21,6 +21,7 @@ func NewUserController(logger common.Logger, userService *services.UserService) 
 
 func (uc *UserController) CreateUser(c *gin.Context) {
 	const op errors.Op = "controllers.UserController.CreateUser"
+	var ctx = c.Request.Context()
 	var body struct {
 		IdToken string `json:"idToken"`
 	}
@@ -30,7 +31,34 @@ func (uc *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.userService.CreateUser(c.Request.Context(), body.IdToken)
+	user, err := uc.userService.CreateUser(ctx, body.IdToken)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err), uc.logger)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func (uc *UserController) GetUser(c *gin.Context) {
+	const op errors.Op = "controllers.UserController.GetUser"
+	var ctx = c.Request.Context()
+
+	userId := utils.GetUserIdFromPath(c)
+
+	user, err := uc.userService.GetUser(ctx, userId)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err), uc.logger)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": user})
+}
+
+func (uc *UserController) GetAuthedUser(c *gin.Context) {
+	const op errors.Op = "controllers.UserController.GetAuthedUser"
+
+	user, err := utils.GetUserFromContext(c)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return
