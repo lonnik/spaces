@@ -6,6 +6,8 @@ import (
 	"spaces-p/controllers"
 	"spaces-p/firebase"
 	"spaces-p/middlewares"
+	"spaces-p/redis"
+	"spaces-p/repositories/redis_repo"
 	"spaces-p/services"
 	"spaces-p/zerologger"
 	"time"
@@ -49,19 +51,27 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	})
 
+	// initialize redis client
+	redis.ConnectRedis()
+
+	// set up cache repo
+	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
+
 	// set up services
-	userService := services.NewUserService(logger)
+	userService := services.NewUserService(logger, redisRepo)
 
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
+
+	// middlewares
+	// userIsAuthenticatedAndSignedUpMiddleware := middlewares.EnsureAuthenticatedAndSignedUp(logger, redisRepo)
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
 	api := router.Group("/api")
 
-	api.GET("/google-oauthcallback", userController.GoogleOAuthCallback)
-	api.POST("/users/provider/:provider", userController.Signup)
-	api.PUT("/users/:userid")
+	api.POST("/users", userController.CreateUser)
+	// api.GET("/users/:userid")
 
 	router.Run()
 }
