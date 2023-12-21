@@ -21,6 +21,7 @@ import {
   sendEmailVerification,
   deleteUser,
   User,
+  OAuthProvider,
 } from "firebase/auth";
 import { fetchApi } from "../utils/fetch_api";
 
@@ -101,29 +102,7 @@ export const Signin: FC<{}> = ({}) => {
           }}
         />
       </View>
-      <AppleAuthenticationButton
-        buttonType={AppleAuthenticationButtonType.SIGN_IN}
-        buttonStyle={AppleAuthenticationButtonStyle.BLACK}
-        cornerRadius={10}
-        style={{ height: 50, width: "60%", marginTop: 25 }}
-        onPress={async () => {
-          try {
-            const credential = await signInAsync({
-              requestedScopes: [
-                AppleAuthenticationScope.FULL_NAME,
-                AppleAuthenticationScope.EMAIL,
-              ],
-            });
-            console.log("credential :>> ", credential);
-          } catch (e: any) {
-            if (e.code === "ERR_REQUEST_CANCELED") {
-              // handle that the user canceled the sign-in flow
-            } else {
-              // handle other errors
-            }
-          }
-        }}
-      />
+      <AppleSignIn />
       <EmailSignIn />
       <EmailSignUp />
       <View style={{ marginTop: 25 }}>
@@ -138,6 +117,62 @@ export const Signin: FC<{}> = ({}) => {
   );
 };
 
+const AppleSignIn: FC<{}> = () => {
+  const handleSignIn = async () => {
+    try {
+      const credential = await signInAsync({
+        requestedScopes: [
+          AppleAuthenticationScope.FULL_NAME,
+          AppleAuthenticationScope.EMAIL,
+        ],
+      });
+
+      // if (!credential.identityToken) {
+      //   throw new Error("Apple Sign-In failed - no identify token returned");
+      // }
+
+      // const provider = new OAuthProvider("apple.com");
+      // const firebaseCredential = provider.credential({
+      //   idToken: credential.identityToken,
+      // });
+      // const userCredential = await signInWithCredential(
+      //   auth,
+      //   firebaseCredential
+      // );
+
+      // const firebaseIdToken = (userCredential as any)?._tokenResponse
+      //   ?.idToken as string;
+
+      // if (!firebaseIdToken) {
+      //   throw new Error("firebaseIdToken is undefined");
+      // }
+
+      // const user = await fetchApi<any>("/users", {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     idToken: firebaseIdToken,
+      //   }),
+      // });
+    } catch (error: any) {
+      console.log("error :>> ", error);
+      if (error.code === "ERR_REQUEST_CANCELED") {
+        // handle that the user canceled the sign-in flow
+      } else {
+        // handle other errors
+      }
+    }
+  };
+
+  return (
+    <AppleAuthenticationButton
+      buttonType={AppleAuthenticationButtonType.SIGN_IN}
+      buttonStyle={AppleAuthenticationButtonStyle.BLACK}
+      cornerRadius={10}
+      style={{ height: 50, width: "60%", marginTop: 25 }}
+      onPress={handleSignIn}
+    />
+  );
+};
 const EmailSignIn: FC<{}> = ({}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
