@@ -1,6 +1,6 @@
 package models
 
-type BaseUser struct {
+type baseUser struct {
 	ID        string `json:"id"`
 	Username  string `json:"username"`
 	FirstName string `json:"firstName"`
@@ -8,8 +8,8 @@ type BaseUser struct {
 	AvatarUrl string `json:"avatarUrl"`
 }
 type User struct {
-	BaseUser
+	baseUser
 	IsSignedUp bool `json:"isSignedUp"`
 }
 
-type NewUser BaseUser
+type NewUser baseUser

@@ -59,9 +59,11 @@ func main() {
 
 	// set up services
 	userService := services.NewUserService(logger, redisRepo)
+	spaceService := services.NewSpaceService(logger, redisRepo)
 
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
+	spaceController := controllers.NewSpaceController(logger, spaceService)
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
@@ -75,6 +77,10 @@ func main() {
 	api.GET("/user", middlewares.EnsureAuthenticated(logger, redisRepo, false, false), userController.GetAuthedUser)
 	api.PUT("/user", middlewares.EnsureAuthenticated(logger, redisRepo, true, false)) // TODO
 	api.DELETE("/user")                                                               // TODO
+
+	// SPACES
+	api.GET("/spaces", spaceController.GetSpaces)
+	api.POST("/spaces", spaceController.CreateSpace)
 
 	router.Run()
 }
