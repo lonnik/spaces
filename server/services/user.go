@@ -19,6 +19,16 @@ func NewUserService(logger common.Logger, cacheRepo common.CacheRepository) *Use
 	return &UserService{logger, cacheRepo}
 }
 
+func (us *UserService) CreateUser(ctx context.Context, newUser models.NewUser) error {
+	const op errors.Op = "services.UserService.CreateUser"
+
+	if err := us.cacheRepo.SetUser(ctx, newUser); err != nil {
+		return errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return nil
+}
+
 // CreateUser verifies the id token for its valicity, verifies that the user's email is verifies.
 // It creates a new user with the information extracted from the id token in case there is no user yet with the same UID and returns that newly created user.
 // In case a user already exists, CreateUser basically becomes a no-op and returns that existing user.
