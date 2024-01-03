@@ -103,3 +103,22 @@ func (ss *SpaceService) CreateSpace(ctx context.Context, newSpace models.NewSpac
 
 	return spaceId, nil
 }
+
+func (ss *SpaceService) AddSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) error {
+	const op errors.Op = "services.SpaceService.AddSpaceSubscriber"
+
+	// check if space subscriber already exists so the created at time is not overridden in the spaceSubscribersKey and userSpacesKey sorted sets
+	spaceHasSubscriber, err := ss.cacheRepo.HasSpaceSubscriber(ctx, spaceId, userUid)
+	switch {
+	case err != nil:
+		return errors.E(op, err, http.StatusInternalServerError)
+	case spaceHasSubscriber:
+		return nil
+	}
+
+	if err := ss.cacheRepo.SetSpaceSubscriber(ctx, spaceId, userUid); err != nil {
+		return errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return nil
+}

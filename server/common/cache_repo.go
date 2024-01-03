@@ -27,7 +27,9 @@ type SpaceCacheRepository interface {
 	GetSpaceTopLevelThreadsByTime(ctx context.Context, spaceId uuid.Uuid, offset, count int64) ([]models.TopLevelThread, error)
 	GetSpaceTopLevelThreadsByPopularity(ctx context.Context, spaceId uuid.Uuid, offset, count int64) ([]models.TopLevelThread, error)
 	SetSpace(ctx context.Context, newSpace models.NewSpace) (uuid.Uuid, error)
+	SetSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) error
 	HasSpaceThread(ctx context.Context, spaceId, threadId uuid.Uuid) (bool, error)
+	HasSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) (bool, error)
 }
 
 type ThreadCacheRepository interface {

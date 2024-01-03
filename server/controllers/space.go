@@ -279,3 +279,27 @@ func (uc *SpaceController) LikeMessage(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"data": "success"})
 }
+
+func (uc *SpaceController) AddSpaceSubscriber(c *gin.Context) {
+	const op errors.Op = "controllers.SpaceController.AddSpaceSubscriber"
+	var ctx = c.Request.Context()
+
+	spaceId, err := utils.GetSpaceIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	authenticatedUser, err := utils.GetUserFromContext(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), uc.logger)
+		return
+	}
+
+	if err := uc.spaceService.AddSpaceSubscriber(ctx, spaceId, authenticatedUser.ID); err != nil {
+		utils.WriteError(c, errors.E(op, err), uc.logger)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": "success"})
+}

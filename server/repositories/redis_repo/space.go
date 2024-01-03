@@ -193,6 +193,43 @@ func (repo *RedisRepository) HasSpaceThread(ctx context.Context, spaceId, thread
 	return thread.SpaceId == spaceId, nil
 }
 
+func (repo *RedisRepository) SetSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) error {
+	const op errors.Op = "redis_repo.RedisRepository.SetSpaceSubscriber"
+	var spaceSubscribersKey = getSpaceSubscribersKey(spaceId)
+	var userSpacesKey = getUserSpacesKey(userUid)
+
+	if err := repo.redisClient.ZAdd(ctx, spaceSubscribersKey, redis.Z{
+		Score:  float64(time.Now().UnixMilli()),
+		Member: string(userUid),
+	}).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	if err := repo.redisClient.ZAdd(ctx, userSpacesKey, redis.Z{
+		Score:  float64(time.Now().UnixMilli()),
+		Member: spaceId.String(),
+	}).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
+}
+
+func (repo *RedisRepository) HasSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) (bool, error) {
+	const op errors.Op = "redis_repo.RedisRepository.HasSpaceSubscriber"
+	var spaceSubscribersKey = getSpaceSubscribersKey(spaceId)
+
+	_, err := repo.redisClient.ZScore(ctx, spaceSubscribersKey, string(userUid)).Result()
+	switch {
+	case errors.Is(err, redis.Nil):
+		return false, nil
+	case err != nil:
+		return false, errors.E(op, err)
+	}
+
+	return true, nil
+}
+
 func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceId uuid.Uuid, collectionKey string, offset, count int64) ([]models.TopLevelThread, error) {
 	const op errors.Op = "redis_repo.RedisRepository.getSpaceTopLevelThreads"
 

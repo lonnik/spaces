@@ -90,6 +90,10 @@ func main() {
 	api.POST("/spaces", spaceController.CreateSpace)
 	api.GET("/spaces/:spaceid")             // TODO NEXT: space
 	api.GET("/spaces/:spaceid/subscribers") // TODO NEXT: space, subscribers, active subscribers, toplevel threads with 5 recent and 5 most popular messages
+	api.POST("/spaces/:spaceid/subscribers",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		spaceController.AddSpaceSubscriber,
+	)
 	api.GET("/spaces/:spaceid/toplevel-threads",
 		spaceController.GetTopLevelThreads,
 	)
