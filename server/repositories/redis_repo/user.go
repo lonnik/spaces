@@ -7,7 +7,7 @@ import (
 	"spaces-p/models"
 )
 
-func (repo *RedisRepository) GetUserById(ctx context.Context, id string) (*models.User, error) {
+func (repo *RedisRepository) GetUserById(ctx context.Context, id models.UserUid) (*models.User, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetUserById"
 	var userKey = getUserKey(id)
 
@@ -23,7 +23,7 @@ func (repo *RedisRepository) GetUserById(ctx context.Context, id string) (*model
 	user.ID = id
 	user.FirstName = r[userFields.userFirstNameField]
 	user.LastName = r[userFields.userLastNameField]
-	user.Username = r[userFields.userUsernameField]
+	user.Username = models.UserUid(r[userFields.userUsernameField])
 	user.AvatarUrl = r[userFields.userAvatarUrlField]
 	user.IsSignedUp = user.FirstName != "" && user.LastName != "" && user.Username != "" && user.AvatarUrl != ""
 

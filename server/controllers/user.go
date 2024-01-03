@@ -44,7 +44,7 @@ func (uc *UserController) GetUser(c *gin.Context) {
 	const op errors.Op = "controllers.UserController.GetUser"
 	var ctx = c.Request.Context()
 
-	userId := utils.GetUserIdFromPath(c)
+	userId := utils.GetUserUidFromPath(c)
 
 	user, err := uc.userService.GetUser(ctx, userId)
 	if err != nil {

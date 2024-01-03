@@ -1,0 +1,20 @@
+[
+  {
+    "username": "niko",
+    "firstName": "Nikolas",
+    "lastName": "Heidner",
+    "email": "niko@gmail.com"
+  },
+  {
+    "username": "luka",
+    "firstName": "Luka",
+    "lastName": "Stärk",
+    "email": "luka@gmail.com"
+  },
+  {
+    "username": "przemi",
+    "firstName": "Przemek",
+    "lastName": "Borucki",
+    "email": "przemi@gmail.com"
+  }
+]

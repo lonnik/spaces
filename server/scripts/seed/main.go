@@ -37,34 +37,37 @@ func main() {
 	spaceService := services.NewSpaceService(logger, redisRepo)
 	userService := services.NewUserService(logger, redisRepo)
 
-	newFakeUsers, err := createFakeUsers(ctx, userService, 3)
+	newFakeUsers, err := createFakeUsers(ctx, 3)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
-	newSpacesFixtureJsonFile, err := os.Open("newSpacesFixture.json")
-	if err != nil {
+	if err := seedUsers(ctx, userService, newFakeUsers); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
-	defer newSpacesFixtureJsonFile.Close()
 
-	newSpacesFixtureBytes, err := io.ReadAll(newSpacesFixtureJsonFile)
+	newUsers, err := createRecordsFromFile[models.NewFakeUser](ctx, "newUsersFixture.json")
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
-	var newSpaces = make([]models.NewSpace, 0)
-	if err := json.Unmarshal(newSpacesFixtureBytes, &newSpaces); err != nil {
+	if err := seedUsers(ctx, userService, newUsers); err != nil {
+		logger.Error(err)
+		os.Exit(1)
+	}
+
+	newSpaces, err := createRecordsFromFile[models.NewSpace](ctx, "newSpacesFixture.json")
+	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
 	for _, newSpace := range newSpaces {
 		randomFakeUsersIndex := rand.Intn(len(newFakeUsers))
-		newSpace.AdminId = newFakeUsers[randomFakeUsersIndex].ID
+		newSpace.AdminId = models.UserUid(newFakeUsers[randomFakeUsersIndex].ID)
 		_, err := spaceService.CreateSpace(context.Background(), newSpace)
 		if err != nil {
 			logger.Error(err)
@@ -73,7 +76,29 @@ func main() {
 	}
 }
 
-func createFakeUsers(ctx context.Context, userService *services.UserService, number int) ([]models.NewFakeUser, error) {
+func createRecordsFromFile[T models.NewSpace | models.NewFakeUser](ctx context.Context, fileName string) ([]T, error) {
+	const op errors.Op = "main.createFakeUsersFromFile"
+
+	jsonFile, err := os.Open(fileName)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	defer jsonFile.Close()
+
+	newRecordsBytes, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	var newRecords = make([]T, 0)
+	if err := json.Unmarshal(newRecordsBytes, &newRecords); err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	return newRecords, nil
+}
+
+func createFakeUsers(ctx context.Context, number int) ([]models.NewFakeUser, error) {
 	const op errors.Op = "main.createFakeUsers"
 
 	var fakeUsers = make([]models.NewFakeUser, 0, number)
@@ -83,20 +108,28 @@ func createFakeUsers(ctx context.Context, userService *services.UserService, num
 			return nil, errors.E(op, err)
 		}
 
-		fireBaseUserparams := (&auth.UserToCreate{}).Email(newFakeUser.Email).Password("password1?").EmailVerified(true)
-
-		u, err := firebase.AuthClient.CreateUser(ctx, fireBaseUserparams)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-
-		newFakeUser.ID = u.UID
-		if err := userService.CreateUser(ctx, newFakeUser.NewUser); err != nil {
-			return nil, errors.E(op, err)
-		}
-
 		fakeUsers = append(fakeUsers, *newFakeUser)
 	}
 
 	return fakeUsers, nil
+}
+
+func seedUsers(ctx context.Context, userService *services.UserService, newFakeUsers []models.NewFakeUser) error {
+	const op errors.Op = "main.seedUsers"
+
+	for i := range newFakeUsers {
+		fireBaseUserparams := (&auth.UserToCreate{}).Email(newFakeUsers[i].Email).Password("password1?").EmailVerified(true)
+
+		u, err := firebase.AuthClient.CreateUser(ctx, fireBaseUserparams)
+		if err != nil {
+			return errors.E(op, err)
+		}
+
+		newFakeUsers[i].ID = models.UserUid(u.UID)
+		if err := userService.CreateUser(ctx, newFakeUsers[i].NewUser); err != nil {
+			return errors.E(op, err)
+		}
+	}
+
+	return nil
 }

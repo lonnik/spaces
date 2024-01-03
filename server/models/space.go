@@ -3,11 +3,10 @@ package models
 import (
 	"fmt"
 	"spaces-p/errors"
+	"spaces-p/uuid"
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const (
@@ -17,14 +16,14 @@ const (
 type BaseSpace struct {
 	Name               string   `json:"name"` // does NOT have to be unique
 	ThemeColorHexaCode string   `json:"themeColorHexaCode"`
-	Radius             float64  `json:"radius"` // min = 10m, max = 100m
+	Radius             float64  `json:"radius"`
 	Location           Location `json:"location"`
-	AdminId            string   `json:"adminId"`
+	AdminId            UserUid  `json:"adminId"`
 }
 
 type Space struct {
 	BaseSpace
-	ID        uuid.UUID `json:"id"`
+	ID        uuid.Uuid `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`
 }
 

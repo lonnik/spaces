@@ -4,12 +4,37 @@ import (
 	"fmt"
 	"spaces-p/errors"
 	"spaces-p/models"
+	"spaces-p/uuid"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetUserIdFromPath(c *gin.Context) string {
-	return c.Param("userid")
+func getUuidFromPath(c *gin.Context, segment string) (uuid.Uuid, error) {
+	const op errors.Op = "utils.getUuidFromPath"
+
+	segmentValue := c.Param(segment)
+	id, err := uuid.Parse(segmentValue)
+	if err != nil {
+		return uuid.Nil, errors.E(op, err)
+	}
+
+	return id, nil
+}
+
+func GetSpaceIdFromPath(c *gin.Context) (spaceId uuid.Uuid, err error) {
+	return getUuidFromPath(c, "spaceid")
+}
+
+func GetThreadIdFromPath(c *gin.Context) (threadId uuid.Uuid, err error) {
+	return getUuidFromPath(c, "threadid")
+}
+
+func GetMessageIdFromPath(c *gin.Context) (threadId uuid.Uuid, err error) {
+	return getUuidFromPath(c, "messageid")
+}
+
+func GetUserUidFromPath(c *gin.Context) models.UserUid {
+	return models.UserUid(c.Param("userid"))
 }
 
 func GetUserFromContext(c *gin.Context) (user *models.User, err error) {

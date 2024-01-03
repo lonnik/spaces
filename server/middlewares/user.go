@@ -5,7 +5,7 @@ import (
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/firebase"
-	"strings"
+	"spaces-p/models"
 
 	"github.com/gin-gonic/gin"
 )
@@ -48,7 +48,7 @@ func EnsureAuthenticated(
 		}
 
 		// verify that user exists
-		user, err := cacheRepo.GetUserById(ctx, token.UID)
+		user, err := cacheRepo.GetUserById(ctx, models.UserUid(token.UID))
 		switch {
 		case errors.Is(err, common.ErrNotFound):
 			abortAndWriteError(c, errors.E(op, err, http.StatusUnauthorized), logger)
@@ -68,17 +68,4 @@ func EnsureAuthenticated(
 
 		c.Next()
 	}
-}
-
-func extractBearerToken(c *gin.Context) (string, error) {
-	const op errors.Op = "middlewares.extractBearerToken"
-
-	const bearerPrefix = "Bearer "
-	authHeaderValue := c.Request.Header.Get("Authorization")
-	if !strings.HasPrefix(authHeaderValue, bearerPrefix) {
-		errNoBearerPrefix := errors.New("no bearer prefix")
-		return "", errors.E(op, errNoBearerPrefix)
-	}
-
-	return authHeaderValue[len(bearerPrefix):], nil
 }

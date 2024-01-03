@@ -61,14 +61,20 @@ func main() {
 	// set up services
 	userService := services.NewUserService(logger, redisRepo)
 	spaceService := services.NewSpaceService(logger, redisRepo)
+	threadService := services.NewThreadService(logger, redisRepo)
+	messageService := services.NewMessageService(logger, redisRepo)
 
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
-	spaceController := controllers.NewSpaceController(logger, spaceService)
+	spaceController := controllers.NewSpaceController(logger, spaceService, threadService, messageService)
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
 	api := router.Group("/api")
+
+	// middleware functions
+	validateThreadInSpaceMiddleware := middlewares.ValidateThreadInSpace(logger, redisRepo)
+	validateMessageInThreadMiddleware := middlewares.ValidateMessageInThread(logger, redisRepo)
 
 	// USERS
 	api.POST("/users", userController.CreateUserFromIdToken)
@@ -82,6 +88,34 @@ func main() {
 	// SPACES
 	api.GET("/spaces", spaceController.GetSpaces)
 	api.POST("/spaces", spaceController.CreateSpace)
+	api.GET("/spaces/:spaceid")             // TODO NEXT: space
+	api.GET("/spaces/:spaceid/subscribers") // TODO NEXT: space, subscribers, active subscribers, toplevel threads with 5 recent and 5 most popular messages
+	api.GET("/spaces/:spaceid/toplevel-threads",
+		spaceController.GetTopLevelThreads,
+	)
+	api.POST("/spaces/:spaceid/toplevel-threads",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		spaceController.CreateTopLevelThread,
+	)
+	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
+		validateThreadInSpaceMiddleware,
+		validateMessageInThreadMiddleware,
+		spaceController.CreateThread,
+	)
+	api.GET("/spaces/:spaceid/threads/:threadid",
+		validateThreadInSpaceMiddleware,
+		spaceController.GetThreadWithMessages,
+	)
+	api.POST("/spaces/:spaceid/threads/:threadid/messages",
+		validateThreadInSpaceMiddleware,
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		spaceController.CreateMessage,
+	)
+	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/like",
+		validateThreadInSpaceMiddleware,
+		validateMessageInThreadMiddleware,
+		spaceController.LikeMessage,
+	)
 
 	router.Run()
 }

@@ -39,6 +39,7 @@ func (us *UserService) CreateUserFromIdToken(ctx context.Context, idToken string
 	if err != nil {
 		return nil, errors.E(op, err, http.StatusBadRequest)
 	}
+	var userUid = models.UserUid(token.UID)
 
 	// extract signInProvider from token claims
 	firebaseMap, ok := token.Claims["firebase"].(map[string]any)
@@ -65,17 +66,17 @@ func (us *UserService) CreateUserFromIdToken(ctx context.Context, idToken string
 	}
 
 	// check if user already exists in DB using UID
-	_, err = us.cacheRepo.GetUserById(ctx, token.UID)
+	_, err = us.cacheRepo.GetUserById(ctx, userUid)
 	switch {
 	case errors.Is(err, common.ErrNotFound):
-		if err := us.createNewUserFromTokenClaims(ctx, token.UID, token.Claims); err != nil {
+		if err := us.createNewUserFromTokenClaims(ctx, userUid, token.Claims); err != nil {
 			return nil, errors.E(op, err, http.StatusInternalServerError)
 		}
 	case err != nil:
 		return nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	user, err := us.cacheRepo.GetUserById(ctx, token.UID)
+	user, err := us.cacheRepo.GetUserById(ctx, userUid)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -83,7 +84,7 @@ func (us *UserService) CreateUserFromIdToken(ctx context.Context, idToken string
 	return user, nil
 }
 
-func (us *UserService) GetUser(ctx context.Context, userId string) (*models.User, error) {
+func (us *UserService) GetUser(ctx context.Context, userId models.UserUid) (*models.User, error) {
 	const op errors.Op = "services.UserService.GetUser"
 
 	user, err := us.cacheRepo.GetUserById(ctx, userId)
@@ -97,7 +98,7 @@ func (us *UserService) GetUser(ctx context.Context, userId string) (*models.User
 	return user, nil
 }
 
-func (us *UserService) createNewUserFromTokenClaims(ctx context.Context, id string, tokenClaims map[string]any) error {
+func (us *UserService) createNewUserFromTokenClaims(ctx context.Context, id models.UserUid, tokenClaims map[string]any) error {
 	const op errors.Op = "services.UserService.createNewUserFromTokenClaims"
 
 	avatarUrl, _ := tokenClaims["picture"].(string)
