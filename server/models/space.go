@@ -41,7 +41,7 @@ type Location struct {
 	Lat  float64 `json:"latitude"`
 }
 
-func (loc *Location) ParseString(str string) error {
+func (loc *Location) Parse(str string) error {
 	const op errors.Op = "models.Location.ParseString"
 
 	parts := strings.Split(str, ",")

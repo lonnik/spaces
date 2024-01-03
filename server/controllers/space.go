@@ -26,28 +26,55 @@ func (uc *SpaceController) GetSpaces(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.GetSpaces"
 	var ctx = c.Request.Context()
 	var query struct {
-		Location string  `form:"searchByLocation"`
-		Radius   float64 `form:"radius"`
+		paginationQuery
+		Location string         `form:"location"`
+		Radius   models.Radius  `form:"radius"`
+		UserId   models.UserUid `form:"user_id"`
+	}
+	if query.Count == 0 {
+		query.Count = 10
 	}
 
 	if err := c.ShouldBindQuery(&query); err != nil {
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
 	}
-
-	var location models.Location
-	if err := location.ParseString(query.Location); err != nil {
+	switch {
+	case query.Location != "" && query.UserId != "":
+		err := errors.New("either the \"location\" or \"user_id\" query parameter must be specified")
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
-	}
-
-	spaces, err := uc.spaceService.GetSpacesByLocation(ctx, location, models.Radius(query.Radius))
-	if err != nil {
-		utils.WriteError(c, errors.E(op, err), uc.logger)
+	case query.Location == "" && query.UserId == "":
+		err := errors.New("either the \"location\" or \"user_id\" query parameter must be specified, but not both")
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
-	}
+	case query.Location != "" && query.Radius == 0:
+		err := errors.New("when the \"location\" query parameter is specified, the \"radius\" query parameter must be specified as well")
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	case query.Location != "":
+		var location models.Location
+		if err := location.Parse(query.Location); err != nil {
+			utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+			return
+		}
 
-	c.JSON(http.StatusOK, gin.H{"data": spaces})
+		spaces, err := uc.spaceService.GetSpacesByLocation(ctx, location, query.Radius, int(query.Count), int(query.Offset))
+		if err != nil {
+			utils.WriteError(c, errors.E(op, err), uc.logger)
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"data": spaces})
+	case query.UserId != "":
+		spaces, err := uc.spaceService.GetSpacesByUser(ctx, query.UserId, int(query.Count), int(query.Offset))
+		if err != nil {
+			utils.WriteError(c, errors.E(op, err), uc.logger)
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"data": spaces})
+	}
 }
 
 func (uc *SpaceController) CreateSpace(c *gin.Context) {
@@ -75,9 +102,8 @@ func (uc *SpaceController) GetTopLevelThreads(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.GetTopLevelThreads"
 	var ctx = c.Request.Context()
 	var query struct {
-		Offset int64          `form:"offset"`
-		Count  int64          `form:"count"`
-		Sort   models.Sorting `form:"sort"`
+		paginationQuery
+		Sort models.Sorting `form:"sort"`
 	}
 	if query.Count == 0 {
 		query.Count = 10

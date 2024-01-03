@@ -12,24 +12,21 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func constructSpaceFromGeolocationAndSpaceMap(geoLocation redis.GeoLocation, spaceMap map[string]string) (*models.Space, error) {
-	const op errors.Op = "redis_repo.constructSpaceFromGeolocationAndSpaceMap"
+func parseSpaceFromSpaceMap(spaceMap map[string]string) (*models.Space, error) {
+	const op errors.Op = "redis_repo.parseSpaceFromSpaceMap"
 
 	radiusStr := spaceMap[spaceFields.radiusField]
-	radius, err := strconv.ParseFloat(radiusStr, 64)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 	name := spaceMap[spaceFields.nameField]
 	themeColor := spaceMap[spaceFields.themeColorHexaCodeField]
 	createdAtStr := spaceMap[spaceFields.createdAtField]
-	adminId := spaceMap[spaceFields.adminIdField]
-	location := models.Location{
-		Long: geoLocation.Longitude,
-		Lat:  geoLocation.Latitude,
-	}
+	adminIdStr := spaceMap[spaceFields.adminIdField]
+	locationStr := spaceMap[spaceFields.locationField]
 
-	spaceId, err := uuid.Parse(geoLocation.Name)
+	var location models.Location
+	if err := location.Parse(locationStr); err != nil {
+		return nil, errors.E(op, err)
+	}
+	radius, err := strconv.ParseFloat(radiusStr, 64)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -37,22 +34,23 @@ func constructSpaceFromGeolocationAndSpaceMap(geoLocation redis.GeoLocation, spa
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
+	adminId := models.UserUid(adminIdStr)
 
 	return &models.Space{
-		ID:        spaceId,
+		ID:        uuid.Nil,
 		CreatedAt: createdAt,
 		BaseSpace: models.BaseSpace{
 			Name:               name,
 			ThemeColorHexaCode: themeColor,
 			Radius:             radius,
 			Location:           location,
-			AdminId:            models.UserUid(adminId),
+			AdminId:            adminId,
 		},
 	}, nil
 }
 
-func getCollectionCmds(ctx context.Context, repo *RedisRepository, collectionKey string, offset, count int64, getValueKeyFn func(uuid.Uuid) string) ([]redis.Cmder, []uuid.Uuid, error) {
-	const op errors.Op = "redis_repo.getCollectionCmds"
+func getCollectionValues(ctx context.Context, repo *RedisRepository, collectionKey string, offset, count int64, getValueKeyFn func(uuid.Uuid) string) ([]map[string]string, []uuid.Uuid, error) {
+	const op errors.Op = "redis_repo.getCollectionValues"
 
 	collectionValueIdStrs, err := repo.redisClient.ZRevRangeByScore(ctx, collectionKey, &redis.ZRangeBy{
 		Max:    "+inf",
@@ -83,7 +81,13 @@ func getCollectionCmds(ctx context.Context, repo *RedisRepository, collectionKey
 		return nil, nil, errors.E(op, err)
 	}
 
-	return cmds, collectionValueIds, nil
+	var threadMaps = make([]map[string]string, 0, len(cmds))
+	for _, cmd := range cmds {
+		threadMap := cmd.(*redis.MapStringStringCmd).Val()
+		threadMaps = append(threadMaps, threadMap)
+	}
+
+	return threadMaps, collectionValueIds, nil
 }
 
 func getTimeStampString() string {

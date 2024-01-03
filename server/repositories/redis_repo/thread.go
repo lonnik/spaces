@@ -172,14 +172,13 @@ func (repo *RedisRepository) HasThreadMessage(ctx context.Context, threadId, mes
 func (repo *RedisRepository) getThreadMessages(ctx context.Context, threadId uuid.Uuid, collectionKey string, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error) {
 	const op errors.Op = "redis_repo.RedisRepository.getThreadMessages"
 
-	cmds, messageIds, err := getCollectionCmds(ctx, repo, collectionKey, offset, count, getMessageKey)
+	messageMaps, messageIds, err := getCollectionValues(ctx, repo, collectionKey, offset, count, getMessageKey)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	var messages = make([]models.MessageWithChildThreadMessagesCount, 0, len(cmds))
-	for i, cmd := range cmds {
-		messageMap := cmd.(*redis.MapStringStringCmd).Val()
+	var messages = make([]models.MessageWithChildThreadMessagesCount, 0, len(messageMaps))
+	for i, messageMap := range messageMaps {
 
 		childThreadIdStr := messageMap[messageFields.childThreadIdField]
 		var childThreadId uuid.Uuid

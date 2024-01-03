@@ -17,8 +17,15 @@ var userFields = struct {
 // getUserKey returns a redis key: users:[user_uid]
 //
 // The keys holds a HASH value with the following fields: "is_signed_up", "first_name", "last_name" "username", "avatar_url"
-func getUserKey(id models.UserUid) string {
-	return "users:" + string(id)
+func getUserKey(userId models.UserUid) string {
+	return "users:" + string(userId)
+}
+
+// getUserSpacesKey returns a redis key: users:[user_uid]:spaces
+//
+// The keys hold SORTED SET values with the space ids as MEMBERS and joining time as SCORES
+func getUserSpacesKey(userId models.UserUid) string {
+	return getUserKey(userId) + ":spaces"
 }
 
 // ---- SPACE COORDINATES ----
@@ -51,6 +58,8 @@ func getSpaceKey(spaceId uuid.Uuid) string {
 	return "spaces:" + spaceId.String()
 }
 
+// must be subset of users:[user_uid]
+//
 // spaces:[spaceid]:subscribers
 func getSpaceSubscribersKey(spaceId uuid.Uuid) string {
 	return getSpaceKey(spaceId) + ":subscribers"

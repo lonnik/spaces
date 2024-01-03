@@ -11,10 +11,35 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+func (repo *RedisRepository) GetSpacesByUserId(ctx context.Context, userId models.UserUid, count, offset int) ([]models.Space, error) {
+	const op errors.Op = "redis_repo.RedisRepository.GetSpacesByUserId"
+	var userSpacesKey = getUserSpacesKey(userId)
+
+	spaceMaps, spaceIds, err := getCollectionValues(ctx, repo, userSpacesKey, int64(offset), int64(count), getSpaceKey)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	var spaces = make([]models.Space, 0, len(spaceMaps))
+	for i, spaceMap := range spaceMaps {
+		space, err := parseSpaceFromSpaceMap(spaceMap)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+
+		space.ID = spaceIds[i]
+
+		spaces = append(spaces, *space)
+	}
+
+	return spaces, nil
+}
+
 func (repo *RedisRepository) GetSpacesByLocation(
 	ctx context.Context,
 	location models.Location,
 	searchRadius models.Radius,
+	count int,
 ) ([]models.SpaceWithDistance, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetSpacesByLocation"
 	var spaceCoordinatesKey = getSpaceCoordinatesKey()
@@ -25,6 +50,7 @@ func (repo *RedisRepository) GetSpacesByLocation(
 		WithDist:  true,
 		Sort:      "asc",
 		WithCoord: true,
+		Count:     count,
 	}).Result()
 	if err != nil {
 		return nil, errors.E(op, err)
@@ -46,7 +72,8 @@ func (repo *RedisRepository) GetSpacesByLocation(
 		return nil, errors.E(op, err)
 	}
 
-	var spacesWithDistance = make([]models.SpaceWithDistance, 0, len(geoLocations)/2)
+	var inSpaces = make([]models.SpaceWithDistance, 0, len(geoLocations)/2)
+	var closeSpaces = make([]models.SpaceWithDistance, 0, len(geoLocations)/2)
 	for i, cmd := range cmds {
 		spaceMap := cmd.(*redis.MapStringStringCmd).Val()
 
@@ -56,38 +83,39 @@ func (repo *RedisRepository) GetSpacesByLocation(
 			return nil, errors.E(op, err)
 		}
 
+		space, err := parseSpaceFromSpaceMap(spaceMap)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+
+		spaceId, err := uuid.Parse(geoLocation.Name)
+		if err != nil {
+			return nil, errors.E(op, err)
+		}
+		space.ID = spaceId
+
 		isIn := geoLocation.Dist-radius < 0
 		isClose := geoLocation.Dist-radius < float64(searchRadius)
 		switch {
 		case isIn:
-			space, err := constructSpaceFromGeolocationAndSpaceMap(geoLocation, spaceMap)
-			if err != nil {
-				return nil, errors.E(op, err)
-			}
-
 			spaceWithDistance := models.SpaceWithDistance{
 				Distance: 0,
 				Space:    *space,
 			}
 
-			spacesWithDistance = append(spacesWithDistance, spaceWithDistance)
+			inSpaces = append(inSpaces, spaceWithDistance)
 		case isClose:
-			space, err := constructSpaceFromGeolocationAndSpaceMap(geoLocation, spaceMap)
-			if err != nil {
-				return nil, errors.E(op, err)
-			}
-
 			spaceWithDistance := models.SpaceWithDistance{
 				Distance: geoLocation.Dist,
 				Space:    *space,
 			}
 
-			spacesWithDistance = append(spacesWithDistance, spaceWithDistance)
+			closeSpaces = append(closeSpaces, spaceWithDistance)
 		default:
 		}
 	}
 
-	return spacesWithDistance, nil
+	return append(inSpaces, closeSpaces...), nil
 }
 
 func (repo *RedisRepository) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid) ([]models.User, error) {
@@ -168,18 +196,12 @@ func (repo *RedisRepository) HasSpaceThread(ctx context.Context, spaceId, thread
 func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceId uuid.Uuid, collectionKey string, offset, count int64) ([]models.TopLevelThread, error) {
 	const op errors.Op = "redis_repo.RedisRepository.getSpaceTopLevelThreads"
 
-	cmds, topLevelThreadIds, err := getCollectionCmds(ctx, repo, collectionKey, offset, count, getThreadKey)
+	threadMaps, topLevelThreadIds, err := getCollectionValues(ctx, repo, collectionKey, offset, count, getThreadKey)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	var threadMaps = make([]map[string]string, 0, len(cmds))
-	for _, cmd := range cmds {
-		threadMap := cmd.(*redis.MapStringStringCmd).Val()
-		threadMaps = append(threadMaps, threadMap)
-	}
-
-	var firstMessages = make([]models.Message, 0, len(cmds))
+	var firstMessages = make([]models.Message, 0, len(threadMaps))
 	for _, threadMap := range threadMaps {
 		firstMessageIdStr := threadMap[threadFields.firstMessageIdField]
 		firstMessageId, err := uuid.Parse(firstMessageIdStr)
@@ -196,7 +218,7 @@ func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceI
 		firstMessages = append(firstMessages, message)
 	}
 
-	var threads = make([]models.TopLevelThread, 0, len(cmds))
+	var threads = make([]models.TopLevelThread, 0, len(threadMaps))
 	for i, threadMap := range threadMaps {
 		likesStr := threadMap[threadFields.likesField]
 		messagesCountStr := threadMap[threadFields.messagesCountField]

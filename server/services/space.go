@@ -2,7 +2,6 @@ package services
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"spaces-p/common"
 	"spaces-p/errors"
@@ -19,38 +18,26 @@ func NewSpaceService(logger common.Logger, cacheRepo common.CacheRepository) *Sp
 	return &SpaceService{logger, cacheRepo}
 }
 
-func (ss *SpaceService) GetSpacesByLocation(ctx context.Context, location models.Location, radius models.Radius) ([]models.SpaceWithDistance, error) {
+func (ss *SpaceService) GetSpacesByLocation(ctx context.Context, location models.Location, radius models.Radius, count, offset int) ([]models.SpaceWithDistance, error) {
 	const op errors.Op = "services.SpaceService.GetSpacesByLocation"
 
-	spaces, err := ss.cacheRepo.GetSpacesByLocation(ctx, location, radius)
+	spaces, err := ss.cacheRepo.GetSpacesByLocation(ctx, location, radius, count+offset)
+	if err != nil {
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return spaces[offset:], nil
+}
+
+func (ss *SpaceService) GetSpacesByUser(ctx context.Context, userId models.UserUid, count, offset int) ([]models.Space, error) {
+	const op errors.Op = "services.SpaceService.GetSpacesByUser"
+
+	spaces, err := ss.cacheRepo.GetSpacesByUserId(ctx, userId, count, offset)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
 
-	fmt.Printf("spaces :>> %+v\n", spaces)
-
 	return spaces, nil
-}
-
-func (ss *SpaceService) CreateSpace(ctx context.Context, newSpace models.NewSpace) (uuid.Uuid, error) {
-	const op errors.Op = "services.SpaceService.CreateSpace"
-
-	// verify that user with id == newSpace.AdminId exists
-	_, err := ss.cacheRepo.GetUserById(ctx, newSpace.AdminId)
-	switch {
-	case errors.Is(err, common.ErrNotFound):
-		err := errors.New("admin id does not belong to existing user")
-		return uuid.Nil, errors.E(op, err, http.StatusBadRequest)
-	case err != nil:
-		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
-	}
-
-	spaceId, err := ss.cacheRepo.SetSpace(ctx, newSpace)
-	if err != nil {
-		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
-	}
-
-	return spaceId, nil
 }
 
 func (ss *SpaceService) GetTopLevelThreads(ctx context.Context, spaceId uuid.Uuid, sort models.Sorting, offset, count int64) ([]models.TopLevelThread, error) {
@@ -94,4 +81,25 @@ func (ss *SpaceService) GetThreadWithMessages(ctx context.Context, spaceId, thre
 		Thread:   thread,
 		Messages: messages,
 	}, nil
+}
+
+func (ss *SpaceService) CreateSpace(ctx context.Context, newSpace models.NewSpace) (uuid.Uuid, error) {
+	const op errors.Op = "services.SpaceService.CreateSpace"
+
+	// verify that user with id == newSpace.AdminId exists
+	_, err := ss.cacheRepo.GetUserById(ctx, newSpace.AdminId)
+	switch {
+	case errors.Is(err, common.ErrNotFound):
+		err := errors.New("admin id does not belong to existing user")
+		return uuid.Nil, errors.E(op, err, http.StatusBadRequest)
+	case err != nil:
+		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	spaceId, err := ss.cacheRepo.SetSpace(ctx, newSpace)
+	if err != nil {
+		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return spaceId, nil
 }
