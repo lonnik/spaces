@@ -19,15 +19,7 @@ func (repo *RedisRepository) GetUserById(ctx context.Context, id models.UserUid)
 		return nil, errors.E(op, common.ErrNotFound)
 	}
 
-	var user = models.User{}
-	user.ID = id
-	user.FirstName = r[userFields.userFirstNameField]
-	user.LastName = r[userFields.userLastNameField]
-	user.Username = models.UserUid(r[userFields.userUsernameField])
-	user.AvatarUrl = r[userFields.userAvatarUrlField]
-	user.IsSignedUp = user.FirstName != "" && user.LastName != "" && user.Username != "" && user.AvatarUrl != ""
-
-	return &user, nil
+	return repo.parseUser(ctx, id, r), nil
 }
 
 func (repo *RedisRepository) SetUser(ctx context.Context, newUser models.NewUser) error {
@@ -46,4 +38,23 @@ func (repo *RedisRepository) SetUser(ctx context.Context, newUser models.NewUser
 	}
 
 	return nil
+}
+
+func (repo *RedisRepository) parseUser(ctx context.Context, userUid models.UserUid, stringMap map[string]string) *models.User {
+	firstNameStr := stringMap[userFields.userFirstNameField]
+	lastNameStr := stringMap[userFields.userLastNameField]
+	userNameStr := stringMap[userFields.userUsernameField]
+	avatarUrlStr := stringMap[userFields.userAvatarUrlField]
+	isSignedUp := firstNameStr != "" && lastNameStr != "" && userNameStr != "" && avatarUrlStr != ""
+
+	return &models.User{
+		BaseUser: models.BaseUser{
+			ID:        userUid,
+			FirstName: firstNameStr,
+			LastName:  lastNameStr,
+			Username:  userNameStr,
+			AvatarUrl: avatarUrlStr,
+		},
+		IsSignedUp: isSignedUp,
+	}
 }

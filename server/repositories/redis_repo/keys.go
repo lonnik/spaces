@@ -70,6 +70,8 @@ func getSpaceSubscribersKey(spaceId uuid.Uuid) string {
 // must be subset of spaces:[spaceid]:subscribers
 //
 // spaces:[spaceid]:active_subscribers
+//
+// The keys hold SORTED SET values with the user ids as MEMBERS and joining time as SCORES
 func getSpaceActiveSubscribers(spaceId uuid.Uuid) string {
 	return getSpaceKey(spaceId) + ":active_subscribers"
 }

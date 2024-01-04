@@ -77,6 +77,37 @@ func (uc *SpaceController) GetSpaces(c *gin.Context) {
 	}
 }
 
+func (uc *SpaceController) GetSpaceSubscribers(c *gin.Context) {
+	const op errors.Op = "controllers.SpaceController.GetSpaceSubscribers"
+	var ctx = c.Request.Context()
+
+	var query struct {
+		paginationQuery
+		Active bool `form:"active"`
+	}
+	if err := c.ShouldBindQuery(&query); err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+	if query.Count == 0 {
+		query.Count = 10
+	}
+
+	spaceId, err := utils.GetSpaceIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	subscribers, err := uc.spaceService.GetSpaceSubscribers(ctx, spaceId, query.Active, query.Offset, query.Count)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err), uc.logger)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": subscribers})
+}
+
 func (uc *SpaceController) CreateSpace(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.CreateSpace"
 	var ctx = c.Request.Context()
@@ -105,17 +136,16 @@ func (uc *SpaceController) GetTopLevelThreads(c *gin.Context) {
 		paginationQuery
 		Sort models.Sorting `form:"sort"`
 	}
+	if err := c.ShouldBindQuery(&query); err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
 	if query.Count == 0 {
 		query.Count = 10
 	}
 
 	spaceId, err := utils.GetSpaceIdFromPath(c)
 	if err != nil {
-		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
-		return
-	}
-
-	if err := c.ShouldBindQuery(&query); err != nil {
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
 	}

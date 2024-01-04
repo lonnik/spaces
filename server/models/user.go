@@ -6,19 +6,19 @@ func (m UserUid) MarshalBinary() ([]byte, error) {
 	return []byte(m), nil
 }
 
-type baseUser struct {
+type BaseUser struct {
 	ID        UserUid `json:"id" faker:"-"`
-	Username  UserUid `json:"username" faker:"username"`
+	Username  string  `json:"username" faker:"username"`
 	FirstName string  `json:"firstName" faker:"first_name"`
 	LastName  string  `json:"lastName" faker:"last_name"`
 	AvatarUrl string  `json:"avatarUrl" faker:"-"`
 }
 type User struct {
-	baseUser
+	BaseUser
 	IsSignedUp bool `json:"isSignedUp"`
 }
 
-type NewUser baseUser
+type NewUser BaseUser
 
 type NewFakeUser struct {
 	NewUser

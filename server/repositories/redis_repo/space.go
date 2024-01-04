@@ -118,12 +118,16 @@ func (repo *RedisRepository) GetSpacesByLocation(
 	return append(inSpaces, closeSpaces...), nil
 }
 
-func (repo *RedisRepository) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid) ([]models.User, error) {
-	return []models.User{{}}, nil
+func (repo *RedisRepository) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid, offset, count int64) ([]models.User, error) {
+	var spaceSubscribersKey = getSpaceSubscribersKey(spaceId)
+
+	return repo.getSpaceSubscribers(ctx, spaceSubscribersKey, offset, count)
 }
 
-func (repo *RedisRepository) GetSpaceActiveSubscribers(ctx context.Context, spaceId uuid.Uuid) ([]models.User, error) {
-	return []models.User{{}}, nil
+func (repo *RedisRepository) GetSpaceActiveSubscribers(ctx context.Context, spaceId uuid.Uuid, offset, count int64) ([]models.User, error) {
+	var spaceSubscribersKey = getSpaceActiveSubscribers(spaceId)
+
+	return repo.getSpaceSubscribers(ctx, spaceSubscribersKey, offset, count)
 }
 
 // from is including
@@ -228,6 +232,42 @@ func (repo *RedisRepository) HasSpaceSubscriber(ctx context.Context, spaceId uui
 	}
 
 	return true, nil
+}
+
+func (repo *RedisRepository) getSpaceSubscribers(ctx context.Context, collectionKey string, offset, count int64) ([]models.User, error) {
+	const op errors.Op = "redis_repo.RedisRepository.getSpaceSubscribers"
+
+	userIdStrs, err := repo.redisClient.ZRevRangeByScore(ctx, collectionKey, &redis.ZRangeBy{
+		Max:    "+inf",
+		Min:    "-inf",
+		Offset: offset,
+		Count:  count,
+	}).Result()
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	pipe := repo.redisClient.Pipeline()
+	for _, userIdStr := range userIdStrs {
+		userKey := getUserKey(models.UserUid(userIdStr))
+
+		pipe.HGetAll(ctx, userKey)
+	}
+
+	cmds, err := pipe.Exec(ctx)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	var users = make([]models.User, 0, len(userIdStrs))
+	for i, cmd := range cmds {
+		userStringMap := cmd.(*redis.MapStringStringCmd).Val()
+		user := repo.parseUser(ctx, models.UserUid(userIdStrs[i]), userStringMap)
+
+		users = append(users, *user)
+	}
+
+	return users, nil
 }
 
 func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceId uuid.Uuid, collectionKey string, offset, count int64) ([]models.TopLevelThread, error) {

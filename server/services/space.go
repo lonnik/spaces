@@ -122,3 +122,21 @@ func (ss *SpaceService) AddSpaceSubscriber(ctx context.Context, spaceId uuid.Uui
 
 	return nil
 }
+
+func (ss *SpaceService) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid, activeSubscribers bool, offset, count int64) ([]models.User, error) {
+	const op errors.Op = "services.SpaceService.GetSpaceSubscribers"
+
+	var subscribers = []models.User{}
+	var err error
+	switch activeSubscribers {
+	case true:
+		subscribers, err = ss.cacheRepo.GetSpaceActiveSubscribers(ctx, spaceId, offset, count)
+	case false:
+		subscribers, err = ss.cacheRepo.GetSpaceSubscribers(ctx, spaceId, offset, count)
+	}
+	if err != nil {
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return subscribers, nil
+}
