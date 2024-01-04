@@ -7,6 +7,7 @@ import (
 	"spaces-p/firebase"
 	"spaces-p/middlewares"
 	"spaces-p/redis"
+	googlegeocode "spaces-p/repositories/google_geocode"
 	"spaces-p/repositories/redis_repo"
 	"spaces-p/services"
 	"spaces-p/zerologger"
@@ -55,18 +56,21 @@ func main() {
 	// initialize redis client
 	redis.ConnectRedis()
 
-	// set up cache repo
+	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
+	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(os.Getenv("GOOGLE_GEOCODE_API_KEY"))
 
 	// set up services
 	userService := services.NewUserService(logger, redisRepo)
 	spaceService := services.NewSpaceService(logger, redisRepo)
 	threadService := services.NewThreadService(logger, redisRepo)
 	messageService := services.NewMessageService(logger, redisRepo)
+	addressService := services.NewAddressService(logger, redisRepo, googleGeocodeRepo)
 
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
 	spaceController := controllers.NewSpaceController(logger, spaceService, threadService, messageService)
+	addressController := controllers.NewAddressController(logger, addressService)
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
@@ -122,6 +126,9 @@ func main() {
 		validateMessageInThreadMiddleware,
 		spaceController.LikeMessage,
 	)
+
+	// ADDRESSES
+	api.GET("/address", addressController.GetAddress)
 
 	router.Run()
 }

@@ -12,6 +12,7 @@ type CacheRepository interface {
 	SpaceCacheRepository
 	ThreadCacheRepository
 	MessageCacheRepository
+	AddressCacheRepository
 }
 
 type UserCacheRepository interface {
@@ -45,4 +46,9 @@ type MessageCacheRepository interface {
 	GetMessage(ctx context.Context, messageId uuid.Uuid) (models.Message, error)
 	SetMessage(ctx context.Context, newMessage models.NewMessage) (uuid.Uuid, error)
 	LikeMessage(ctx context.Context, messageId uuid.Uuid) error
+}
+
+type AddressCacheRepository interface {
+	GetAddress(ctx context.Context, geoHash string) (*models.Address, error)
+	SetAddress(ctx context.Context, newAddress models.Address) error
 }

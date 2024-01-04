@@ -23,7 +23,7 @@ func parseSpaceFromSpaceMap(spaceMap map[string]string) (*models.Space, error) {
 	locationStr := spaceMap[spaceFields.locationField]
 
 	var location models.Location
-	if err := location.Parse(locationStr); err != nil {
+	if err := location.ParseString(locationStr); err != nil {
 		return nil, errors.E(op, err)
 	}
 	radius, err := strconv.ParseFloat(radiusStr, 64)

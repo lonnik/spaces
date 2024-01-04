@@ -54,7 +54,7 @@ func (uc *SpaceController) GetSpaces(c *gin.Context) {
 		return
 	case query.Location != "":
 		var location models.Location
-		if err := location.Parse(query.Location); err != nil {
+		if err := location.ParseString(query.Location); err != nil {
 			utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 			return
 		}

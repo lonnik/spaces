@@ -7,6 +7,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/mmcloughlin/geohash"
 )
 
 const (
@@ -41,7 +43,7 @@ type Location struct {
 	Lat  float64 `json:"latitude"`
 }
 
-func (loc *Location) Parse(str string) error {
+func (loc *Location) ParseString(str string) error {
 	const op errors.Op = "models.Location.ParseString"
 
 	parts := strings.Split(str, ",")
@@ -66,8 +68,25 @@ func (loc *Location) Parse(str string) error {
 	return nil
 }
 
+func (loc *Location) ParseGeoHash(geoHash string) {
+	lat, lng := geohash.DecodeCenter(geoHash)
+
+	loc = &Location{
+		Long: lng,
+		Lat:  lat,
+	}
+}
+
 func (loc *Location) String() string {
 	return fmt.Sprintf("%v,%v", loc.Long, loc.Lat)
+}
+
+func (loc *Location) GeoHash(precision int) string {
+	if precision > 12 {
+		precision = 12
+	}
+
+	return geohash.Encode(loc.Lat, loc.Long)[:precision]
 }
 
 type Radius float64

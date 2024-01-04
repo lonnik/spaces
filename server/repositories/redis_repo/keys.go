@@ -141,3 +141,12 @@ var messageFields = struct {
 func getMessageKey(messageId uuid.Uuid) string {
 	return "messages:" + messageId.String()
 }
+
+// ---- ADDRESS ----
+
+// getAddressKey returns a redis key: addresses:[geohash]
+//
+// The keys holds a STRINGIFIED JSON value which represent an address
+func getAddressKey(geohash string) string {
+	return "addresses:" + geohash
+}
