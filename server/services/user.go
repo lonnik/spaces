@@ -19,6 +19,20 @@ func NewUserService(logger common.Logger, cacheRepo common.CacheRepository) *Use
 	return &UserService{logger, cacheRepo}
 }
 
+func (us *UserService) GetUser(ctx context.Context, userId models.UserUid) (*models.User, error) {
+	const op errors.Op = "services.UserService.GetUser"
+
+	user, err := us.cacheRepo.GetUserById(ctx, userId)
+	switch {
+	case err != nil:
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	case !user.IsSignedUp:
+		return nil, errors.E(op, common.ErrUserNotSignedUp, http.StatusNotFound)
+	}
+
+	return user, nil
+}
+
 func (us *UserService) CreateUser(ctx context.Context, newUser models.NewUser) error {
 	const op errors.Op = "services.UserService.CreateUser"
 
@@ -79,20 +93,6 @@ func (us *UserService) CreateUserFromIdToken(ctx context.Context, idToken string
 	user, err := us.cacheRepo.GetUserById(ctx, userUid)
 	if err != nil {
 		return nil, errors.E(op, err)
-	}
-
-	return user, nil
-}
-
-func (us *UserService) GetUser(ctx context.Context, userId models.UserUid) (*models.User, error) {
-	const op errors.Op = "services.UserService.GetUser"
-
-	user, err := us.cacheRepo.GetUserById(ctx, userId)
-	switch {
-	case err != nil:
-		return nil, errors.E(op, err, http.StatusInternalServerError)
-	case !user.IsSignedUp:
-		return nil, errors.E(op, common.ErrUserNotSignedUp, http.StatusNotFound)
 	}
 
 	return user, nil

@@ -34,7 +34,7 @@ type SpaceCacheRepository interface {
 }
 
 type ThreadCacheRepository interface {
-	GetThread(ctx context.Context, threadId uuid.Uuid) (models.Thread, error)
+	GetThread(ctx context.Context, threadId uuid.Uuid) (*models.Thread, error)
 	GetThreadMessagesByTime(ctx context.Context, threadId uuid.Uuid, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error)
 	GetThreadMessagesByPopularity(ctx context.Context, threadId uuid.Uuid, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error)
 	SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error)
@@ -43,7 +43,7 @@ type ThreadCacheRepository interface {
 }
 
 type MessageCacheRepository interface {
-	GetMessage(ctx context.Context, messageId uuid.Uuid) (models.Message, error)
+	GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.Message, error)
 	SetMessage(ctx context.Context, newMessage models.NewMessage) (uuid.Uuid, error)
 	LikeMessage(ctx context.Context, messageId uuid.Uuid) error
 }

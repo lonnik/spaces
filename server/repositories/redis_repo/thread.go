@@ -13,16 +13,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) (models.Thread, error) {
+func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) (*models.Thread, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetThread"
 	var threadKey = getThreadKey(threadId)
 
 	r, err := repo.redisClient.HGetAll(ctx, threadKey).Result()
 	switch {
 	case err != nil:
-		return models.Thread{}, err
+		return &models.Thread{}, err
 	case len(r) == 0:
-		return models.Thread{}, errors.E(op, common.ErrNotFound)
+		return &models.Thread{}, errors.E(op, common.ErrNotFound)
 	}
 
 	likesStr := r[threadFields.likesField]
@@ -35,22 +35,22 @@ func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) 
 	case uuid.IsInvalidLengthError(err):
 		break
 	case err != nil:
-		return models.Thread{}, errors.E(op, err)
+		return &models.Thread{}, errors.E(op, err)
 	}
 	likes, err := strconv.Atoi(likesStr)
 	if err != nil {
-		return models.Thread{}, errors.E(op, err)
+		return &models.Thread{}, errors.E(op, err)
 	}
 	messagesCount, err := strconv.Atoi(messagesCountStr)
 	if err != nil {
-		return models.Thread{}, errors.E(op, err)
+		return &models.Thread{}, errors.E(op, err)
 	}
 	spaceId, err := uuid.Parse(spaceIdStr)
 	if err != nil {
-		return models.Thread{}, errors.E(op, err)
+		return &models.Thread{}, errors.E(op, err)
 	}
 
-	return models.Thread{
+	return &models.Thread{
 		ParentMessageId: parentMessageId,
 		BaseThread: models.BaseThread{
 			SpaceId:       spaceId,

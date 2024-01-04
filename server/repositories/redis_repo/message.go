@@ -13,16 +13,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (repo *RedisRepository) GetMessage(ctx context.Context, messageId uuid.Uuid) (models.Message, error) {
+func (repo *RedisRepository) GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.Message, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetMessage"
 	var messageKey = getMessageKey(messageId)
 
 	messageMap, err := repo.redisClient.HGetAll(ctx, messageKey).Result()
 	switch {
 	case err != nil:
-		return models.Message{}, errors.E(op, err)
+		return &models.Message{}, errors.E(op, err)
 	case len(messageMap) == 0:
-		return models.Message{}, errors.E(op, common.ErrNotFound)
+		return &models.Message{}, errors.E(op, common.ErrNotFound)
 	}
 
 	childThreadIdStr := messageMap[messageFields.childThreadIdField]
@@ -38,32 +38,32 @@ func (repo *RedisRepository) GetMessage(ctx context.Context, messageId uuid.Uuid
 	case uuid.IsInvalidLengthError(err):
 		break
 	case err != nil:
-		return models.Message{}, errors.E(op, err)
+		return &models.Message{}, errors.E(op, err)
 	}
 
 	likes, err := strconv.Atoi(likesStr)
 	if err != nil {
-		return models.Message{}, errors.E(op, err)
+		return &models.Message{}, errors.E(op, err)
 	}
 
 	senderId := models.UserUid(senderIdStr)
 
 	threadId, err := uuid.Parse(threadIdStr)
 	if err != nil {
-		return models.Message{}, errors.E(op, err)
+		return &models.Message{}, errors.E(op, err)
 	}
 
 	timeStamp, err := utils.StringToTime(timeUnixMilliStr)
 	if err != nil {
-		return models.Message{}, errors.E(op, err)
+		return &models.Message{}, errors.E(op, err)
 	}
 
 	var messageType models.MessageType
 	if err := messageType.Parse(messageTypeStr); err != nil {
-		return models.Message{}, errors.E(op, err)
+		return &models.Message{}, errors.E(op, err)
 	}
 
-	return models.Message{
+	return &models.Message{
 		ID:            messageId,
 		Time:          timeStamp,
 		ChildThreadId: childThreadId,

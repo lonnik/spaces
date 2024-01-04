@@ -292,7 +292,7 @@ func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceI
 			return nil, errors.E(op, err)
 		}
 
-		firstMessages = append(firstMessages, message)
+		firstMessages = append(firstMessages, *message)
 	}
 
 	var threads = make([]models.TopLevelThread, 0, len(threadMaps))

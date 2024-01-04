@@ -58,12 +58,30 @@ func (ss *SpaceService) GetTopLevelThreads(ctx context.Context, spaceId uuid.Uui
 	return threads, nil
 }
 
-func (ss *SpaceService) GetThreadWithMessages(ctx context.Context, spaceId, threadId uuid.Uuid, messagesSort models.Sorting, messagesOffset, messagesCount int64) (models.ThreadWithMessages, error) {
+func (ss *SpaceService) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid, activeSubscribers bool, offset, count int64) ([]models.User, error) {
+	const op errors.Op = "services.SpaceService.GetSpaceSubscribers"
+
+	var subscribers = []models.User{}
+	var err error
+	switch activeSubscribers {
+	case true:
+		subscribers, err = ss.cacheRepo.GetSpaceActiveSubscribers(ctx, spaceId, offset, count)
+	case false:
+		subscribers, err = ss.cacheRepo.GetSpaceSubscribers(ctx, spaceId, offset, count)
+	}
+	if err != nil {
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return subscribers, nil
+}
+
+func (ss *SpaceService) GetThreadWithMessages(ctx context.Context, spaceId, threadId uuid.Uuid, messagesSort models.Sorting, messagesOffset, messagesCount int64) (*models.ThreadWithMessages, error) {
 	const op errors.Op = "services.SpaceService.GetThreadWithMessages"
 
 	thread, err := ss.cacheRepo.GetThread(ctx, threadId)
 	if err != nil {
-		return models.ThreadWithMessages{}, errors.E(op, err, http.StatusInternalServerError)
+		return &models.ThreadWithMessages{}, errors.E(op, err, http.StatusInternalServerError)
 	}
 
 	var messages []models.MessageWithChildThreadMessagesCount
@@ -74,11 +92,11 @@ func (ss *SpaceService) GetThreadWithMessages(ctx context.Context, spaceId, thre
 		messages, err = ss.cacheRepo.GetThreadMessagesByTime(ctx, threadId, messagesOffset, messagesCount)
 	}
 	if err != nil {
-		return models.ThreadWithMessages{}, errors.E(op, err, http.StatusInternalServerError)
+		return &models.ThreadWithMessages{}, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	return models.ThreadWithMessages{
-		Thread:   thread,
+	return &models.ThreadWithMessages{
+		Thread:   *thread,
 		Messages: messages,
 	}, nil
 }
@@ -121,22 +139,4 @@ func (ss *SpaceService) AddSpaceSubscriber(ctx context.Context, spaceId uuid.Uui
 	}
 
 	return nil
-}
-
-func (ss *SpaceService) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid, activeSubscribers bool, offset, count int64) ([]models.User, error) {
-	const op errors.Op = "services.SpaceService.GetSpaceSubscribers"
-
-	var subscribers = []models.User{}
-	var err error
-	switch activeSubscribers {
-	case true:
-		subscribers, err = ss.cacheRepo.GetSpaceActiveSubscribers(ctx, spaceId, offset, count)
-	case false:
-		subscribers, err = ss.cacheRepo.GetSpaceSubscribers(ctx, spaceId, offset, count)
-	}
-	if err != nil {
-		return nil, errors.E(op, err, http.StatusInternalServerError)
-	}
-
-	return subscribers, nil
 }
