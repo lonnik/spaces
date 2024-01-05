@@ -28,7 +28,7 @@ func (uc *SpaceController) GetSpaces(c *gin.Context) {
 	var query struct {
 		paginationQuery
 		Location string         `form:"location"`
-		Radius   models.Radius  `form:"radius"`
+		Radius   models.Radius  `form:"radius" binding:"min=0,max=1000"`
 		UserId   models.UserUid `form:"user_id"`
 	}
 	if query.Count == 0 {
@@ -67,7 +67,7 @@ func (uc *SpaceController) GetSpaces(c *gin.Context) {
 
 		c.JSON(http.StatusOK, gin.H{"data": spaces})
 	case query.UserId != "":
-		spaces, err := uc.spaceService.GetSpacesByUser(ctx, query.UserId, int(query.Count), int(query.Offset))
+		spaces, err := uc.spaceService.GetSpacesByUser(ctx, query.UserId, query.Count, query.Offset)
 		if err != nil {
 			utils.WriteError(c, errors.E(op, err), uc.logger)
 			return
@@ -134,7 +134,7 @@ func (uc *SpaceController) GetTopLevelThreads(c *gin.Context) {
 	var ctx = c.Request.Context()
 	var query struct {
 		paginationQuery
-		Sort models.Sorting `form:"sort"`
+		Sort string `form:"sort" binding:"oneof='recent' 'popularity' ''"`
 	}
 	if err := c.ShouldBindQuery(&query); err != nil {
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
@@ -143,6 +143,17 @@ func (uc *SpaceController) GetTopLevelThreads(c *gin.Context) {
 	if query.Count == 0 {
 		query.Count = 10
 	}
+	var sort models.Sorting
+	var err error
+	if query.Sort != "" {
+		err = sort.ParseString(query.Sort)
+	} else {
+		sort = models.RecentSorting
+	}
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), uc.logger)
+		return
+	}
 
 	spaceId, err := utils.GetSpaceIdFromPath(c)
 	if err != nil {
@@ -150,7 +161,7 @@ func (uc *SpaceController) GetTopLevelThreads(c *gin.Context) {
 		return
 	}
 
-	topLevelThreads, err := uc.spaceService.GetTopLevelThreads(ctx, spaceId, query.Sort, query.Offset, query.Count)
+	topLevelThreads, err := uc.spaceService.GetTopLevelThreads(ctx, spaceId, sort, query.Offset, query.Count)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), uc.logger)
 		return
@@ -163,12 +174,23 @@ func (uc *SpaceController) GetThreadWithMessages(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.GetThreadWithMessages"
 	var ctx = c.Request.Context()
 	var query struct {
-		MessagesOffset int64          `form:"messages_offset"`
-		MessagesCount  int64          `form:"messages_count"`
-		MessagesSort   models.Sorting `form:"messages_sort"`
+		MessagesOffset int64  `form:"messages_offset" binding:"min=0"`
+		MessagesCount  int64  `form:"messages_count" binding:"min=0"`
+		MessagesSort   string `form:"messages_sort" binding:"oneof='recent' 'popularity' ''"`
 	}
 	if query.MessagesCount == 0 {
 		query.MessagesCount = 10
+	}
+	var messagesSort models.Sorting
+	var err error
+	if query.MessagesSort != "" {
+		err = messagesSort.ParseString(query.MessagesSort)
+	} else {
+		messagesSort = models.RecentSorting
+	}
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), uc.logger)
+		return
 	}
 
 	spaceId, err := utils.GetSpaceIdFromPath(c)
@@ -183,7 +205,7 @@ func (uc *SpaceController) GetThreadWithMessages(c *gin.Context) {
 		return
 	}
 
-	threads, err := uc.spaceService.GetThreadWithMessages(ctx, spaceId, threadId, query.MessagesSort, query.MessagesOffset, query.MessagesCount)
+	threads, err := uc.spaceService.GetThreadWithMessages(ctx, spaceId, threadId, messagesSort, query.MessagesOffset, query.MessagesCount)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return

@@ -11,11 +11,11 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (repo *RedisRepository) GetSpacesByUserId(ctx context.Context, userId models.UserUid, count, offset int) ([]models.Space, error) {
+func (repo *RedisRepository) GetSpacesByUserId(ctx context.Context, userId models.UserUid, count, offset int64) ([]models.Space, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetSpacesByUserId"
 	var userSpacesKey = getUserSpacesKey(userId)
 
-	spaceMaps, spaceIds, err := getCollectionValues(ctx, repo, userSpacesKey, int64(offset), int64(count), getSpaceKey)
+	spaceMaps, spaceIds, err := getCollectionValues(ctx, repo, userSpacesKey, offset, count, getSpaceKey)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

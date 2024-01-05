@@ -43,7 +43,7 @@ func (us *UserService) CreateUser(ctx context.Context, newUser models.NewUser) e
 	return nil
 }
 
-// CreateUser verifies the id token for its valicity, verifies that the user's email is verifies.
+// CreateUser verifies the id token for its valicity, verifies that the user's email is verified.
 // It creates a new user with the information extracted from the id token in case there is no user yet with the same UID and returns that newly created user.
 // In case a user already exists, CreateUser basically becomes a no-op and returns that existing user.
 func (us *UserService) CreateUserFromIdToken(ctx context.Context, idToken string) (*models.User, error) {

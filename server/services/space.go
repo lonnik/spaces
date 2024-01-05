@@ -29,8 +29,17 @@ func (ss *SpaceService) GetSpacesByLocation(ctx context.Context, location models
 	return spaces[offset:], nil
 }
 
-func (ss *SpaceService) GetSpacesByUser(ctx context.Context, userId models.UserUid, count, offset int) ([]models.Space, error) {
+func (ss *SpaceService) GetSpacesByUser(ctx context.Context, userId models.UserUid, count, offset int64) ([]models.Space, error) {
 	const op errors.Op = "services.SpaceService.GetSpacesByUser"
+
+	// validate user id
+	_, err := ss.cacheRepo.GetUserById(ctx, userId)
+	switch {
+	case errors.Is(err, common.ErrNotFound):
+		return nil, errors.E(op, err, http.StatusBadRequest)
+	case err != nil:
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	}
 
 	spaces, err := ss.cacheRepo.GetSpacesByUserId(ctx, userId, count, offset)
 	if err != nil {

@@ -23,7 +23,7 @@ func (uc *UserController) CreateUserFromIdToken(c *gin.Context) {
 	const op errors.Op = "controllers.UserController.CreateUser"
 	var ctx = c.Request.Context()
 	var body struct {
-		IdToken string `json:"idToken"`
+		IdToken string `json:"idToken" binding:"required"`
 	}
 
 	if err := c.ShouldBindJSON(&body); err != nil {

@@ -24,7 +24,7 @@ func (uc *AddressController) GetAddress(c *gin.Context) {
 	const op errors.Op = "controllers.AddressController.GetAddress"
 	var ctx = c.Request.Context()
 	var query struct {
-		Location string `form:"location"`
+		Location string `form:"location" binding:"required"`
 	}
 
 	if err := c.ShouldBindQuery(&query); err != nil {

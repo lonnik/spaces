@@ -38,6 +38,20 @@ const (
 
 var sortingStrings = map[string]Sorting{"recent": RecentSorting, "popularity": PopularitySorting}
 
+func (s *Sorting) ParseString(data string) error {
+	const op errors.Op = "models.Sorting.ParseString"
+
+	sorting, ok := sortingStrings[data]
+	if !ok {
+		err := errors.New(fmt.Sprintf("%s is not valid sorting value", data))
+		return errors.E(op, err)
+	}
+
+	*s = sorting
+
+	return nil
+}
+
 func (s *Sorting) UnmarshalJSON(data []byte) error {
 	const op errors.Op = "models.Sorting.UnmarshalJSON"
 
@@ -46,13 +60,9 @@ func (s *Sorting) UnmarshalJSON(data []byte) error {
 		return errors.E(op, err)
 	}
 
-	sorting, ok := sortingStrings[str]
-	if !ok {
-		err := errors.New(fmt.Sprintf("%s is not valid sorting value", str))
+	if err := s.ParseString(str); err != nil {
 		return errors.E(op, err)
 	}
-
-	*s = sorting
 
 	return nil
 }

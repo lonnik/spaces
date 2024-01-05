@@ -16,11 +16,11 @@ const (
 )
 
 type BaseSpace struct {
-	Name               string   `json:"name"` // does NOT have to be unique
-	ThemeColorHexaCode string   `json:"themeColorHexaCode"`
-	Radius             float64  `json:"radius"`
-	Location           Location `json:"location"`
-	AdminId            UserUid  `json:"adminId"`
+	Name               string   `json:"name" binding:"required"` // does NOT have to be unique
+	ThemeColorHexaCode string   `json:"themeColorHexaCode" binding:"required,hexcolor"`
+	Radius             float64  `json:"radius" binding:"required,min=0,max=100"` // max MUST be same as MaxSpaceRadiusM constant
+	Location           Location `json:"location" binding:"required"`
+	AdminId            UserUid  `json:"adminId" binding:"required"`
 }
 
 type Space struct {
@@ -34,9 +34,7 @@ type SpaceWithDistance struct {
 	Distance float64 `json:"distance"`
 }
 
-type NewSpace struct {
-	BaseSpace
-}
+type NewSpace BaseSpace
 
 type Location struct {
 	Long float64 `json:"longitude"`
