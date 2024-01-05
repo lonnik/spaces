@@ -9,6 +9,8 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+const txRetries = 10
+
 type RedisRepository struct {
 	redisClient *redis.Client
 }

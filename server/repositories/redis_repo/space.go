@@ -148,7 +148,7 @@ func (repo *RedisRepository) GetSpaceSubscribers(ctx context.Context, spaceId uu
 }
 
 func (repo *RedisRepository) GetSpaceActiveSubscribers(ctx context.Context, spaceId uuid.Uuid, offset, count int64) ([]models.User, error) {
-	var spaceSubscribersKey = getSpaceActiveSubscribers(spaceId)
+	var spaceSubscribersKey = getSpaceActiveSubscribersKey(spaceId)
 
 	return repo.getSpaceSubscribers(ctx, spaceSubscribersKey, offset, count)
 }
@@ -237,6 +237,69 @@ func (repo *RedisRepository) SetSpaceSubscriber(ctx context.Context, spaceId uui
 		Member: spaceId.String(),
 	}).Err(); err != nil {
 		return errors.E(op, err)
+	}
+
+	return nil
+}
+
+func (repo *RedisRepository) SetSpaceSubscriberSession(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid, sessionId uuid.Uuid) error {
+	const op errors.Op = "redis_repo.RedisRepository.SetSpaceSubscriberSession"
+	var spaceActiveSubscribersKey = getSpaceActiveSubscribersKey(spaceId)
+	var spaceActiveSubscriberSessionsKey = getSpaceActiveSubscriberSessionsKey(spaceId, userUid)
+
+	if err := repo.redisClient.ZAdd(ctx, spaceActiveSubscribersKey, redis.Z{
+		Score:  float64(time.Now().UnixMilli()),
+		Member: string(userUid),
+	}).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	if err := repo.redisClient.ZAdd(ctx, spaceActiveSubscriberSessionsKey, redis.Z{
+		Score:  float64(time.Now().UnixMilli()),
+		Member: sessionId.String(),
+	}).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
+}
+
+func (repo *RedisRepository) DeleteSpaceSubscriberSession(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid, sessionId uuid.Uuid) error {
+	const op errors.Op = "redis_repo.RedisRepository.DeleteSpaceSubscriberSession"
+	var spaceActiveSubscribersKey = getSpaceActiveSubscribersKey(spaceId)
+	var spaceActiveSubscriberSessionsKey = getSpaceActiveSubscriberSessionsKey(spaceId, userUid)
+
+	if err := repo.redisClient.ZRem(ctx, spaceActiveSubscriberSessionsKey, sessionId.String()).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	for i := 0; i < txRetries; i++ {
+		err := repo.redisClient.Watch(ctx, func(_ *redis.Tx) error {
+			sessionsCount, err := repo.redisClient.ZCard(ctx, spaceActiveSubscriberSessionsKey).Result()
+			if err != nil {
+				return err
+			}
+
+			tx := repo.redisClient.TxPipeline()
+			if sessionsCount > 0 {
+				tx.Discard()
+
+				return nil
+			}
+
+			tx.ZRem(ctx, spaceActiveSubscribersKey, string(userUid))
+
+			_, err = tx.Exec(ctx)
+			return err
+		}, spaceActiveSubscriberSessionsKey)
+		switch err {
+		case redis.TxFailedErr:
+			continue
+		case nil:
+			return nil
+		default:
+			return errors.E(op, err)
+		}
 	}
 
 	return nil

@@ -67,12 +67,19 @@ func getSpaceSubscribersKey(spaceId uuid.Uuid) string {
 	return getSpaceKey(spaceId) + ":subscribers"
 }
 
+// spaces:[spaceid]:subscribers[userid]:sessions
+//
+// The keys holds a SORTED SET value with the session ids as MEMBERS and starting session time as SCORES
+func getSpaceActiveSubscriberSessionsKey(spaceId uuid.Uuid, userId models.UserUid) string {
+	return getSpaceSubscribersKey(spaceId) + ":" + string(userId) + ":sessions"
+}
+
 // must be subset of spaces:[spaceid]:subscribers
 //
 // spaces:[spaceid]:active_subscribers
 //
-// The keys hold SORTED SET values with the user ids as MEMBERS and joining time as SCORES
-func getSpaceActiveSubscribers(spaceId uuid.Uuid) string {
+// The keys hold SORTED SET values with the user ids as MEMBERS and joining times as SCORES
+func getSpaceActiveSubscribersKey(spaceId uuid.Uuid) string {
 	return getSpaceKey(spaceId) + ":active_subscribers"
 }
 
