@@ -79,13 +79,17 @@ func main() {
 	// middleware functions
 	validateThreadInSpaceMiddleware := middlewares.ValidateThreadInSpace(logger, redisRepo)
 	validateMessageInThreadMiddleware := middlewares.ValidateMessageInThread(logger, redisRepo)
+	isSpaceSubscriberMiddleware := middlewares.IsSpaceSubscriber(logger, redisRepo)
 
 	// USERS
 	api.POST("/users", userController.CreateUserFromIdToken)
 	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, true), userController.GetUser)
 
 	// AUTHENTICATED USER
-	api.GET("/user", middlewares.EnsureAuthenticated(logger, redisRepo, false, false), userController.GetAuthedUser)
+	api.GET("/user",
+		middlewares.EnsureAuthenticated(logger, redisRepo, false, false),
+		userController.GetAuthedUser,
+	)
 	api.PUT("/user", middlewares.EnsureAuthenticated(logger, redisRepo, true, false)) // TODO
 	api.DELETE("/user")                                                               // TODO
 
@@ -105,6 +109,7 @@ func main() {
 	)
 	api.POST("/spaces/:spaceid/toplevel-threads",
 		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		isSpaceSubscriberMiddleware,
 		spaceController.CreateTopLevelThread,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
@@ -117,8 +122,9 @@ func main() {
 		spaceController.GetThreadWithMessages,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages",
-		validateThreadInSpaceMiddleware,
 		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		validateThreadInSpaceMiddleware,
+		isSpaceSubscriberMiddleware,
 		spaceController.CreateMessage,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/like",

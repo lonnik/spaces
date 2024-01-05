@@ -6,6 +6,7 @@ import (
 	"spaces-p/errors"
 	"spaces-p/firebase"
 	"spaces-p/models"
+	"spaces-p/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,6 +66,45 @@ func EnsureAuthenticated(
 		}
 
 		c.Set("user", user)
+
+		c.Next()
+	}
+}
+
+func IsSpaceSubscriber(
+	logger common.Logger,
+	cacheRepo common.CacheRepository,
+) gin.HandlerFunc {
+	const op errors.Op = "middlewares.IsSpaceSubscriber"
+
+	return func(c *gin.Context) {
+		var ctx = c.Request.Context()
+
+		spaceId, err := utils.GetSpaceIdFromPath(c)
+		if err != nil {
+			abortAndWriteError(c, errors.E(op, err, http.StatusInternalServerError), logger)
+			return
+		}
+
+		user, err := utils.GetUserFromContext(c)
+		if err != nil {
+			abortAndWriteError(c, errors.E(op, err, http.StatusInternalServerError), logger)
+			return
+		}
+
+		isSpaceSubscriber, err := cacheRepo.HasSpaceSubscriber(ctx, spaceId, user.ID)
+		switch {
+		case err != nil:
+			if err != nil {
+				abortAndWriteError(c, errors.E(op, err, http.StatusInternalServerError), logger)
+				return
+			}
+		case !isSpaceSubscriber:
+			if err != nil {
+				abortAndWriteError(c, errors.E(op, err, http.StatusForbidden), logger)
+				return
+			}
+		}
 
 		c.Next()
 	}
