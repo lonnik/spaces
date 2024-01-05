@@ -21,6 +21,7 @@ type UserCacheRepository interface {
 }
 
 type SpaceCacheRepository interface {
+	GetSpace(ctx context.Context, spaceid uuid.Uuid) (*models.Space, error)
 	GetSpacesByUserId(ctx context.Context, userId models.UserUid, count, offset int64) ([]models.Space, error)
 	GetSpacesByLocation(ctx context.Context, location models.Location, radius models.Radius, count int) ([]models.SpaceWithDistance, error)
 	GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid, offset, count int64) ([]models.User, error)

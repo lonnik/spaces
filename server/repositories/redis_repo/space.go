@@ -2,14 +2,37 @@ package redis_repo
 
 import (
 	"context"
+	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/models"
+	"spaces-p/utils"
 	"spaces-p/uuid"
 	"strconv"
 	"time"
 
 	"github.com/redis/go-redis/v9"
 )
+
+func (repo *RedisRepository) GetSpace(ctx context.Context, spaceid uuid.Uuid) (*models.Space, error) {
+	const op errors.Op = "redis_repo.RedisRepository.GetSpace"
+	var spaceKey = getSpaceKey(spaceid)
+
+	r, err := repo.redisClient.HGetAll(ctx, spaceKey).Result()
+	switch {
+	case err != nil:
+		return nil, err
+	case len(r) == 0:
+		return nil, errors.E(op, common.ErrNotFound)
+	}
+
+	space, err := repo.parseSpace(r)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	space.ID = spaceid
+
+	return space, nil
+}
 
 func (repo *RedisRepository) GetSpacesByUserId(ctx context.Context, userId models.UserUid, count, offset int64) ([]models.Space, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetSpacesByUserId"
@@ -22,7 +45,7 @@ func (repo *RedisRepository) GetSpacesByUserId(ctx context.Context, userId model
 
 	var spaces = make([]models.Space, 0, len(spaceMaps))
 	for i, spaceMap := range spaceMaps {
-		space, err := parseSpaceFromSpaceMap(spaceMap)
+		space, err := repo.parseSpace(spaceMap)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
@@ -83,7 +106,7 @@ func (repo *RedisRepository) GetSpacesByLocation(
 			return nil, errors.E(op, err)
 		}
 
-		space, err := parseSpaceFromSpaceMap(spaceMap)
+		space, err := repo.parseSpace(spaceMap)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
@@ -327,4 +350,41 @@ func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceI
 	}
 
 	return threads, nil
+}
+
+func (repo *RedisRepository) parseSpace(spaceMap map[string]string) (*models.Space, error) {
+	const op errors.Op = "redis_repo.RedisRepository.parseSpace"
+
+	radiusStr := spaceMap[spaceFields.radiusField]
+	name := spaceMap[spaceFields.nameField]
+	themeColor := spaceMap[spaceFields.themeColorHexaCodeField]
+	createdAtStr := spaceMap[spaceFields.createdAtField]
+	adminIdStr := spaceMap[spaceFields.adminIdField]
+	locationStr := spaceMap[spaceFields.locationField]
+
+	var location models.Location
+	if err := location.ParseString(locationStr); err != nil {
+		return nil, errors.E(op, err)
+	}
+	radius, err := strconv.ParseFloat(radiusStr, 64)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	createdAt, err := utils.StringToTime(createdAtStr)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	adminId := models.UserUid(adminIdStr)
+
+	return &models.Space{
+		ID:        uuid.Nil,
+		CreatedAt: createdAt,
+		BaseSpace: models.BaseSpace{
+			Name:               name,
+			ThemeColorHexaCode: themeColor,
+			Radius:             radius,
+			Location:           location,
+			AdminId:            adminId,
+		},
+	}, nil
 }

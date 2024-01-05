@@ -18,6 +18,20 @@ func NewSpaceService(logger common.Logger, cacheRepo common.CacheRepository) *Sp
 	return &SpaceService{logger, cacheRepo}
 }
 
+func (ss *SpaceService) GetSpace(ctx context.Context, spaceId uuid.Uuid) (*models.Space, error) {
+	const op errors.Op = "services.SpaceService.GetSpace"
+
+	space, err := ss.cacheRepo.GetSpace(ctx, spaceId)
+	switch {
+	case errors.Is(err, common.ErrNotFound):
+		return nil, errors.E(op, err, http.StatusBadRequest)
+	case err != nil:
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return space, nil
+}
+
 func (ss *SpaceService) GetSpacesByLocation(ctx context.Context, location models.Location, radius models.Radius, count, offset int) ([]models.SpaceWithDistance, error) {
 	const op errors.Op = "services.SpaceService.GetSpacesByLocation"
 

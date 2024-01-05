@@ -22,6 +22,25 @@ func NewSpaceController(logger common.Logger, spaceService *services.SpaceServic
 	return &SpaceController{logger, spaceService, threadService, messageService}
 }
 
+func (uc *SpaceController) GetSpace(c *gin.Context) {
+	const op errors.Op = "controllers.SpaceController.GetSpace"
+	var ctx = c.Request.Context()
+
+	spaceId, err := utils.GetSpaceIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	space, err := uc.spaceService.GetSpace(ctx, spaceId)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err), uc.logger)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": space})
+}
+
 func (uc *SpaceController) GetSpaces(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.GetSpaces"
 	var ctx = c.Request.Context()

@@ -20,9 +20,9 @@ func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) 
 	r, err := repo.redisClient.HGetAll(ctx, threadKey).Result()
 	switch {
 	case err != nil:
-		return &models.Thread{}, err
+		return nil, err
 	case len(r) == 0:
-		return &models.Thread{}, errors.E(op, common.ErrNotFound)
+		return nil, errors.E(op, common.ErrNotFound)
 	}
 
 	likesStr := r[threadFields.likesField]
@@ -35,19 +35,19 @@ func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) 
 	case uuid.IsInvalidLengthError(err):
 		break
 	case err != nil:
-		return &models.Thread{}, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 	likes, err := strconv.Atoi(likesStr)
 	if err != nil {
-		return &models.Thread{}, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 	messagesCount, err := strconv.Atoi(messagesCountStr)
 	if err != nil {
-		return &models.Thread{}, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 	spaceId, err := uuid.Parse(spaceIdStr)
 	if err != nil {
-		return &models.Thread{}, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
 	return &models.Thread{

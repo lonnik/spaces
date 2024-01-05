@@ -96,7 +96,7 @@ func main() {
 	// SPACES
 	api.GET("/spaces", spaceController.GetSpaces)
 	api.POST("/spaces", spaceController.CreateSpace)
-	api.GET("/spaces/:spaceid") // TODO NEXT: space
+	api.GET("/spaces/:spaceid", spaceController.GetSpace)
 	api.GET("/spaces/:spaceid/subscribers",
 		spaceController.GetSpaceSubscribers,
 	)
