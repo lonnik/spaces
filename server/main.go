@@ -8,6 +8,7 @@ import (
 	"spaces-p/middlewares"
 	"spaces-p/redis"
 	googlegeocode "spaces-p/repositories/google_geocode"
+	localmemory "spaces-p/repositories/local_memory"
 	"spaces-p/repositories/redis_repo"
 	"spaces-p/services"
 	"spaces-p/zerologger"
@@ -59,17 +60,19 @@ func main() {
 	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
 	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(os.Getenv("GOOGLE_GEOCODE_API_KEY"))
+	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 
 	// set up services
 	userService := services.NewUserService(logger, redisRepo)
 	spaceService := services.NewSpaceService(logger, redisRepo)
+	spaceNotificationService := services.NewSpaceNotificationsService(logger, redisRepo, localMemoryRepo)
 	threadService := services.NewThreadService(logger, redisRepo)
 	messageService := services.NewMessageService(logger, redisRepo)
 	addressService := services.NewAddressService(logger, redisRepo, googleGeocodeRepo)
 
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
-	spaceController := controllers.NewSpaceController(logger, spaceService, threadService, messageService)
+	spaceController := controllers.NewSpaceController(logger, spaceService, spaceNotificationService, threadService, messageService)
 	addressController := controllers.NewAddressController(logger, addressService)
 
 	router := gin.New()
@@ -97,6 +100,11 @@ func main() {
 	api.GET("/spaces", spaceController.GetSpaces)
 	api.POST("/spaces", spaceController.CreateSpace)
 	api.GET("/spaces/:spaceid", spaceController.GetSpace)
+	api.GET("/space/:spaceid/updates/ws",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, true),
+		isSpaceSubscriberMiddleware,
+		spaceController.SpaceConnect,
+	)
 	api.GET("/spaces/:spaceid/subscribers",
 		spaceController.GetSpaceSubscribers,
 	)

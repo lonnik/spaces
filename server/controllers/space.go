@@ -12,14 +12,15 @@ import (
 )
 
 type SpaceController struct {
-	logger         common.Logger
-	spaceService   *services.SpaceService
-	threadService  *services.ThreadService
-	messageService *services.MessageService
+	logger                   common.Logger
+	spaceService             *services.SpaceService
+	spaceNotificationService *services.SpaceNotificationsService
+	threadService            *services.ThreadService
+	messageService           *services.MessageService
 }
 
-func NewSpaceController(logger common.Logger, spaceService *services.SpaceService, threadService *services.ThreadService, messageService *services.MessageService) *SpaceController {
-	return &SpaceController{logger, spaceService, threadService, messageService}
+func NewSpaceController(logger common.Logger, spaceService *services.SpaceService, spaceNotificationService *services.SpaceNotificationsService, threadService *services.ThreadService, messageService *services.MessageService) *SpaceController {
+	return &SpaceController{logger, spaceService, spaceNotificationService, threadService, messageService}
 }
 
 func (uc *SpaceController) GetSpace(c *gin.Context) {
@@ -231,6 +232,26 @@ func (uc *SpaceController) GetThreadWithMessages(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": threads})
+}
+
+func (uc *SpaceController) SpaceConnect(c *gin.Context) {
+	const op errors.Op = "controllers.SpaceController.SpaceConnect"
+	var ctx = c.Request.Context()
+
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	spaceId, err := utils.GetSpaceIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	err = uc.spaceNotificationService.SpaceConnect(ctx, c, spaceId, *user)
+	utils.WriteError(c, errors.E(op, err), uc.logger)
 }
 
 func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {

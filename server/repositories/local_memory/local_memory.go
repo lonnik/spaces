@@ -1,19 +1,18 @@
 package localmemory
 
 import (
-	"spaces-p/common"
-	"spaces-p/errors"
 	"spaces-p/models"
 	"spaces-p/uuid"
-
-	"nhooyr.io/websocket"
+	"sync"
 )
 
+const NotificationsBufferSize = 16
+
 type BaseSession struct {
-	SpaceId       uuid.Uuid
-	UserId        uuid.Uuid
-	Conn          *websocket.Conn
-	Notifications chan models.Notification
+	SpaceId         uuid.Uuid
+	UserId          models.UserUid
+	NotificationsCh chan models.Notification
+	CloseSlow       func()
 }
 
 type Session struct {
@@ -25,17 +24,20 @@ type NewSessionInput BaseSession
 
 type space map[uuid.Uuid]*Session
 
-// TODO: must be thread-safe
-type LocalMemory struct {
+type LocalMemoryRepo struct {
+	mu     sync.Mutex
 	spaces map[uuid.Uuid]space
 }
 
-func NewLocalMemory() *LocalMemory {
-	return &LocalMemory{spaces: map[uuid.Uuid]space{}}
+func NewLocalMemoryRepo() *LocalMemoryRepo {
+	return &LocalMemoryRepo{spaces: map[uuid.Uuid]space{}}
 }
 
-func (lm *LocalMemory) AddSession(newSessionInput NewSessionInput) *Session {
+func (lm *LocalMemoryRepo) AddSession(newSessionInput NewSessionInput) *Session {
 	var newSessionId = uuid.New()
+
+	lm.mu.Lock()
+	defer lm.mu.Unlock()
 
 	newSession := &Session{
 		SessionId:   newSessionId,
@@ -52,19 +54,11 @@ func (lm *LocalMemory) AddSession(newSessionInput NewSessionInput) *Session {
 	return newSession
 }
 
-func (lm *LocalMemory) GetSession(spaceId, sessionId uuid.Uuid) (*Session, error) {
-	const op errors.Op = "localmemory.LocalMemory.GetSession"
-
-	session, sessionExists := lm.spaces[spaceId][sessionId]
-	if !sessionExists {
-		return nil, errors.E(op, common.ErrNotFound)
-	}
-
-	return session, nil
-}
-
 // becomes no-op when space or session does not exist
-func (lm *LocalMemory) DeleteSession(spaceId, sessionId uuid.Uuid) {
+func (lm *LocalMemoryRepo) DeleteSession(spaceId, sessionId uuid.Uuid) {
+	lm.mu.Lock()
+	defer lm.mu.Unlock()
+
 	space, spaceExists := lm.spaces[spaceId]
 	if !spaceExists {
 		return
@@ -78,23 +72,37 @@ func (lm *LocalMemory) DeleteSession(spaceId, sessionId uuid.Uuid) {
 }
 
 // becomes no-op when space does not exist
-func (lm *LocalMemory) PublishNotificationToSpaceSessions(spaceId uuid.Uuid, notification models.Notification) {
+func (lm *LocalMemoryRepo) PublishNotificationToSpaceSessions(spaceId uuid.Uuid, notification models.Notification) {
+	lm.mu.Lock()
+	defer lm.mu.Unlock()
+
 	space, spaceExists := lm.spaces[spaceId]
 	if !spaceExists {
 		return
 	}
 
 	for _, session := range space {
-		session.Notifications <- notification
+		lm.publishNotification(session, notification)
 	}
 }
 
 // becomes no-op when session does not exist in space
-func (lm *LocalMemory) PublishNotificationToSpaceSession(spaceId, sessionId uuid.Uuid, notification models.Notification) {
+func (lm *LocalMemoryRepo) PublishNotificationToSpaceSession(spaceId, sessionId uuid.Uuid, notification models.Notification) {
+	lm.mu.Lock()
+	defer lm.mu.Unlock()
+
 	session, sessionExists := lm.spaces[spaceId][sessionId]
 	if !sessionExists {
 		return
 	}
 
-	session.Notifications <- notification
+	lm.publishNotification(session, notification)
+}
+
+func (lm *LocalMemoryRepo) publishNotification(session *Session, notification []byte) {
+	select {
+	case session.NotificationsCh <- notification:
+	default:
+		go session.CloseSlow()
+	}
 }
