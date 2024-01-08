@@ -40,8 +40,8 @@ type ThreadCacheRepository interface {
 	GetThread(ctx context.Context, threadId uuid.Uuid) (*models.Thread, error)
 	GetThreadMessagesByTime(ctx context.Context, threadId uuid.Uuid, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error)
 	GetThreadMessagesByPopularity(ctx context.Context, threadId uuid.Uuid, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error)
-	SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error)
-	SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid) (uuid.Uuid, error)
+	SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, createdAtTimeStamp int64, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error)
+	SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, createdAtTimeStamp int64) (uuid.Uuid, error)
 	HasThreadMessage(ctx context.Context, threadId, messageId uuid.Uuid) (bool, error)
 }
 

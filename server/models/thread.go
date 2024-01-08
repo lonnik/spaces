@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"spaces-p/errors"
 	"spaces-p/uuid"
+	"time"
 )
 
 type BaseThread struct {
@@ -12,6 +13,7 @@ type BaseThread struct {
 	Likes         int       `json:"likes"`
 	MessagesCount int       `json:"messagesCount"`
 	SpaceId       uuid.Uuid `json:"spaceId"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
 type TopLevelThread struct {

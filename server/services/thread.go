@@ -7,6 +7,7 @@ import (
 	"spaces-p/errors"
 	"spaces-p/models"
 	"spaces-p/uuid"
+	"time"
 )
 
 type ThreadService struct {
@@ -32,7 +33,8 @@ func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessag
 		return uuid.Nil, errors.E(op, err, http.StatusBadRequest)
 	}
 
-	threadId, err := ts.cacheRepo.SetThread(ctx, spaceId, parentMessageId)
+	createdAtTimeStamp := time.Now().UnixMilli()
+	threadId, err := ts.cacheRepo.SetThread(ctx, spaceId, parentMessageId, createdAtTimeStamp)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
@@ -43,7 +45,8 @@ func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessag
 func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
 	const op errors.Op = "services.ThreadService.CreateTopLevelThread"
 
-	threadId, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, newTopLevelThreadFirstMessage)
+	createdAtTimeStamp := time.Now().UnixMilli()
+	threadId, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, createdAtTimeStamp, newTopLevelThreadFirstMessage)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}

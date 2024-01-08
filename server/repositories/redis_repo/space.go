@@ -383,31 +383,14 @@ func (repo *RedisRepository) getSpaceTopLevelThreads(ctx context.Context, spaceI
 
 	var threads = make([]models.TopLevelThread, 0, len(threadMaps))
 	for i, threadMap := range threadMaps {
-		likesStr := threadMap[threadFields.likesField]
-		messagesCountStr := threadMap[threadFields.messagesCountField]
-		spaceIdStr := threadMap[threadFields.spaceIdField]
-
-		likes, err := strconv.Atoi(likesStr)
+		baseThread, err := repo.parseBaseThread(threadMap)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
-		messagesCount, err := strconv.Atoi(messagesCountStr)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		spaceId, err := uuid.Parse(spaceIdStr)
-		if err != nil {
-			return nil, errors.E(op, err)
-		}
-		threadId := topLevelThreadIds[i]
+		baseThread.ID = topLevelThreadIds[i]
 
 		threads = append(threads, models.TopLevelThread{
-			BaseThread: models.BaseThread{
-				SpaceId:       spaceId,
-				ID:            threadId,
-				Likes:         likes,
-				MessagesCount: messagesCount,
-			},
+			BaseThread:   *baseThread,
 			FirstMessage: firstMessages[i],
 		})
 	}

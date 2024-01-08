@@ -8,7 +8,6 @@ import (
 	"spaces-p/utils"
 	"spaces-p/uuid"
 	"strconv"
-	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -25,10 +24,13 @@ func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) 
 		return nil, errors.E(op, common.ErrNotFound)
 	}
 
-	likesStr := r[threadFields.likesField]
-	messagesCountStr := r[threadFields.messagesCountField]
 	parentMessageIdStr := r[threadFields.parentMessageIdField]
-	spaceIdStr := r[threadFields.spaceIdField]
+
+	baseThread, err := repo.parseBaseThread(r)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	baseThread.ID = threadId
 
 	parentMessageId, err := uuid.Parse(parentMessageIdStr)
 	switch {
@@ -37,27 +39,10 @@ func (repo *RedisRepository) GetThread(ctx context.Context, threadId uuid.Uuid) 
 	case err != nil:
 		return nil, errors.E(op, err)
 	}
-	likes, err := strconv.Atoi(likesStr)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	messagesCount, err := strconv.Atoi(messagesCountStr)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	spaceId, err := uuid.Parse(spaceIdStr)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
 
 	return &models.Thread{
 		ParentMessageId: parentMessageId,
-		BaseThread: models.BaseThread{
-			SpaceId:       spaceId,
-			ID:            threadId,
-			Likes:         likes,
-			MessagesCount: messagesCount,
-		},
+		BaseThread:      *baseThread,
 	}, nil
 }
 
@@ -86,7 +71,7 @@ func (repo *RedisRepository) GetThreadMessagesByPopularity(ctx context.Context, 
 }
 
 // set parent's message child_thread_id field, set thread
-func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid) (uuid.Uuid, error) {
+func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, createdAtTimeStamp int64) (uuid.Uuid, error) {
 	const op errors.Op = "redis_repo.RedisRepository.SetThread"
 	var threadId = uuid.New()
 	var threadKey = getThreadKey(threadId)
@@ -102,6 +87,7 @@ func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessa
 		threadFields.firstMessageIdField:  "",
 		threadFields.likesField:           "0",
 		threadFields.messagesCountField:   "0",
+		threadFields.createdAtField:       strconv.FormatInt(createdAtTimeStamp, 10),
 		threadFields.parentMessageIdField: parentMessageId.String(),
 		threadFields.spaceIdField:         spaceId.String(),
 	}).Err(); err != nil {
@@ -112,7 +98,7 @@ func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessa
 }
 
 // add new thread to space toplevel sets, set first message
-func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
+func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, createdAtTimeStamp int64, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
 	const op errors.Op = "redis_repo.RedisRepository.SetTopLevelThread"
 	var threadId = uuid.New()
 
@@ -133,6 +119,7 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 		threadFields.likesField:           "0",
 		threadFields.messagesCountField:   "0",
 		threadFields.parentMessageIdField: "",
+		threadFields.createdAtField:       strconv.FormatInt(createdAtTimeStamp, 10),
 		threadFields.spaceIdField:         spaceId.String(),
 	}).Err(); err != nil {
 		return uuid.Nil, errors.E(op, err)
@@ -141,7 +128,7 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 	// add to space thread toplevel sets
 	var spaceToplevelThreadsByTimeKey = getSpaceToplevelThreadsByTimeKey(spaceId)
 	if err := repo.redisClient.ZAdd(ctx, spaceToplevelThreadsByTimeKey, redis.Z{
-		Score:  float64(time.Now().UnixMilli()),
+		Score:  float64(createdAtTimeStamp),
 		Member: threadId.String(),
 	}).Err(); err != nil {
 		return uuid.Nil, errors.E(op, err)
@@ -266,4 +253,38 @@ func (repo *RedisRepository) incrementThreadLikesBy(ctx context.Context, threadI
 	}
 
 	return nil
+}
+
+func (repo *RedisRepository) parseBaseThread(threadMap map[string]string) (*models.BaseThread, error) {
+	const op errors.Op = "redis_repo.RedisRepository.parseBaseThread"
+
+	likesStr := threadMap[threadFields.likesField]
+	messagesCountStr := threadMap[threadFields.messagesCountField]
+	spaceIdStr := threadMap[threadFields.spaceIdField]
+	createdAtStr := threadMap[threadFields.createdAtField]
+
+	likes, err := strconv.Atoi(likesStr)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	messagesCount, err := strconv.Atoi(messagesCountStr)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	spaceId, err := uuid.Parse(spaceIdStr)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+	createdAt, err := utils.StringToTime(createdAtStr)
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	return &models.BaseThread{
+		ID:            uuid.Nil,
+		SpaceId:       spaceId,
+		Likes:         likes,
+		MessagesCount: messagesCount,
+		CreatedAt:     createdAt,
+	}, nil
 }
