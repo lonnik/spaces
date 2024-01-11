@@ -10,6 +10,7 @@ import (
 	"spaces-p/firebase"
 	"spaces-p/models"
 	"spaces-p/redis"
+	localmemory "spaces-p/repositories/local_memory"
 	"spaces-p/repositories/redis_repo"
 	"spaces-p/services"
 	"spaces-p/zerologger"
@@ -25,6 +26,7 @@ func main() {
 
 	redis.ConnectRedis()
 	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
+	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
@@ -34,7 +36,7 @@ func main() {
 		panic(err)
 	}
 
-	spaceService := services.NewSpaceService(logger, redisRepo)
+	spaceService := services.NewSpaceService(logger, redisRepo, localMemoryRepo)
 	userService := services.NewUserService(logger, redisRepo)
 
 	newFakeUsers, err := createFakeUsers(ctx, 3)
