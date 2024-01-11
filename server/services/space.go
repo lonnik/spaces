@@ -6,16 +6,18 @@ import (
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/models"
+	localmemory "spaces-p/repositories/local_memory"
 	"spaces-p/uuid"
 )
 
 type SpaceService struct {
-	logger    common.Logger
-	cacheRepo common.CacheRepository
+	logger          common.Logger
+	cacheRepo       common.CacheRepository
+	localMemoryRepo *localmemory.LocalMemoryRepo
 }
 
-func NewSpaceService(logger common.Logger, cacheRepo common.CacheRepository) *SpaceService {
-	return &SpaceService{logger, cacheRepo}
+func NewSpaceService(logger common.Logger, cacheRepo common.CacheRepository, localMemoryRepo *localmemory.LocalMemoryRepo) *SpaceService {
+	return &SpaceService{logger, cacheRepo, localMemoryRepo}
 }
 
 func (ss *SpaceService) GetSpace(ctx context.Context, spaceId uuid.Uuid) (*models.Space, error) {
@@ -145,11 +147,11 @@ func (ss *SpaceService) CreateSpace(ctx context.Context, newSpace models.NewSpac
 	return spaceId, nil
 }
 
-func (ss *SpaceService) AddSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) error {
+func (ss *SpaceService) AddSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userId models.UserUid) error {
 	const op errors.Op = "services.SpaceService.AddSpaceSubscriber"
 
 	// check if space subscriber already exists so the created at time is not overridden in the spaceSubscribersKey and userSpacesKey sorted sets
-	spaceHasSubscriber, err := ss.cacheRepo.HasSpaceSubscriber(ctx, spaceId, userUid)
+	spaceHasSubscriber, err := ss.cacheRepo.HasSpaceSubscriber(ctx, spaceId, userId)
 	switch {
 	case err != nil:
 		return errors.E(op, err, http.StatusInternalServerError)
@@ -157,9 +159,11 @@ func (ss *SpaceService) AddSpaceSubscriber(ctx context.Context, spaceId uuid.Uui
 		return nil
 	}
 
-	if err := ss.cacheRepo.SetSpaceSubscriber(ctx, spaceId, userUid); err != nil {
+	if err := ss.cacheRepo.SetSpaceSubscriber(ctx, spaceId, userId); err != nil {
 		return errors.E(op, err, http.StatusInternalServerError)
 	}
+
+	ss.localMemoryRepo.PublishNewSpaceSubscriber(spaceId, userId)
 
 	return nil
 }

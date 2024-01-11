@@ -6,20 +6,22 @@ import (
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/models"
+	localmemory "spaces-p/repositories/local_memory"
 	"spaces-p/uuid"
 	"time"
 )
 
 type ThreadService struct {
-	logger    common.Logger
-	cacheRepo common.CacheRepository
+	logger          common.Logger
+	cacheRepo       common.CacheRepository
+	localMemoryRepo *localmemory.LocalMemoryRepo
 }
 
-func NewThreadService(logger common.Logger, cacheRepo common.CacheRepository) *ThreadService {
-	return &ThreadService{logger, cacheRepo}
+func NewThreadService(logger common.Logger, cacheRepo common.CacheRepository, localMemoryRepo *localmemory.LocalMemoryRepo) *ThreadService {
+	return &ThreadService{logger, cacheRepo, localMemoryRepo}
 }
 
-func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid) (uuid.Uuid, error) {
+func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, authenticatedUserId models.UserUid) (uuid.Uuid, error) {
 	const op errors.Op = "services.ThreadService.CreateThread"
 
 	m, err := ts.cacheRepo.GetMessage(ctx, parentMessageId)
@@ -33,23 +35,26 @@ func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessag
 		return uuid.Nil, errors.E(op, err, http.StatusBadRequest)
 	}
 
-	createdAtTimeStamp := time.Now().UnixMilli()
-	threadId, err := ts.cacheRepo.SetThread(ctx, spaceId, parentMessageId, createdAtTimeStamp)
+	var createdAt = time.Now()
+	thread, err := ts.cacheRepo.SetThread(ctx, spaceId, parentMessageId, createdAt)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	return threadId, nil
+	ts.localMemoryRepo.PublishNewThread(spaceId, authenticatedUserId, *thread)
+
+	return thread.ID, nil
 }
 
-func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
+func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage, authenticatedUserId models.UserUid) (uuid.Uuid, error) {
 	const op errors.Op = "services.ThreadService.CreateTopLevelThread"
 
-	createdAtTimeStamp := time.Now().UnixMilli()
-	threadId, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, createdAtTimeStamp, newTopLevelThreadFirstMessage)
+	createdTopLevelThread, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, newTopLevelThreadFirstMessage)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	return threadId, nil
+	ts.localMemoryRepo.PublishNewToplevelThread(spaceId, authenticatedUserId, *createdTopLevelThread)
+
+	return createdTopLevelThread.ID, nil
 }

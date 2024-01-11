@@ -279,7 +279,7 @@ func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {
 	threadId, err := uc.threadService.CreateTopLevelThread(ctx, spaceId, models.NewTopLevelThreadFirstMessage{
 		NewMessageInput: body,
 		SenderId:        authenticatedUser.ID,
-	})
+	}, authenticatedUser.ID)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return
@@ -291,6 +291,12 @@ func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {
 func (uc *SpaceController) CreateThread(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.CreateThread"
 	var ctx = c.Request.Context()
+
+	authenticatedUser, err := utils.GetUserFromContext(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), uc.logger)
+		return
+	}
 
 	spaceId, err := utils.GetSpaceIdFromPath(c)
 	if err != nil {
@@ -304,7 +310,7 @@ func (uc *SpaceController) CreateThread(c *gin.Context) {
 		return
 	}
 
-	threadId, err := uc.threadService.CreateThread(ctx, spaceId, messageId)
+	threadId, err := uc.threadService.CreateThread(ctx, spaceId, messageId, authenticatedUser.ID)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return
@@ -341,7 +347,7 @@ func (uc *SpaceController) CreateMessage(c *gin.Context) {
 		return
 	}
 
-	messageId, err := uc.messageService.CreateMessage(ctx, spaceId, models.NewMessage{
+	messageId, err := uc.messageService.CreateMessage(ctx, spaceId, authenticatedUser.ID, models.NewMessage{
 		BaseMessage: models.BaseMessage(body),
 		SenderId:    authenticatedUser.ID,
 		ThreadId:    threadId,
@@ -358,13 +364,31 @@ func (uc *SpaceController) LikeMessage(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.LikeMessage"
 	var ctx = c.Request.Context()
 
+	authenticatedUser, err := utils.GetUserFromContext(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusInternalServerError), uc.logger)
+		return
+	}
+
+	spaceId, err := utils.GetSpaceIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	threadId, err := utils.GetThreadIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
 	messageId, err := utils.GetMessageIdFromPath(c)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
 	}
 
-	if err := uc.messageService.LikeMessage(ctx, messageId); err != nil {
+	if err := uc.messageService.LikeMessage(ctx, spaceId, threadId, messageId, authenticatedUser.ID); err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return
 	}

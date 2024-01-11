@@ -99,6 +99,7 @@ var threadFields = struct {
 	likesField           string
 	messagesCountField   string
 	spaceIdField         string
+	createdAtField       string
 	parentMessageIdField string
 	firstMessageIdField  string
 }{
@@ -107,6 +108,7 @@ var threadFields = struct {
 	spaceIdField:         "space_id",
 	parentMessageIdField: "parent_message_id", // only for sublevel threads
 	firstMessageIdField:  "first_message_id",  // only for toplevel threads
+	createdAtField:       "created_at",
 }
 
 // threads:[threadid]
@@ -130,7 +132,7 @@ var messageFields = struct {
 	contentField       string
 	senderIdField      string
 	typeField          string
-	timeStampField     string
+	createdAtField     string
 	childThreadIdField string
 	threadIdField      string
 	likesField         string
@@ -138,7 +140,7 @@ var messageFields = struct {
 	contentField:       "content",
 	senderIdField:      "sender_id",
 	typeField:          "type",
-	timeStampField:     "timestamp",
+	createdAtField:     "created_at",
 	childThreadIdField: "child_thread_id",
 	threadIdField:      "thread_id",
 	likesField:         "likes",

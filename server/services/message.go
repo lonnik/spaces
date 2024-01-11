@@ -7,19 +7,21 @@ import (
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/models"
+	localmemory "spaces-p/repositories/local_memory"
 	"spaces-p/uuid"
 )
 
 type MessageService struct {
-	logger    common.Logger
-	cacheRepo common.CacheRepository
+	logger          common.Logger
+	cacheRepo       common.CacheRepository
+	localMemoryRepo *localmemory.LocalMemoryRepo
 }
 
-func NewMessageService(logger common.Logger, cacheRepo common.CacheRepository) *MessageService {
-	return &MessageService{logger, cacheRepo}
+func NewMessageService(logger common.Logger, cacheRepo common.CacheRepository, localMemoryRepo *localmemory.LocalMemoryRepo) *MessageService {
+	return &MessageService{logger, cacheRepo, localMemoryRepo}
 }
 
-func (ts *MessageService) CreateMessage(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewMessage) (uuid.Uuid, error) {
+func (ts *MessageService) CreateMessage(ctx context.Context, spaceId uuid.Uuid, authenticatedUserId models.UserUid, newMessage models.NewMessage) (uuid.Uuid, error) {
 	const op errors.Op = "services.MessageService.CreateMessage"
 
 	// ensure that thread exists
@@ -32,21 +34,53 @@ func (ts *MessageService) CreateMessage(ctx context.Context, spaceId uuid.Uuid, 
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	messageId, err := ts.cacheRepo.SetMessage(ctx, newMessage)
+	createdMessage, err := ts.cacheRepo.SetMessage(ctx, newMessage)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
+	ts.localMemoryRepo.PublishNewMessage(spaceId, authenticatedUserId, *createdMessage)
 
-	return messageId, nil
+	return createdMessage.ID, nil
 }
 
-func (ts *MessageService) LikeMessage(ctx context.Context, messageId uuid.Uuid) error {
+func (ts *MessageService) LikeMessage(ctx context.Context, spaceId, threadId, likedMessageId uuid.Uuid, authenticatedUserId models.UserUid) error {
 	const op errors.Op = "services.MessageService.LikeMessage"
 
 	// don't need to validate if message with messageId exists, because validateMessageInThreadMiddleware middleware is already doing this
 
-	if err := ts.cacheRepo.LikeMessage(ctx, messageId); err != nil {
-		return errors.E(op, err, http.StatusInternalServerError)
+	if err := ts.cacheRepo.IncrementMessageLikesBy(ctx, threadId, likedMessageId, 1); err != nil {
+		return errors.E(op, err)
+	}
+	ts.localMemoryRepo.PublishMessagePopularityIncrease(spaceId, authenticatedUserId, threadId, likedMessageId)
+
+	var messageId = likedMessageId
+loop:
+	for {
+		message, err := ts.cacheRepo.GetMessage(ctx, messageId)
+		if err != nil {
+			return errors.E(op, err)
+		}
+
+		thread, err := ts.cacheRepo.GetThread(ctx, message.ThreadId)
+		var isTopLevelThread = thread.ParentMessageId == uuid.Nil
+		switch {
+		case err != nil:
+			return errors.E(op, err)
+		case isTopLevelThread:
+			if err := ts.cacheRepo.IncrementTopLevelThreadLikesBy(ctx, spaceId, thread.ID, 1); err != nil {
+				return errors.E(op, err)
+			}
+			ts.localMemoryRepo.PublishToplevelThreadPopularityIncrease(spaceId, authenticatedUserId, thread.ID)
+
+			break loop
+		default:
+			if err := ts.cacheRepo.IncrementThreadLikesBy(ctx, thread.ID, 1); err != nil {
+				return errors.E(op, err)
+			}
+			ts.localMemoryRepo.PublishThreadPopularityIncrease(spaceId, authenticatedUserId, thread.ParentMessageId, thread.ID)
+		}
+
+		messageId = thread.ParentMessageId
 	}
 
 	return nil

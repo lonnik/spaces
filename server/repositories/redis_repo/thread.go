@@ -8,6 +8,7 @@ import (
 	"spaces-p/utils"
 	"spaces-p/uuid"
 	"strconv"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -71,7 +72,7 @@ func (repo *RedisRepository) GetThreadMessagesByPopularity(ctx context.Context, 
 }
 
 // set parent's message child_thread_id field, set thread
-func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, createdAtTimeStamp int64) (uuid.Uuid, error) {
+func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, createdAt time.Time) (*models.Thread, error) {
 	const op errors.Op = "redis_repo.RedisRepository.SetThread"
 	var threadId = uuid.New()
 	var threadKey = getThreadKey(threadId)
@@ -80,58 +81,76 @@ func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessa
 	if err := repo.redisClient.HSet(ctx, parentMessageKey, map[string]any{
 		messageFields.childThreadIdField: threadId.String(),
 	}).Err(); err != nil {
-		return uuid.Nil, errors.E(op, err)
+		return nil, errors.E(op, err)
+	}
+
+	var newThread = &models.Thread{
+		BaseThread: models.BaseThread{
+			ID:        threadId,
+			SpaceId:   spaceId,
+			CreatedAt: createdAt,
+		},
+		ParentMessageId: parentMessageId,
 	}
 
 	if err := repo.redisClient.HSet(ctx, threadKey, map[string]any{
 		threadFields.firstMessageIdField:  "",
 		threadFields.likesField:           "0",
 		threadFields.messagesCountField:   "0",
-		threadFields.createdAtField:       strconv.FormatInt(createdAtTimeStamp, 10),
+		threadFields.createdAtField:       strconv.FormatInt(createdAt.UnixMilli(), 10),
 		threadFields.parentMessageIdField: parentMessageId.String(),
 		threadFields.spaceIdField:         spaceId.String(),
 	}).Err(); err != nil {
-		return uuid.Nil, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
-	return threadId, nil
+	return newThread, nil
 }
 
 // add new thread to space toplevel sets, set first message
-func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, createdAtTimeStamp int64, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
+func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (*models.TopLevelThread, error) {
 	const op errors.Op = "redis_repo.RedisRepository.SetTopLevelThread"
 	var threadId = uuid.New()
+	var createdAt = time.Now()
 
 	// set first message
-	firstMessageId, err := repo.setMessage(ctx, models.NewMessage{
+	createdFirstMessage, err := repo.setMessage(ctx, createdAt, models.NewMessage{
 		BaseMessage: models.BaseMessage(newMessage.NewMessageInput),
 		ThreadId:    threadId,
 		SenderId:    newMessage.SenderId,
 	})
 	if err != nil {
-		return uuid.Nil, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
+	var createdTopLevelThread = &models.TopLevelThread{
+		BaseThread: models.BaseThread{
+			ID:        threadId,
+			SpaceId:   spaceId,
+			CreatedAt: createdAt,
+		},
+		FirstMessage: *createdFirstMessage,
+	}
 	// set thread hash
 	var threadKey = getThreadKey(threadId)
 	if err := repo.redisClient.HSet(ctx, threadKey, map[string]any{
-		threadFields.firstMessageIdField:  firstMessageId.String(),
+		threadFields.firstMessageIdField:  createdFirstMessage.ID.String(),
 		threadFields.likesField:           "0",
 		threadFields.messagesCountField:   "0",
 		threadFields.parentMessageIdField: "",
-		threadFields.createdAtField:       strconv.FormatInt(createdAtTimeStamp, 10),
+		threadFields.createdAtField:       strconv.FormatInt(createdAt.UnixMilli(), 10),
 		threadFields.spaceIdField:         spaceId.String(),
 	}).Err(); err != nil {
-		return uuid.Nil, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
 	// add to space thread toplevel sets
 	var spaceToplevelThreadsByTimeKey = getSpaceToplevelThreadsByTimeKey(spaceId)
 	if err := repo.redisClient.ZAdd(ctx, spaceToplevelThreadsByTimeKey, redis.Z{
-		Score:  float64(createdAtTimeStamp),
+		Score:  float64(createdAt.UnixMilli()),
 		Member: threadId.String(),
 	}).Err(); err != nil {
-		return uuid.Nil, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
 	var spaceToplevelThreadsByPopularityKey = getSpaceToplevelThreadsByPopularityKey(spaceId)
@@ -139,10 +158,10 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 		Score:  0,
 		Member: threadId.String(),
 	}).Err(); err != nil {
-		return uuid.Nil, errors.E(op, err)
+		return nil, errors.E(op, err)
 	}
 
-	return threadId, nil
+	return createdTopLevelThread, nil
 }
 
 func (repo *RedisRepository) HasThreadMessage(ctx context.Context, threadId, messageId uuid.Uuid) (bool, error) {
@@ -154,6 +173,33 @@ func (repo *RedisRepository) HasThreadMessage(ctx context.Context, threadId, mes
 	}
 
 	return message.ThreadId == threadId, nil
+}
+
+func (repo *RedisRepository) IncrementTopLevelThreadLikesBy(ctx context.Context, spaceId, threadId uuid.Uuid, increment int64) error {
+	const op errors.Op = "redis_repo.RedisRepository.IncrementThreadLikesBy"
+	var threadKey = getThreadKey(threadId)
+	var spaceToplevelThreadsByPopularityKey = getSpaceToplevelThreadsByPopularityKey(spaceId)
+
+	if err := repo.redisClient.HIncrBy(ctx, threadKey, threadFields.likesField, increment).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	if err := repo.redisClient.ZIncrBy(ctx, spaceToplevelThreadsByPopularityKey, 1, threadId.String()).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
+}
+
+func (repo *RedisRepository) IncrementThreadLikesBy(ctx context.Context, threadId uuid.Uuid, increment int64) error {
+	const op errors.Op = "redis_repo.RedisRepository.IncrementThreadLikesBy"
+	var threadKey = getThreadKey(threadId)
+
+	if err := repo.redisClient.HIncrBy(ctx, threadKey, threadFields.likesField, increment).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
 }
 
 func (repo *RedisRepository) getThreadMessages(ctx context.Context, threadId uuid.Uuid, collectionKey string, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error) {
@@ -188,7 +234,7 @@ func (repo *RedisRepository) getThreadMessages(ctx context.Context, threadId uui
 		likesStr := messageMap[messageFields.likesField]
 		senderId := messageMap[messageFields.senderIdField]
 		threadIdStr := messageMap[messageFields.threadIdField]
-		timeUnixMilliStr := messageMap[messageFields.timeStampField]
+		createdAtMilliStr := messageMap[messageFields.createdAtField]
 		messageTypeStr := messageMap[messageFields.typeField]
 
 		likes, err := strconv.Atoi(likesStr)
@@ -201,7 +247,7 @@ func (repo *RedisRepository) getThreadMessages(ctx context.Context, threadId uui
 			return nil, errors.E(op, err)
 		}
 
-		timeStamp, err := utils.StringToTime(timeUnixMilliStr)
+		createdAt, err := utils.StringToTime(createdAtMilliStr)
 		if err != nil {
 			return nil, errors.E(op, err)
 		}
@@ -215,7 +261,7 @@ func (repo *RedisRepository) getThreadMessages(ctx context.Context, threadId uui
 			ChildThreadMessagesCount: childThreadMessagesCount,
 			Message: models.Message{
 				ID:            messageIds[i],
-				Time:          timeStamp,
+				CreatedAt:     createdAt,
 				ChildThreadId: childThreadId,
 				Likes:         likes,
 				NewMessage: models.NewMessage{
@@ -231,28 +277,6 @@ func (repo *RedisRepository) getThreadMessages(ctx context.Context, threadId uui
 	}
 
 	return messages, nil
-}
-
-func (repo *RedisRepository) incrementMessageLikesBy(ctx context.Context, messageId uuid.Uuid, increment int64) error {
-	const op errors.Op = "redis_repo.RedisRepository.incrementMessageLikesBy"
-	var messageKey = getMessageKey(messageId)
-
-	if err := repo.redisClient.HIncrBy(ctx, messageKey, messageFields.likesField, increment).Err(); err != nil {
-		return errors.E(op, err)
-	}
-
-	return nil
-}
-
-func (repo *RedisRepository) incrementThreadLikesBy(ctx context.Context, threadId uuid.Uuid, increment int64) error {
-	const op errors.Op = "redis_repo.RedisRepository.incrementThreadLikesBy"
-	var threadKey = getThreadKey(threadId)
-
-	if err := repo.redisClient.HIncrBy(ctx, threadKey, threadFields.likesField, increment).Err(); err != nil {
-		return errors.E(op, err)
-	}
-
-	return nil
 }
 
 func (repo *RedisRepository) parseBaseThread(threadMap map[string]string) (*models.BaseThread, error) {

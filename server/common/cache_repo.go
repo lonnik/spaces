@@ -4,6 +4,7 @@ import (
 	"context"
 	"spaces-p/models"
 	"spaces-p/uuid"
+	"time"
 )
 
 type CacheRepository interface {
@@ -40,15 +41,17 @@ type ThreadCacheRepository interface {
 	GetThread(ctx context.Context, threadId uuid.Uuid) (*models.Thread, error)
 	GetThreadMessagesByTime(ctx context.Context, threadId uuid.Uuid, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error)
 	GetThreadMessagesByPopularity(ctx context.Context, threadId uuid.Uuid, offset, count int64) ([]models.MessageWithChildThreadMessagesCount, error)
-	SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, createdAtTimeStamp int64, newMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error)
-	SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, createdAtTimeStamp int64) (uuid.Uuid, error)
+	SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (*models.TopLevelThread, error)
+	SetThread(ctx context.Context, spaceId, parentMessageId uuid.Uuid, createdAt time.Time) (*models.Thread, error)
 	HasThreadMessage(ctx context.Context, threadId, messageId uuid.Uuid) (bool, error)
+	IncrementTopLevelThreadLikesBy(ctx context.Context, spaceId, threadId uuid.Uuid, increment int64) error
+	IncrementThreadLikesBy(ctx context.Context, threadId uuid.Uuid, increment int64) error
 }
 
 type MessageCacheRepository interface {
 	GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.Message, error)
-	SetMessage(ctx context.Context, newMessage models.NewMessage) (uuid.Uuid, error)
-	LikeMessage(ctx context.Context, messageId uuid.Uuid) error
+	SetMessage(ctx context.Context, newMessage models.NewMessage) (*models.Message, error)
+	IncrementMessageLikesBy(ctx context.Context, threadId, messageId uuid.Uuid, increment int64) error
 }
 
 type AddressCacheRepository interface {

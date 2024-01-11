@@ -224,16 +224,17 @@ func (repo *RedisRepository) SetSpaceSubscriber(ctx context.Context, spaceId uui
 	const op errors.Op = "redis_repo.RedisRepository.SetSpaceSubscriber"
 	var spaceSubscribersKey = getSpaceSubscribersKey(spaceId)
 	var userSpacesKey = getUserSpacesKey(userUid)
+	var score = float64(time.Now().UnixMilli())
 
 	if err := repo.redisClient.ZAdd(ctx, spaceSubscribersKey, redis.Z{
-		Score:  float64(time.Now().UnixMilli()),
+		Score:  score,
 		Member: string(userUid),
 	}).Err(); err != nil {
 		return errors.E(op, err)
 	}
 
 	if err := repo.redisClient.ZAdd(ctx, userSpacesKey, redis.Z{
-		Score:  float64(time.Now().UnixMilli()),
+		Score:  score,
 		Member: spaceId.String(),
 	}).Err(); err != nil {
 		return errors.E(op, err)
@@ -246,16 +247,17 @@ func (repo *RedisRepository) SetSpaceSubscriberSession(ctx context.Context, spac
 	const op errors.Op = "redis_repo.RedisRepository.SetSpaceSubscriberSession"
 	var spaceActiveSubscribersKey = getSpaceActiveSubscribersKey(spaceId)
 	var spaceActiveSubscriberSessionsKey = getSpaceActiveSubscriberSessionsKey(spaceId, userUid)
+	var score = float64(time.Now().UnixMilli())
 
 	if err := repo.redisClient.ZAdd(ctx, spaceActiveSubscribersKey, redis.Z{
-		Score:  float64(time.Now().UnixMilli()),
+		Score:  score,
 		Member: string(userUid),
 	}).Err(); err != nil {
 		return errors.E(op, err)
 	}
 
 	if err := repo.redisClient.ZAdd(ctx, spaceActiveSubscriberSessionsKey, redis.Z{
-		Score:  float64(time.Now().UnixMilli()),
+		Score:  score,
 		Member: sessionId.String(),
 	}).Err(); err != nil {
 		return errors.E(op, err)

@@ -64,10 +64,10 @@ func main() {
 
 	// set up services
 	userService := services.NewUserService(logger, redisRepo)
-	spaceService := services.NewSpaceService(logger, redisRepo)
+	spaceService := services.NewSpaceService(logger, redisRepo, localMemoryRepo)
 	spaceNotificationService := services.NewSpaceNotificationsService(logger, redisRepo, localMemoryRepo)
-	threadService := services.NewThreadService(logger, redisRepo)
-	messageService := services.NewMessageService(logger, redisRepo)
+	threadService := services.NewThreadService(logger, redisRepo, localMemoryRepo)
+	messageService := services.NewMessageService(logger, redisRepo, localMemoryRepo)
 	addressService := services.NewAddressService(logger, redisRepo, googleGeocodeRepo)
 
 	// set up controllers
