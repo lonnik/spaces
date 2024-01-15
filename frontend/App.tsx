@@ -1,12 +1,13 @@
+import "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { Signin } from "./screens/SignIn";
 import { NavigationContainer } from "@react-navigation/native";
+import { RootStackNavigator } from "./src/components/RootStackNavigator";
 
 export default function App() {
   return (
     <NavigationContainer>
       <SafeAreaProvider>
-        <Signin />
+        <RootStackNavigator />
       </SafeAreaProvider>
     </NavigationContainer>
   );

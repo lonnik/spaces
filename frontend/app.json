@@ -1,8 +1,8 @@
 {
   "expo": {
-    "name": "tryout-expo",
-    "slug": "tryout-expo",
-    "scheme": "tryout-expo",
+    "name": "spaces-p",
+    "slug": "spaces-p",
+    "scheme": "spaces-p",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

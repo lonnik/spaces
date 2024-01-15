@@ -1,4 +1,4 @@
-import { auth } from "../firebase";
+import { auth } from "../../firebase";
 import { getApiUrl } from "./get_api_url";
 
 export class FetchError extends Error {

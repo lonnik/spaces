@@ -10,7 +10,7 @@ import {
   AppleAuthenticationScope,
   signInAsync,
 } from "expo-apple-authentication";
-import { auth } from "../firebase";
+import { auth } from "../../firebase";
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
