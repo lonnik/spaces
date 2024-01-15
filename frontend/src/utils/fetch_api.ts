@@ -28,7 +28,7 @@ export const fetchApi = async <T>(url: string, options?: RequestInit) => {
     throw new FetchError(res.statusText, res.status);
   }
 
-  const data = (await res.json()) as { data: T };
+  const jsonData = (await res.json()) as { data: T };
 
-  return data.data;
+  return jsonData.data;
 };

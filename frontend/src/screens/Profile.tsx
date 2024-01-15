@@ -1,16 +1,15 @@
 import { StackScreenProps } from "@react-navigation/stack";
-import { FC, useContext } from "react";
-import { Button, Text, View } from "react-native";
+import { FC } from "react";
+import { Button, View } from "react-native";
 import { RootStackParamList } from "../types";
-import { RootDispatchContext } from "../components/RootContext";
+import { signOut } from "firebase/auth";
+import { auth } from "../../firebase";
 
 export const ProfileScreen: FC<
   StackScreenProps<RootStackParamList, "Profile">
 > = () => {
-  const dispatch = useContext(RootDispatchContext);
-
   const handleSignOut = () => {
-    dispatch!({ type: "SIGN_OUT" });
+    signOut(auth).catch((error) => console.error("error :>>", error));
   };
 
   return (
