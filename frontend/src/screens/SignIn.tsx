@@ -28,8 +28,6 @@ import { fetchApi } from "../utils/fetch_api";
 maybeCompleteAuthSession();
 
 export const Signin: FC<{}> = ({}) => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-
   const [_, response, promptAsync] = useAuthRequest({
     iosClientId:
       "717063629448-ctoeh0a3vdaknng6cvmb2d23v1mjttk1.apps.googleusercontent.com",
@@ -74,26 +72,10 @@ export const Signin: FC<{}> = ({}) => {
     }
   }, [response]);
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsLoggedIn(true);
-        return;
-      }
-
-      setIsLoggedIn(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
   const insets = useSafeAreaInsets();
 
   return (
     <View style={{ paddingTop: insets.top, flex: 1, alignItems: "center" }}>
-      <Text style={{ fontSize: 30 }}>
-        {isLoggedIn ? "is logged in" : "is not logged in"}
-      </Text>
       <View style={{ marginTop: 25 }}>
         <Button
           title="Log in with Google"
@@ -190,6 +172,7 @@ const EmailSignIn: FC<{}> = ({}) => {
   return (
     <View style={{ marginTop: 30 }}>
       <TextInput
+        autoCapitalize="none"
         onChangeText={(newText) => setEmail(newText)}
         style={{
           borderWidth: 1,
@@ -202,6 +185,7 @@ const EmailSignIn: FC<{}> = ({}) => {
         placeholder="email"
       />
       <TextInput
+        autoCapitalize="none"
         onChangeText={(newPassword) => setPassword(newPassword)}
         style={{
           borderWidth: 1,
