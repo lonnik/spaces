@@ -1,28 +1,21 @@
 import "react-native-gesture-handler";
-import {
-  Button,
-  Text,
-  View,
-  ActivityIndicator,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import {
-  BottomTabNavigationProp,
-  BottomTabScreenProps,
-} from "@react-navigation/bottom-tabs";
+import { View, FlatList } from "react-native";
+import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useCallback, useEffect, useState } from "react";
-import { Location, Space, TabsParamList } from "../types";
-import { useQuery } from "@tanstack/react-query";
+import { Location, TabsParamList } from "../types";
+import { useQueries } from "@tanstack/react-query";
 import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
 } from "expo-location";
-import { getSpacesByLocation } from "../utils/queries";
+import { getAddress, getSpacesByLocation } from "../utils/queries";
 import { LoadingScreen } from "./Loading";
+import { SpaceItem } from "../modules/here/SpaceItem";
+import { Header } from "../modules/here/Header";
 
 export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   navigation,
+  route,
 }) => {
   const [location, setLocation] = useState<Location | null>(null);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,19 +36,27 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
     })();
   }, []);
 
-  const {
-    data: spaces,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ["spaces by location", location],
-    queryFn: () => getSpacesByLocation(location as Location),
-    enabled: !!location,
+  const [
+    { data: spaces, isLoading, refetch: refetchSpaces },
+    { data: address, refetch: refetchAddress },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ["spaces by location", location],
+        queryFn: () => getSpacesByLocation(location as Location),
+        enabled: !!location,
+      },
+      {
+        queryKey: ["address", location],
+        queryFn: () => getAddress(location as Location),
+        enabled: !!location,
+      },
+    ],
   });
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await refetch();
+    await Promise.allSettled([refetchAddress(), refetchSpaces()]);
     setRefreshing(false);
   }, []);
 
@@ -65,10 +66,7 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
 
   return (
     <View style={{ flex: 1 }}>
-      <Button
-        title="Profile"
-        onPress={() => navigation.navigate("Profile" as any)}
-      />
+      <Header address={address} navigation={navigation} />
       <FlatList
         data={spaces}
         numColumns={3}
@@ -80,36 +78,6 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
         }}
         style={{ flex: 1, padding: 5 }}
       />
-    </View>
-  );
-};
-
-const SpaceItem: FC<{
-  data: Space;
-  navigation: BottomTabNavigationProp<TabsParamList, "Here", undefined>;
-}> = ({ data, navigation }) => {
-  return (
-    <View
-      style={{
-        width: "33.33333%",
-        padding: 5,
-        aspectRatio: 1,
-      }}
-    >
-      <TouchableOpacity
-        style={{
-          flex: 1,
-          backgroundColor: `#${data.themeColorHexaCode}`,
-          borderRadius: 7,
-          marginVertical: 0,
-          paddingHorizontal: 0,
-        }}
-        onPress={() => {
-          navigation.navigate("Space" as any, { spaceId: data.id });
-        }}
-      >
-        <Text>{JSON.stringify(data)}</Text>
-      </TouchableOpacity>
     </View>
   );
 };

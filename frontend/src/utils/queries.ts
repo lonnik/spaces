@@ -1,4 +1,4 @@
-import { Location, Space, Uuid } from "../types";
+import { Address, Location, Space, Uuid } from "../types";
 import { fetchApi } from "./fetch_api";
 import { parseQuery } from "./parse_query";
 
@@ -8,10 +8,16 @@ export const getSpacesByLocation = async (loc: Location) => {
   const locationParamValue = `${loc.longitude},${loc.latitude}`;
   const queryStr = parseQuery({ location: locationParamValue, radius });
 
-  const spaces = await fetchApi<Space[]>(`/spaces${queryStr}`);
-  return spaces;
+  return fetchApi<Space[]>(`/spaces${queryStr}`);
 };
 
 export const getSpaceById = async (spaceId: Uuid) => {
   return fetchApi<Space>(`/spaces/${encodeURIComponent(spaceId)}`);
+};
+
+export const getAddress = async (loc: Location) => {
+  const locationParamValue = `${loc.longitude},${loc.latitude}`;
+  const queryStr = parseQuery({ location: locationParamValue });
+
+  return fetchApi<Address>(`/address${queryStr}`);
 };

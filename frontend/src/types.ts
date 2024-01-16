@@ -30,3 +30,13 @@ export type Space = {
   createdAt: Date;
   distance: number;
 };
+
+export type Address = {
+  city: string;
+  country: string;
+  formattedAddress: string;
+  geoHash: string;
+  postalCode: string;
+  street: string;
+  streetNumber: string;
+};

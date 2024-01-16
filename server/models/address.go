@@ -1,7 +1,7 @@
 package models
 
 type Address struct {
-	GeoHash          string `json:"geohash"`
+	GeoHash          string `json:"geoHash"`
 	Street           string `json:"street"`
 	StreetNumber     string `json:"streetNumber"`
 	City             string `json:"city"`

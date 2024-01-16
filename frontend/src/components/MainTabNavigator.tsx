@@ -9,7 +9,11 @@ const Tabs = createBottomTabNavigator<TabsParamList>();
 export const MainTabNavigator: FC = () => {
   return (
     <Tabs.Navigator>
-      <Tabs.Screen name="Here" component={HereScreen} />
+      <Tabs.Screen
+        name="Here"
+        component={HereScreen}
+        options={{ headerShown: false }}
+      />
       <Tabs.Screen
         name="MySpaces"
         options={{ headerTitle: "My Spaces", tabBarLabel: "My Spaces" }}
