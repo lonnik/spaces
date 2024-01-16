@@ -1,24 +1,54 @@
 import "react-native-gesture-handler";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button, Text, View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { FC } from "react";
-import { TabsParamList } from "../types";
+import { FC, useEffect, useState } from "react";
+import { Location, TabsParamList } from "../types";
+import { useQuery } from "@tanstack/react-query";
+import {
+  LocationObject,
+  requestForegroundPermissionsAsync,
+  getCurrentPositionAsync,
+} from "expo-location";
+import { getSpacesByLocation } from "../utils/queries";
 
-export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Home">> = ({
+export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   navigation,
 }) => {
-  const insets = useSafeAreaInsets();
+  const [location, setLocation] = useState<LocationObject | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await requestForegroundPermissionsAsync();
+      if (status !== "granted") {
+        console.error("permission to access location was denied");
+        return;
+      }
+
+      const location = await getCurrentPositionAsync({});
+      setLocation(location);
+    })();
+  }, []);
+
+  let coords = location
+    ? {
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      }
+    : null;
+
+  const { data: spaces } = useQuery({
+    queryKey: ["spaces by location"],
+    queryFn: () => getSpacesByLocation(coords as Location),
+    enabled: !!coords,
+  });
 
   return (
-    <View style={{ marginTop: insets.top }}>
+    <View>
       <Button
         title="Profile"
         onPress={() => navigation.navigate("Profile" as any)}
       />
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Home!</Text>
-      </View>
+      <Text>{JSON.stringify(spaces)}</Text>
     </View>
   );
 };

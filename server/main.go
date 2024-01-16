@@ -97,7 +97,7 @@ func main() {
 	api.DELETE("/user")                                                               // TODO
 
 	// SPACES
-	api.GET("/spaces", spaceController.GetSpaces)
+	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.GetSpaces)
 	api.POST("/spaces", spaceController.CreateSpace)
 	api.GET("/spaces/:spaceid", spaceController.GetSpace)
 	api.GET("/space/:spaceid/updates/ws",
