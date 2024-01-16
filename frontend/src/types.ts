@@ -1,10 +1,13 @@
-type UserUid = string;
-type Uuid = string;
+export type UserUid = string;
+export type Uuid = string;
 
 export type RootStackParamList = {
   Profile: undefined;
   MainTabs: undefined;
   SignIn: undefined;
+  Space: {
+    spaceId: Uuid;
+  };
 };
 
 export type TabsParamList = {

@@ -12,6 +12,7 @@ import { Signin } from "../screens/SignIn";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../firebase";
 import { LoadingScreen } from "../screens/Loading";
+import { SpaceScreen } from "../screens/Space";
 
 const screenOptions: StackNavigationOptions = {
   gestureDirection: "horizontal",
@@ -94,6 +95,7 @@ export const RootStackNavigator: FC = () => {
             component={ProfileScreen}
             options={screenOptions}
           />
+          <Stack.Screen name="Space" component={SpaceScreen} />
         </>
       ) : (
         <Stack.Screen name="SignIn" component={Signin} />

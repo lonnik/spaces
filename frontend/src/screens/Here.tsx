@@ -1,6 +1,16 @@
 import "react-native-gesture-handler";
-import { Button, Text, View, ActivityIndicator, FlatList } from "react-native";
-import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
+import {
+  Button,
+  Text,
+  View,
+  ActivityIndicator,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+import {
+  BottomTabNavigationProp,
+  BottomTabScreenProps,
+} from "@react-navigation/bottom-tabs";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Location, Space, TabsParamList } from "../types";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +19,7 @@ import {
   getCurrentPositionAsync,
 } from "expo-location";
 import { getSpacesByLocation } from "../utils/queries";
+import { LoadingScreen } from "./Loading";
 
 export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   navigation,
@@ -37,7 +48,7 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
     isLoading,
     refetch,
   } = useQuery({
-    queryKey: ["spaces by location"],
+    queryKey: ["spaces by location", location],
     queryFn: () => getSpacesByLocation(location as Location),
     enabled: !!location,
   });
@@ -49,11 +60,7 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   }, []);
 
   if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator />
-      </View>
-    );
+    return <LoadingScreen />;
   }
 
   return (
@@ -69,7 +76,7 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
         refreshing={refreshing}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => {
-          return <SpaceItem data={item} />;
+          return <SpaceItem data={item} navigation={navigation} />;
         }}
         style={{ flex: 1, padding: 5 }}
       />
@@ -77,7 +84,10 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   );
 };
 
-const SpaceItem: FC<{ data: Space }> = ({ data }) => {
+const SpaceItem: FC<{
+  data: Space;
+  navigation: BottomTabNavigationProp<TabsParamList, "Here", undefined>;
+}> = ({ data, navigation }) => {
   return (
     <View
       style={{
@@ -86,7 +96,7 @@ const SpaceItem: FC<{ data: Space }> = ({ data }) => {
         aspectRatio: 1,
       }}
     >
-      <View
+      <TouchableOpacity
         style={{
           flex: 1,
           backgroundColor: `#${data.themeColorHexaCode}`,
@@ -94,9 +104,12 @@ const SpaceItem: FC<{ data: Space }> = ({ data }) => {
           marginVertical: 0,
           paddingHorizontal: 0,
         }}
+        onPress={() => {
+          navigation.navigate("Space" as any, { spaceId: data.id });
+        }}
       >
         <Text>{JSON.stringify(data)}</Text>
-      </View>
+      </TouchableOpacity>
     </View>
   );
 };

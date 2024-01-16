@@ -1,4 +1,4 @@
-import { Location, Space } from "../types";
+import { Location, Space, Uuid } from "../types";
 import { fetchApi } from "./fetch_api";
 import { parseQuery } from "./parse_query";
 
@@ -10,4 +10,8 @@ export const getSpacesByLocation = async (loc: Location) => {
 
   const spaces = await fetchApi<Space[]>(`/spaces${queryStr}`);
   return spaces;
+};
+
+export const getSpaceById = async (spaceId: Uuid) => {
+  return fetchApi<Space>(`/spaces/${encodeURIComponent(spaceId)}`);
 };
