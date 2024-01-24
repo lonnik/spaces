@@ -10,16 +10,18 @@ export const SpaceItem: FC<{
 }> = ({ data, navigation }) => {
   return (
     <View
-      style={{
-        width: "33.33333%",
-        padding: 5,
-        aspectRatio: 1,
-      }}
+      style={[
+        {
+          width: "33.33333%",
+          padding: 5,
+          aspectRatio: 1,
+        },
+      ]}
     >
       <TouchableOpacity
         style={{
-          flex: 1,
           backgroundColor: `#${data.themeColorHexaCode}`,
+          flex: 1,
           borderRadius: 7,
           marginVertical: 0,
           paddingHorizontal: 0,

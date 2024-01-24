@@ -1,13 +1,9 @@
-import { StackScreenProps } from "@react-navigation/stack";
 import { FC } from "react";
 import { Button, View } from "react-native";
-import { RootStackParamList } from "../types";
 import { signOut } from "firebase/auth";
 import { auth } from "../../firebase";
 
-export const ProfileScreen: FC<
-  StackScreenProps<RootStackParamList, "Profile">
-> = () => {
+export const ProfileScreen: FC = () => {
   const handleSignOut = () => {
     signOut(auth).catch((error) => console.error("error :>>", error));
   };

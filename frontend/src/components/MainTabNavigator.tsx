@@ -16,7 +16,7 @@ export const MainTabNavigator: FC = () => {
       />
       <Tabs.Screen
         name="MySpaces"
-        options={{ headerTitle: "My Spaces", tabBarLabel: "My Spaces" }}
+        options={{ headerShown: false }}
         component={MySpacesScreen}
       />
     </Tabs.Navigator>
