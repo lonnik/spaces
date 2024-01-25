@@ -21,20 +21,24 @@ export const Card: FC<{
 }> = (props) => {
   const insets = useSafeAreaInsets();
   const relativeIndex = props.index - props.currentIndex;
-  let card: JSX.Element | null = null;
 
+  let card: JSX.Element | null = null;
   switch (props.tabNavigationOptions.animation) {
-    case "slideInFromBottom":
-      card = <CardWithSlideInFromBotomAnimation {...props} />;
-      break;
     case "slideInFromRight":
       card = <CardWithSlideInFromRightAnimation {...props} />;
+      break;
+    case "slideInFromBottom":
+      card = (
+        <CardWithSlideInFromBotomAnimation goBack={props.goBack}>
+          {props.children}
+        </CardWithSlideInFromBotomAnimation>
+      );
       break;
     default:
       card = <CardWithoutAnimation>{props.children}</CardWithoutAnimation>;
   }
 
-  const animatedZIndex = useAnimatedStyle(() => {
+  const animatedZIndexStyle = useAnimatedStyle(() => {
     return {
       zIndex: withDelay(
         animationDuration,
@@ -43,19 +47,19 @@ export const Card: FC<{
     };
   });
 
+  const zIndexStyle = { zIndex: relativeIndex === 0 ? 10 : 0 };
+
   return (
     <Animated.View
       style={[
         StyleSheet.absoluteFill,
         {
           marginTop: insets.top,
-          display:
-            props.index - props.currentIndex < -1 ||
-            props.index - props.currentIndex > 1
-              ? "none"
-              : "flex",
+          display: relativeIndex < -1 || relativeIndex > 1 ? "none" : "flex",
         },
-        animatedZIndex,
+        props.tabNavigationOptions.animation === "slideInFromRight"
+          ? animatedZIndexStyle
+          : zIndexStyle,
       ]}
     >
       {card}

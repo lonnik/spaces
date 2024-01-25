@@ -5,6 +5,8 @@ import { Text, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getSpaceById } from "../utils/queries";
 import { LoadingScreen } from "./Loading";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { Header } from "../modules/space/Header";
 
 export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
   route,
@@ -22,7 +24,10 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
 
   return (
     <View style={{ flex: 1 }}>
-      <Text>{JSON.stringify(space)}</Text>
+      <Header />
+      <BottomSheetScrollView>
+        <Text>{JSON.stringify(space)}</Text>
+      </BottomSheetScrollView>
     </View>
   );
 };

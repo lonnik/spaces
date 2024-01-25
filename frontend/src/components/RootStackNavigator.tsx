@@ -50,7 +50,6 @@ export const RootStackNavigator: FC = () => {
             name="Space"
             component={SpaceScreen}
             options={{
-              header: <SpaceHeader />,
               animation: "slideInFromBottom",
             }}
           />

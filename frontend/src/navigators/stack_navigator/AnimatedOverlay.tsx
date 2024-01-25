@@ -14,7 +14,7 @@ export const AnimatedOverlay: FC<{
   gestureActive: SharedValue<boolean>;
 }> = ({ relativeIndex, translate, gestureActive }) => {
   const animatedOpacity = useAnimatedStyle(() => {
-    const opacity = Math.max((translate.value - 0.7) * -1, 0);
+    const opacity = (translate.value - 1) * -0.5;
 
     return {
       display: withDelay(
