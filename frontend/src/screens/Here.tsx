@@ -4,10 +4,6 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Location, TabsParamList } from "../types";
 import { useQueries } from "@tanstack/react-query";
-import {
-  requestForegroundPermissionsAsync,
-  getCurrentPositionAsync,
-} from "expo-location";
 import { getAddress, getSpacesByLocation } from "../utils/queries";
 import { LoadingScreen } from "./Loading";
 import { SpaceItem } from "../modules/here/SpaceItem";
@@ -17,30 +13,16 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useLocation } from "../hooks/use_location";
 
 export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   navigation,
 }) => {
-  const [location, setLocation] = useState<Location | null>(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const opacity = useSharedValue(0);
 
-  useEffect(() => {
-    (async () => {
-      const { status } = await requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        console.error("permission to access location was denied");
-        return;
-      }
-
-      const location = await getCurrentPositionAsync({});
-      setLocation({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    })();
-  }, []);
+  const { location } = useLocation();
 
   const [
     { data: spaces, isLoading, refetch: refetchSpaces },

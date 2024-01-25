@@ -1,13 +1,21 @@
 import { User } from "firebase/auth";
 import { FC, createContext, ReactElement, useReducer, Dispatch } from "react";
+import { Location } from "../types";
 
-const initialState: { user?: User; userIsLoading: boolean } = {
+const initialState: {
+  user?: User;
+  userIsLoading: boolean;
+  location?: Location;
+} = {
   user: undefined,
   userIsLoading: true,
 };
 
 type RootState = typeof initialState;
-type Action = { type: "SIGN_IN"; user: User } | { type: "SIGN_OUT" };
+type Action =
+  | { type: "SIGN_IN"; user: User }
+  | { type: "SIGN_OUT" }
+  | { type: "SET_LOCATION"; location: Location };
 
 const rootReducer = (prevState: RootState, action: Action) => {
   switch (action.type) {
@@ -16,6 +24,9 @@ const rootReducer = (prevState: RootState, action: Action) => {
     }
     case "SIGN_OUT": {
       return { ...prevState, user: undefined, userIsLoading: false };
+    }
+    case "SET_LOCATION": {
+      return { ...prevState, location: action.location };
     }
     default:
       return prevState;
