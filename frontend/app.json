@@ -18,6 +18,12 @@
         {
           "locationWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
         }
+      ],
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "sk.eyJ1Ijoibmlrby1oZWkiLCJhIjoiY2xydWkwb2Q5MGN0dTJrcHFmbWtydmI4ZyJ9.nrXt4EMUF_uf8PS0T1lnxg"
+        }
       ]
     ],
     "assetBundlePatterns": [
