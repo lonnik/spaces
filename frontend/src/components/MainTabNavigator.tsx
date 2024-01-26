@@ -3,6 +3,7 @@ import { TabsParamList } from "../types";
 import { HereScreen } from "../screens/Here";
 import { FC } from "react";
 import { MySpacesScreen } from "../screens/MySpaces";
+import { NewSpaceScreen } from "../screens/NewSpace";
 
 const Tabs = createBottomTabNavigator<TabsParamList>();
 
@@ -15,9 +16,14 @@ export const MainTabNavigator: FC = () => {
         options={{ headerShown: false }}
       />
       <Tabs.Screen
-        name="MySpaces"
+        name="NewSpace"
+        component={NewSpaceScreen}
         options={{ headerShown: false }}
+      />
+      <Tabs.Screen
+        name="MySpaces"
         component={MySpacesScreen}
+        options={{ headerShown: false }}
       />
     </Tabs.Navigator>
   );

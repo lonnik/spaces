@@ -13,6 +13,7 @@ export type RootStackParamList = {
 export type TabsParamList = {
   Here: undefined;
   MySpaces: undefined;
+  NewSpace: undefined;
 };
 
 export type Location = {
