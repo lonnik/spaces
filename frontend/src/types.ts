@@ -8,6 +8,7 @@ export type RootStackParamList = {
   Space: {
     spaceId: Uuid;
   };
+  NewSpace: undefined;
 };
 
 export type TabsParamList = {

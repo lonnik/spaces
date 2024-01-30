@@ -1,20 +1,91 @@
 import {
   BottomTabBarProps,
+  BottomTabNavigationEventMap,
   createBottomTabNavigator,
 } from "@react-navigation/bottom-tabs";
 import { TabsParamList } from "../types";
 import { HereScreen } from "../screens/Here";
-import { FC } from "react";
+import { FC, Fragment } from "react";
 import { MySpacesScreen } from "../screens/MySpaces";
-import { NewSpaceScreen } from "../screens/NewSpace";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { HereIcon } from "./icons/HereIcon";
 import { MySpacesIcon } from "./icons/MySpacesIcon";
 import { AddSpaceIcon } from "./icons/AddSpaceIcon";
 import { template } from "../styles/template";
+import { NavigationHelpers, ParamListBase } from "@react-navigation/native";
 
 const Tabs = createBottomTabNavigator<TabsParamList>();
+
+const MySpacesTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
+  return (
+    <MySpacesIcon
+      stroke={template.colors.text}
+      fill={focused ? template.colors.text : "none"}
+    />
+  );
+};
+
+const HereTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
+  return (
+    <HereIcon
+      stroke={template.colors.text}
+      fill={focused ? template.colors.text : "none"}
+    />
+  );
+};
+
+const AddSpaceTabBarIcon: FC = () => {
+  return <AddSpaceIcon stroke={template.colors.lila} />;
+};
+
+const TabBarItem: FC<{
+  target: string;
+  isFocused: boolean;
+  tabBarIcon: React.ReactNode;
+  routeName: string;
+  routeParams: Readonly<object | undefined>;
+  navigation: NavigationHelpers<ParamListBase, BottomTabNavigationEventMap>;
+}> = ({
+  isFocused,
+  navigation,
+  target,
+  routeName,
+  routeParams,
+  tabBarIcon,
+}) => {
+  const onPress = () => {
+    const event = navigation.emit({
+      type: "tabPress",
+      target,
+      canPreventDefault: true,
+    });
+
+    if (!isFocused && !event.defaultPrevented) {
+      navigation.navigate(routeName, routeParams);
+    }
+  };
+
+  const onLongPress = () => {
+    navigation.emit({
+      type: "tabLongPress",
+      target,
+    });
+  };
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={isFocused ? { selected: true } : {}}
+      onPress={onPress}
+      onLongPress={onLongPress}
+      style={{ flex: 1, alignItems: "center" }}
+      key={routeName}
+    >
+      {tabBarIcon}
+    </Pressable>
+  );
+};
 
 const TabBar: FC<BottomTabBarProps & { bottomInsets: number }> = ({
   state,
@@ -22,6 +93,19 @@ const TabBar: FC<BottomTabBarProps & { bottomInsets: number }> = ({
   navigation,
   bottomInsets,
 }) => {
+  const middleIndex = Math.floor(state.routes.length / 2);
+
+  const addSpaceItem = (
+    <TabBarItem
+      isFocused={false}
+      tabBarIcon={<AddSpaceTabBarIcon />}
+      navigation={navigation}
+      routeName="NewSpace"
+      routeParams={{}}
+      target="NewSpace"
+    />
+  );
+
   return (
     <View
       style={{
@@ -40,74 +124,38 @@ const TabBar: FC<BottomTabBarProps & { bottomInsets: number }> = ({
       >
         {state.routes.map((route, index) => {
           const { options } = descriptors[route.key];
-
           const isFocused = state.index === index;
 
-          const onPress = () => {
-            const event = navigation.emit({
-              type: "tabPress",
-              target: route.key,
-              canPreventDefault: true,
-            });
-
-            if (!isFocused && !event.defaultPrevented) {
-              navigation.navigate(route.name, route.params);
-            }
-          };
-
-          const onLongPress = () => {
-            navigation.emit({
-              type: "tabLongPress",
-              target: route.key,
-            });
-          };
-
-          return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={isFocused ? { selected: true } : {}}
-              accessibilityLabel={options.tabBarAccessibilityLabel}
-              testID={options.tabBarTestID}
-              onPress={onPress}
-              onLongPress={onLongPress}
-              style={{ flex: 1, alignItems: "center" }}
-              key={index}
-            >
-              {options.tabBarIcon?.({
+          const tabBarItem = (
+            <TabBarItem
+              isFocused={isFocused}
+              navigation={navigation}
+              routeName={route.name}
+              routeParams={route.params}
+              tabBarIcon={options.tabBarIcon?.({
                 focused: isFocused,
-                color: isFocused ? "#673ab7" : "#222",
+                color: template.colors.text,
                 size: 24,
               })}
-            </Pressable>
+              target={route.key}
+              key={route.key}
+            />
           );
+
+          if (index === middleIndex) {
+            return (
+              <Fragment key={route.key}>
+                {addSpaceItem}
+                {tabBarItem}
+              </Fragment>
+            );
+          }
+
+          return tabBarItem;
         })}
       </View>
     </View>
   );
-};
-
-const MySpacesTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
-  if (focused) {
-    return (
-      <MySpacesIcon fill={template.colors.text} stroke={template.colors.text} />
-    );
-  }
-
-  return <MySpacesIcon stroke={template.colors.text} />;
-};
-
-const HereTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
-  if (focused) {
-    return (
-      <HereIcon fill={template.colors.text} stroke={template.colors.text} />
-    );
-  }
-
-  return <HereIcon stroke={template.colors.text} />;
-};
-
-const AddSpaceTabBarIcon: FC = () => {
-  return <AddSpaceIcon stroke={template.colors.lila} />;
 };
 
 export const MainTabNavigator: FC = () => {
@@ -123,11 +171,6 @@ export const MainTabNavigator: FC = () => {
         name="Here"
         component={HereScreen}
         options={{ headerShown: false, tabBarIcon: HereTabBarIcon }}
-      />
-      <Tabs.Screen
-        name="NewSpace"
-        component={NewSpaceScreen}
-        options={{ headerShown: false, tabBarIcon: AddSpaceTabBarIcon }}
       />
       <Tabs.Screen
         name="MySpaces"

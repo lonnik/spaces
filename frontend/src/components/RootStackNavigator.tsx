@@ -9,7 +9,7 @@ import { auth } from "../../firebase";
 import { LoadingScreen } from "../screens/Loading";
 import { SpaceScreen } from "../screens/Space";
 import { createCustomStackNavigator } from "../navigators/stack_navigator";
-import { Header as SpaceHeader } from "../modules/space/Header";
+import { NewSpaceScreen } from "../screens/NewSpace";
 
 const Stack = createCustomStackNavigator<RootStackParamList>();
 
@@ -39,6 +39,13 @@ export const RootStackNavigator: FC = () => {
       {rootState?.user ? (
         <>
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
+          <Stack.Screen
+            name="NewSpace"
+            component={NewSpaceScreen}
+            options={{
+              animation: "slideInFromBottom",
+            }}
+          />
           <Stack.Screen
             name="Profile"
             component={ProfileScreen}
