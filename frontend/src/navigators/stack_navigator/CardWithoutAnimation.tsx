@@ -11,7 +11,7 @@ export const CardWithoutAnimation: FC<{
         overflow: "hidden",
         borderTopLeftRadius: 7,
         borderTopRightRadius: 7,
-        backgroundColor: "#eee",
+        backgroundColor: "#fff",
       }}
     >
       {children}

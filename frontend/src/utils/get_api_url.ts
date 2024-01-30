@@ -1,3 +1,3 @@
 export const getApiUrl = () => {
-  return "http://localhost:8080/api";
+  return `${process.env.EXPO_PUBLIC_API_URL}/api`;
 };

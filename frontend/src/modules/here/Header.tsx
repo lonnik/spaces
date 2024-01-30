@@ -1,8 +1,10 @@
 import { FC } from "react";
 import { Address, TabsParamList } from "../../types";
-import { Text, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { FontAwesome5 } from "@expo/vector-icons";
+import { ProfileIcon } from "../../components/ProfileIcon";
+import { template } from "../../styles/template";
+import { Text } from "../../components/Text";
 
 export const Header: FC<{
   address?: Address;
@@ -13,7 +15,7 @@ export const Header: FC<{
   return (
     <View
       style={{
-        height: 103 - 59,
+        height: 56,
         paddingHorizontal: 10,
       }}
     >
@@ -25,20 +27,32 @@ export const Header: FC<{
         }}
       >
         <View style={{ flex: 1 }} />
-        <Text
+        <View
           style={{
-            fontSize: 17,
-            fontWeight: "600",
-            textAlign: "center",
+            paddingHorizontal: 11,
+            paddingVertical: 5,
+            backgroundColor: template.colors.gray,
+            borderRadius: 10,
           }}
         >
-          {addressSmall}
-        </Text>
+          <Text
+            style={{
+              color: "#444",
+              textAlign: "center",
+              fontSize: 16,
+              fontStyle: "normal",
+              fontWeight: "600",
+              letterSpacing: 0.32,
+            }}
+          >
+            {addressSmall}
+          </Text>
+        </View>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile" as any)}
           >
-            <FontAwesome5 size={22} style={{ marginRight: 6 }} name="user" />
+            <ProfileIcon fill={template.colors.lila} />
           </TouchableOpacity>
         </View>
       </View>
