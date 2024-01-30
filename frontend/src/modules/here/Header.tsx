@@ -2,7 +2,7 @@ import { FC } from "react";
 import { Address, TabsParamList } from "../../types";
 import { TouchableOpacity, View } from "react-native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
-import { ProfileIcon } from "../../components/ProfileIcon";
+import { ProfileIcon } from "../../components/icons/ProfileIcon";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 

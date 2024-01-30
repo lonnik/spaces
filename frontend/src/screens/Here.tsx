@@ -65,7 +65,7 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Header address={address} navigation={navigation} />
       <Animated.FlatList
         data={spaces}
