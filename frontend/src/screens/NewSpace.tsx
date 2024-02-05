@@ -1,4 +1,4 @@
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useState } from "react";
 import { TabsParamList } from "../types";
@@ -14,10 +14,11 @@ import { TextInput } from "../components/form/TextInput";
 import { Label } from "../components/form/Label";
 import { ColorPicker } from "../modules/new_space/ColorPicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { PrimaryButton } from "../components/form/Button";
 
 const screenPaddingHorizontal = 20;
-const gapSize = 15; // This is the uniform gap size you want
-const numberOfColumns = 6;
+const gapSize = 10; // This is the uniform gap size you want
+const numberOfColumns = 7;
 
 const colors = [
   template.colors.purple,
@@ -118,28 +119,7 @@ export const NewSpaceScreen: FC<
             marginBottom: insets.bottom + 20,
           }}
         >
-          <Pressable
-            style={{
-              marginHorizontal: "auto",
-              backgroundColor: template.colors.purple,
-              paddingHorizontal: 29,
-              paddingVertical: 13,
-              borderRadius: 10,
-            }}
-          >
-            <Text
-              style={{
-                textAlign: "center",
-                color: "#FFF",
-                fontSize: 18,
-                fontWeight: "700",
-                letterSpacing: 0.36,
-                textTransform: "uppercase",
-              }}
-            >
-              Create Space
-            </Text>
-          </Pressable>
+          <PrimaryButton>Create Space</PrimaryButton>
         </View>
       </BottomSheetScrollView>
     </View>

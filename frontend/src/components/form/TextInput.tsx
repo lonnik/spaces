@@ -23,7 +23,7 @@ export const TextInput: FC<{
           borderRadius: 7,
           padding: 12,
           backgroundColor: "#eee",
-          fontSize: 20,
+          fontSize: 17,
           fontWeight: "500",
           color: template.colors.text,
         },
