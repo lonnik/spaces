@@ -68,6 +68,7 @@ export const MapboxMap: FC<{
         scaleBarEnabled={false}
         zoomEnabled={false}
         scrollEnabled={false}
+        attributionEnabled={false}
       >
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}

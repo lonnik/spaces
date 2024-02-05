@@ -115,7 +115,7 @@ export const NewSpaceScreen: FC<
           style={{
             alignItems: "center",
             marginTop: template.margins.md + 10,
-            marginBottom: insets.bottom + 10,
+            marginBottom: insets.bottom + 20,
           }}
         >
           <Pressable
