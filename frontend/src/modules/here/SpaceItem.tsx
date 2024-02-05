@@ -1,8 +1,9 @@
 import "react-native-gesture-handler";
-import { Text, View, TouchableOpacity } from "react-native";
+import { View, TouchableOpacity } from "react-native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { FC } from "react";
 import { Space, TabsParamList } from "../../types";
+import { Text } from "../../components/Text";
 
 export const SpaceItem: FC<{
   data: Space;

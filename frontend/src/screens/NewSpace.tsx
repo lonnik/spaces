@@ -45,7 +45,7 @@ export const NewSpaceScreen: FC<
       <BottomSheetScrollView
         style={{
           flex: 1,
-          paddingHorizontal: 27,
+          paddingHorizontal: 20,
           columnGap: 20,
           flexDirection: "column",
         }}

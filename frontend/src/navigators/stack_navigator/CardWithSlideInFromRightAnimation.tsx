@@ -1,5 +1,5 @@
 import { useEffect, JSX, FC } from "react";
-import { useWindowDimensions, Text } from "react-native";
+import { useWindowDimensions } from "react-native";
 import Animated, {
   runOnJS,
   useAnimatedStyle,
