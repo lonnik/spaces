@@ -17,12 +17,14 @@ export const TextInput: FC<{
       placeholder={placeholder}
       value={value}
       onChangeText={setValue}
+      placeholderTextColor={template.colors.textLight}
       style={[
         {
           borderRadius: 7,
           padding: 12,
           backgroundColor: "#eee",
           fontSize: 20,
+          fontWeight: "500",
           color: template.colors.text,
         },
         style,

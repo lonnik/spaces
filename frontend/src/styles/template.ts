@@ -3,7 +3,8 @@ export const template = {
     gray: "#d5d5d5",
     purpleLight: "#C081FF",
     purple: "#A347FF",
-    text: "#222",
+    text: "#444",
+    textLight: "#888",
   },
   paddings: {
     screen: 20,
