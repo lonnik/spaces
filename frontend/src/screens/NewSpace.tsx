@@ -3,14 +3,14 @@ import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useState } from "react";
 import { TabsParamList } from "../types";
 import { useLocation } from "../hooks/use_location";
-import { Slider } from "@rneui/themed";
 // import { RnMap } from "../modules/new_space/RnMap";
 import { MapboxMap } from "../modules/new_space/MapboxMap";
-import { TextInput } from "react-native-gesture-handler";
 import { template } from "../styles/template";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Header } from "../modules/new_space/Header";
 import { Text } from "../components/Text";
+import { Slider } from "../components/form/Slider";
+import { TextInput } from "../components/form/TextInput";
 
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
@@ -61,29 +61,21 @@ export const NewSpaceScreen: FC<
           spaceName={spaceName || undefined}
         />
         <Slider
-          value={radius}
-          onValueChange={setRadius}
-          maximumValue={100}
-          minimumValue={10}
+          setRadius={setRadius}
+          radius={radius}
           style={{ marginBottom: template.margins.md }}
         />
         <TextInput
           value={spaceName}
+          setValue={setSpaceName}
           placeholder="Space Name"
-          onChangeText={setSpaceName}
-          style={{
-            borderRadius: 7,
-            padding: 12,
-            backgroundColor: "#eee",
-            fontSize: 20,
-            marginBottom: template.margins.md,
-          }}
+          style={{ marginBottom: template.margins.md }}
         />
         <View style={{ alignItems: "center" }}>
           <Pressable
             style={{
               marginHorizontal: "auto",
-              backgroundColor: template.colors.lila,
+              backgroundColor: template.colors.purple,
               paddingHorizontal: 29,
               paddingVertical: 13,
               borderRadius: 10,
