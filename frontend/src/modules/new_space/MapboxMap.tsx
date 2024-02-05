@@ -44,7 +44,7 @@ export const MapboxMap: FC<{
     debouncedSetBounds(radius);
   }, [radius, debouncedSetBounds]);
 
-  const geoJSONCircle = createGeoJSONCircle(centerCoordinate, radius, 60);
+  const geoJSONCircle = createGeoJSONCircle(centerCoordinate, radius, 120);
 
   const spaceNameTextMaxWidth =
     200 * Math.min(radius / minRadiusForBounds, 1) * (screenWidth / 430);
