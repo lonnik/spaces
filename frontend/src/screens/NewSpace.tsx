@@ -1,15 +1,16 @@
-import { Text, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useState } from "react";
 import { TabsParamList } from "../types";
 import { useLocation } from "../hooks/use_location";
 import { Slider } from "@rneui/themed";
-import { Map } from "../modules/new_space/RnMap";
+// import { RnMap } from "../modules/new_space/RnMap";
 import { MapboxMap } from "../modules/new_space/MapboxMap";
 import { TextInput } from "react-native-gesture-handler";
 import { template } from "../styles/template";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Header } from "../modules/new_space/Header";
+import { Text } from "../components/Text";
 
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
@@ -41,11 +42,19 @@ export const NewSpaceScreen: FC<
       }}
     >
       <Header />
-      <BottomSheetScrollView style={{ flex: 1, paddingHorizontal: 27 }}>
+      <BottomSheetScrollView
+        style={{
+          flex: 1,
+          paddingHorizontal: 27,
+          columnGap: 20,
+          flexDirection: "column",
+        }}
+      >
         <MapboxMap
           style={{
             borderRadius: 10,
             overflow: "hidden",
+            marginBottom: template.margins.md,
           }}
           radius={radius}
           location={location}
@@ -56,18 +65,44 @@ export const NewSpaceScreen: FC<
           onValueChange={setRadius}
           maximumValue={100}
           minimumValue={10}
+          style={{ marginBottom: template.margins.md }}
         />
         <TextInput
           value={spaceName}
+          placeholder="Space Name"
           onChangeText={setSpaceName}
           style={{
-            width: "100%",
-            borderWidth: 1,
-            paddingVertical: 7,
-            paddingHorizontal: 10,
+            borderRadius: 7,
+            padding: 12,
+            backgroundColor: "#eee",
             fontSize: 20,
+            marginBottom: template.margins.md,
           }}
         />
+        <View style={{ alignItems: "center" }}>
+          <Pressable
+            style={{
+              marginHorizontal: "auto",
+              backgroundColor: template.colors.lila,
+              paddingHorizontal: 29,
+              paddingVertical: 13,
+              borderRadius: 10,
+            }}
+          >
+            <Text
+              style={{
+                textAlign: "center",
+                color: "#FFF",
+                fontSize: 18,
+                fontWeight: "700",
+                letterSpacing: 0.36,
+                textTransform: "uppercase",
+              }}
+            >
+              Create Space
+            </Text>
+          </Pressable>
+        </View>
       </BottomSheetScrollView>
     </View>
   );

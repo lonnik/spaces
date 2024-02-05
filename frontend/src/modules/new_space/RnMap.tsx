@@ -9,7 +9,7 @@ import {
 const mapWidthToRadius = 3;
 const minLatitudeDelta = 0.001;
 
-export const Map: FC<{ location: Location; radius: number }> = ({
+export const RnMap: FC<{ location: Location; radius: number }> = ({
   location,
   radius,
 }) => {

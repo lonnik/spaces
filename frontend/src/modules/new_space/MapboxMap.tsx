@@ -1,12 +1,6 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import MapboxGL, { Camera, MapView } from "@rnmapbox/maps";
-import {
-  StyleProp,
-  Text,
-  View,
-  ViewStyle,
-  useWindowDimensions,
-} from "react-native";
+import { StyleProp, View, ViewStyle, useWindowDimensions } from "react-native";
 import { Location } from "../../types";
 import { debounce } from "../../utils/debounce";
 import {
@@ -16,6 +10,7 @@ import {
 } from "./utils";
 import { minRadiusForBounds } from "./constants";
 import { template } from "../../styles/template";
+import { Text } from "../../components/Text";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
