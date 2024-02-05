@@ -52,7 +52,7 @@ export const Header: FC<{
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile" as any)}
           >
-            <ProfileIcon fill={template.colors.lila} />
+            <ProfileIcon fill={template.colors.purple} />
           </TouchableOpacity>
         </View>
       </View>

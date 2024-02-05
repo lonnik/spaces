@@ -84,13 +84,13 @@ export const MapboxMap: FC<{
           <MapboxGL.FillLayer
             id="circleFill"
             style={{
-              fillColor: template.colors.lila,
+              fillColor: template.colors.purple,
               fillOpacity: 0.14,
             }}
           />
           <MapboxGL.LineLayer
             id="circleLine"
-            style={{ lineColor: template.colors.lila, lineWidth: 1 }}
+            style={{ lineColor: template.colors.purple, lineWidth: 1 }}
           />
         </MapboxGL.ShapeSource>
       </MapView>

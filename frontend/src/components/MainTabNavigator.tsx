@@ -36,7 +36,7 @@ const HereTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
 };
 
 const AddSpaceTabBarIcon: FC = () => {
-  return <AddSpaceIcon stroke={template.colors.lila} />;
+  return <AddSpaceIcon stroke={template.colors.purple} />;
 };
 
 const TabBarItem: FC<{
