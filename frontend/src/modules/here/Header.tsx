@@ -15,7 +15,7 @@ export const Header: FC<{
   return (
     <View
       style={{
-        height: 56,
+        height: template.height.header,
         paddingHorizontal: 10,
       }}
     >

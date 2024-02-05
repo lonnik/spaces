@@ -1,5 +1,6 @@
 import { JSX, FC } from "react";
 import { View } from "react-native";
+import { template } from "../../styles/template";
 
 export const CardWithoutAnimation: FC<{
   children: JSX.Element;
@@ -9,8 +10,8 @@ export const CardWithoutAnimation: FC<{
       style={{
         flex: 1,
         overflow: "hidden",
-        borderTopLeftRadius: 7,
-        borderTopRightRadius: 7,
+        borderTopLeftRadius: template.borderRadius.screen,
+        borderTopRightRadius: template.borderRadius.screen,
         backgroundColor: "#fff",
       }}
     >

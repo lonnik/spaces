@@ -1,5 +1,6 @@
 import { JSX, FC, useCallback, useRef } from "react";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
+import { template } from "../../styles/template";
 
 export const CardWithSlideInFromBotomAnimation: FC<{
   goBack: () => void;
@@ -25,8 +26,8 @@ export const CardWithSlideInFromBotomAnimation: FC<{
       backdropComponent={renderBackdrop}
       handleStyle={{ display: "none" }}
       style={{
-        borderTopLeftRadius: 7,
-        borderTopRightRadius: 7,
+        borderTopLeftRadius: template.borderRadius.screen,
+        borderTopRightRadius: template.borderRadius.screen,
         overflow: "hidden",
       }}
     >

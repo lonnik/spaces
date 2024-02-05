@@ -7,6 +7,9 @@ import { Slider } from "@rneui/themed";
 import { Map } from "../modules/new_space/RnMap";
 import { MapboxMap } from "../modules/new_space/MapboxMap";
 import { TextInput } from "react-native-gesture-handler";
+import { template } from "../styles/template";
+import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { Header } from "../modules/new_space/Header";
 
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
@@ -32,29 +35,40 @@ export const NewSpaceScreen: FC<
   }
 
   return (
-    <View style={{ flex: 1 }}>
-      <MapboxMap
-        radius={radius}
-        location={location}
-        spaceName={spaceName || undefined}
-      />
-      <Slider
-        value={radius}
-        onValueChange={setRadius}
-        maximumValue={100}
-        minimumValue={10}
-      />
-      <TextInput
-        value={spaceName}
-        onChangeText={setSpaceName}
-        style={{
-          width: "100%",
-          borderWidth: 1,
-          paddingVertical: 7,
-          paddingHorizontal: 10,
-          fontSize: 20,
-        }}
-      />
+    <View
+      style={{
+        flex: 1,
+      }}
+    >
+      <Header />
+      <BottomSheetScrollView style={{ flex: 1, paddingHorizontal: 27 }}>
+        <MapboxMap
+          style={{
+            borderRadius: 10,
+            overflow: "hidden",
+          }}
+          radius={radius}
+          location={location}
+          spaceName={spaceName || undefined}
+        />
+        <Slider
+          value={radius}
+          onValueChange={setRadius}
+          maximumValue={100}
+          minimumValue={10}
+        />
+        <TextInput
+          value={spaceName}
+          onChangeText={setSpaceName}
+          style={{
+            width: "100%",
+            borderWidth: 1,
+            paddingVertical: 7,
+            paddingHorizontal: 10,
+            fontSize: 20,
+          }}
+        />
+      </BottomSheetScrollView>
     </View>
   );
 };

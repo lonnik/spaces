@@ -1,6 +1,12 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
 import MapboxGL, { Camera, MapView } from "@rnmapbox/maps";
-import { Text, View, useWindowDimensions } from "react-native";
+import {
+  StyleProp,
+  Text,
+  View,
+  ViewStyle,
+  useWindowDimensions,
+} from "react-native";
 import { Location } from "../../types";
 import { debounce } from "../../utils/debounce";
 import {
@@ -9,10 +15,7 @@ import {
   getBoundingBox,
 } from "./utils";
 import { minRadiusForBounds } from "./constants";
-
-// TODOS:
-// try out on phone
-// custom design
+import { template } from "../../styles/template";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
@@ -20,7 +23,8 @@ export const MapboxMap: FC<{
   radius: number;
   spaceName?: string;
   location: Location;
-}> = ({ radius, spaceName = "Your space", location }) => {
+  style?: StyleProp<ViewStyle>;
+}> = ({ radius, spaceName = "Your space", location, style }) => {
   const { width: screenWidth } = useWindowDimensions();
 
   const centerCoordinate = useMemo(
@@ -47,16 +51,17 @@ export const MapboxMap: FC<{
   const geoJSONCircle = createGeoJSONCircle(centerCoordinate, radius, 120);
 
   const spaceNameTextMaxWidth =
-    200 * Math.min(radius / minRadiusForBounds, 1) * (screenWidth / 430);
+    170 * Math.min(radius / minRadiusForBounds, 1) * (screenWidth / 430);
+
   const spaceNameTextFontsize = calculateFontSize(
     spaceName,
     spaceNameTextMaxWidth,
-    20,
+    16,
     40
   );
 
   return (
-    <View style={{ width: "100%", aspectRatio: 1 }}>
+    <View style={[{ width: "100%", aspectRatio: 1 }, style]}>
       <MapView
         style={{ flex: 1 }}
         logoEnabled={false}
@@ -70,7 +75,7 @@ export const MapboxMap: FC<{
           <Text
             style={{
               fontSize: spaceNameTextFontsize,
-              color: "#500",
+              color: template.colors.text,
               fontWeight: "600",
               maxWidth: spaceNameTextMaxWidth,
               textAlign: "center",
@@ -84,13 +89,13 @@ export const MapboxMap: FC<{
           <MapboxGL.FillLayer
             id="circleFill"
             style={{
-              fillColor: "#ff0000",
-              fillOpacity: 0.3,
+              fillColor: template.colors.lila,
+              fillOpacity: 0.14,
             }}
           />
           <MapboxGL.LineLayer
             id="circleLine"
-            style={{ lineColor: "#700", lineWidth: 1 }}
+            style={{ lineColor: template.colors.lila, lineWidth: 1 }}
           />
         </MapboxGL.ShapeSource>
       </MapView>

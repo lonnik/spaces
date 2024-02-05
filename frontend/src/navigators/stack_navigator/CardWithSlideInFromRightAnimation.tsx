@@ -9,6 +9,7 @@ import Animated, {
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { animationDuration, swipeXThreshold } from "./constants";
 import { AnimatedOverlay } from "./AnimatedOverlay";
+import { template } from "../../styles/template";
 
 export const CardWithSlideInFromRightAnimation: FC<{
   goBack: () => void;
@@ -72,8 +73,8 @@ export const CardWithSlideInFromRightAnimation: FC<{
               flex: 1,
               overflow: "hidden",
               backgroundColor: "#fff",
-              borderTopLeftRadius: 7,
-              borderTopRightRadius: 7,
+              borderTopLeftRadius: template.borderRadius.screen,
+              borderTopRightRadius: template.borderRadius.screen,
             },
             animatedCardStyles,
           ]}

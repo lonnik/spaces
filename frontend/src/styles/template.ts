@@ -4,4 +4,13 @@ export const template = {
     lila: "#820DF6",
     text: "#222",
   },
+  paddings: {
+    screen: 20,
+  },
+  borderRadius: {
+    screen: 7,
+  },
+  height: {
+    header: 56,
+  },
 };
