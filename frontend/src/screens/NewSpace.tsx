@@ -11,13 +11,43 @@ import { Header } from "../modules/new_space/Header";
 import { Text } from "../components/Text";
 import { Slider } from "../components/form/Slider";
 import { TextInput } from "../components/form/TextInput";
+import { Label } from "../components/form/Label";
+import { ColorPicker } from "../modules/new_space/ColorPicker";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const screenPaddingHorizontal = 20;
+const gapSize = 15; // This is the uniform gap size you want
+const numberOfColumns = 6;
+
+const colors = [
+  template.colors.purple,
+  "#212078",
+  "#69701e",
+  template.colors.purple,
+  "#ddd",
+  "#faa",
+  template.colors.purple,
+  "#ddd",
+  "#faa",
+  template.colors.purple,
+  "#ddd",
+  "#faa",
+  template.colors.purple,
+  "#ddd",
+  "#faa",
+  template.colors.purple,
+  "#ddd",
+];
 
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
 > = () => {
   const [radius, setRadius] = useState(25);
-  const { location, permissionGranted } = useLocation();
   const [spaceName, setSpaceName] = useState("");
+  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+
+  const { location, permissionGranted } = useLocation();
+  const insets = useSafeAreaInsets();
 
   if (!permissionGranted) {
     return (
@@ -45,33 +75,49 @@ export const NewSpaceScreen: FC<
       <BottomSheetScrollView
         style={{
           flex: 1,
-          paddingHorizontal: 20,
-          columnGap: 20,
+          paddingHorizontal: screenPaddingHorizontal,
           flexDirection: "column",
         }}
       >
         <MapboxMap
-          style={{
-            borderRadius: 10,
-            overflow: "hidden",
-            marginBottom: template.margins.md,
-          }}
           radius={radius}
           location={location}
           spaceName={spaceName || undefined}
+          color={colors[selectedColorIndex]}
+          style={{
+            marginBottom: template.margins.md,
+          }}
         />
-        <Slider
-          setRadius={setRadius}
-          radius={radius}
-          style={{ marginBottom: template.margins.md }}
-        />
-        <TextInput
-          value={spaceName}
-          setValue={setSpaceName}
-          placeholder="Space Name"
-          style={{ marginBottom: template.margins.md }}
-        />
-        <View style={{ alignItems: "center" }}>
+        <View style={{ marginBottom: template.margins.md }}>
+          <Label style={{ marginBottom: 10 }}>Radius</Label>
+          <Slider setRadius={setRadius} radius={radius} />
+        </View>
+        <View style={{ marginBottom: template.margins.md }}>
+          <Label style={{ marginBottom: 10 }}>Name</Label>
+          <TextInput
+            value={spaceName}
+            setValue={setSpaceName}
+            placeholder="Space Name"
+          />
+        </View>
+        <View>
+          <Label style={{ marginBottom: 10 }}>Color</Label>
+          <ColorPicker
+            colors={colors}
+            selectedIndex={selectedColorIndex}
+            setSelectedColorIndex={setSelectedColorIndex}
+            gapSize={gapSize}
+            numberOfColumns={numberOfColumns}
+            screenPaddingHorizontal={screenPaddingHorizontal}
+          />
+        </View>
+        <View
+          style={{
+            alignItems: "center",
+            marginTop: template.margins.md + 10,
+            marginBottom: insets.bottom + 10,
+          }}
+        >
           <Pressable
             style={{
               marginHorizontal: "auto",

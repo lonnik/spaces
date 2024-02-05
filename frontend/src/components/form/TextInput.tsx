@@ -1,6 +1,10 @@
 import { FC } from "react";
-import { StyleProp, TextStyle } from "react-native";
-import { TextInput as NativeTextInput } from "react-native-gesture-handler";
+import {
+  TextInput as NativeTextInput,
+  StyleProp,
+  TextStyle,
+} from "react-native";
+import { template } from "../../styles/template";
 
 export const TextInput: FC<{
   value: string;
@@ -10,8 +14,8 @@ export const TextInput: FC<{
 }> = ({ value, setValue, placeholder, style }) => {
   return (
     <NativeTextInput
-      value={value}
       placeholder={placeholder}
+      value={value}
       onChangeText={setValue}
       style={[
         {
@@ -19,6 +23,7 @@ export const TextInput: FC<{
           padding: 12,
           backgroundColor: "#eee",
           fontSize: 20,
+          color: template.colors.text,
         },
         style,
       ]}

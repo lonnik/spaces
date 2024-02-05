@@ -9,7 +9,6 @@ import {
   getBoundingBox,
 } from "./utils";
 import { minRadiusForBounds } from "./constants";
-import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
@@ -18,8 +17,9 @@ export const MapboxMap: FC<{
   radius: number;
   spaceName?: string;
   location: Location;
+  color: string;
   style?: StyleProp<ViewStyle>;
-}> = ({ radius, spaceName = "Your space", location, style }) => {
+}> = ({ radius, spaceName = "Your space", location, color, style }) => {
   const { width: screenWidth } = useWindowDimensions();
 
   const centerCoordinate = useMemo(
@@ -56,7 +56,12 @@ export const MapboxMap: FC<{
   );
 
   return (
-    <View style={[{ width: "100%", aspectRatio: 1 }, style]}>
+    <View
+      style={[
+        { width: "100%", aspectRatio: 1, borderRadius: 10, overflow: "hidden" },
+        style,
+      ]}
+    >
       <MapView
         style={{ flex: 1 }}
         logoEnabled={false}
@@ -70,7 +75,7 @@ export const MapboxMap: FC<{
           <Text
             style={{
               fontSize: spaceNameTextFontsize,
-              color: template.colors.text,
+              color,
               fontWeight: "600",
               maxWidth: spaceNameTextMaxWidth,
               textAlign: "center",
@@ -84,13 +89,13 @@ export const MapboxMap: FC<{
           <MapboxGL.FillLayer
             id="circleFill"
             style={{
-              fillColor: template.colors.purple,
-              fillOpacity: 0.14,
+              fillColor: color,
+              fillOpacity: 0.18,
             }}
           />
           <MapboxGL.LineLayer
             id="circleLine"
-            style={{ lineColor: template.colors.purple, lineWidth: 1 }}
+            style={{ lineColor: color, lineWidth: 1 }}
           />
         </MapboxGL.ShapeSource>
       </MapView>

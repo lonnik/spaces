@@ -9,7 +9,7 @@ export const template = {
     screen: 20,
   },
   margins: {
-    md: 20,
+    md: 30,
   },
   borderRadius: {
     screen: 7,
