@@ -1,8 +1,7 @@
-import { FC, useContext, useEffect } from "react";
+import { FC, useEffect } from "react";
 import { RootStackParamList } from "../../types";
 import { MainTabNavigator } from "./MainTabNavigator";
 import { ProfileScreen } from "../../screens/Profile";
-import { UserDispatchContext, UserStateContext } from "../context/UserContext";
 import { Signin } from "../../screens/SignIn";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../../../firebase";
@@ -10,12 +9,13 @@ import { LoadingScreen } from "../../screens/Loading";
 import { SpaceScreen } from "../../screens/Space";
 import { createCustomStackNavigator } from "../../navigators/stack_navigator";
 import { NewSpaceScreen } from "../../screens/NewSpace";
+import { useUserState } from "../context/UserContext";
 
 const Stack = createCustomStackNavigator<RootStackParamList>();
 
 export const RootStackNavigator: FC = () => {
-  const rootState = useContext(UserStateContext);
-  const dispatch = useContext(UserDispatchContext);
+  const [userState, dispatch] = useUserState();
+  const { userIsLoading, user } = userState;
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -30,13 +30,13 @@ export const RootStackNavigator: FC = () => {
     return () => unsubscribe();
   }, []);
 
-  if (rootState?.userIsLoading) {
+  if (userIsLoading) {
     return <LoadingScreen />;
   }
 
   return (
     <Stack.Navigator initialRouteName="MainTabs">
-      {rootState?.user ? (
+      {user ? (
         <>
           <Stack.Screen name="MainTabs" component={MainTabNavigator} />
           <Stack.Screen

@@ -1,16 +1,13 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import {
-  UserDispatchContext,
-  UserStateContext,
-} from "../components/context/UserContext";
-import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
 } from "expo-location";
+import { useUserState } from "../components/context/UserContext";
 
 export const useLocation = () => {
-  const rootState = useContext(UserStateContext);
-  const dispatch = useContext(UserDispatchContext);
+  const [userState, dispatch] = useUserState();
+  const { location } = userState;
 
   const [permissionGranted, setPermissionGranted] = useState(false);
 
@@ -33,13 +30,13 @@ export const useLocation = () => {
   }, []);
 
   useEffect(() => {
-    if (!rootState?.location) {
+    if (!location) {
       getLocation();
     }
-  }, [rootState?.location]);
+  }, [location]);
 
   return {
-    location: rootState?.location,
-    permissionGranted: permissionGranted || !!rootState?.location,
+    location: location,
+    permissionGranted: permissionGranted || !!location,
   };
 };
