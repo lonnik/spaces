@@ -1,4 +1,4 @@
-import { JSX, FC, useCallback, useRef } from "react";
+import { JSX, FC, useCallback } from "react";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { template } from "../../styles/template";
 

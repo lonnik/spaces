@@ -5,6 +5,7 @@ export const template = {
     purple: "#A347FF",
     text: "#444",
     textLight: "#888",
+    white: "#fff",
   },
   paddings: {
     screen: 20,

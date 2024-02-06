@@ -6,8 +6,9 @@ import { StyleProp, ViewStyle } from "react-native";
 export const Slider: FC<{
   setRadius: (newRadius: number) => void;
   radius: number;
+  color: string;
   style?: StyleProp<ViewStyle>;
-}> = ({ setRadius, radius, style }) => {
+}> = ({ setRadius, radius, color, style }) => {
   return (
     <RneuiSlider
       value={radius}
