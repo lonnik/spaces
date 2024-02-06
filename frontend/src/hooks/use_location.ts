@@ -1,16 +1,16 @@
 import { useCallback, useContext, useEffect, useState } from "react";
 import {
-  RootDispatchContext,
-  RootStateContext,
-} from "../components/RootContext";
+  UserDispatchContext,
+  UserStateContext,
+} from "../components/context/UserContext";
 import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
 } from "expo-location";
 
 export const useLocation = () => {
-  const rootState = useContext(RootStateContext);
-  const dispatch = useContext(RootDispatchContext);
+  const rootState = useContext(UserStateContext);
+  const dispatch = useContext(UserDispatchContext);
 
   const [permissionGranted, setPermissionGranted] = useState(false);
 

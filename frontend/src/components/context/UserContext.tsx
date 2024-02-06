@@ -1,6 +1,6 @@
 import { User } from "firebase/auth";
 import { FC, createContext, ReactElement, useReducer, Dispatch } from "react";
-import { Location } from "../types";
+import { Location } from "../../types";
 
 const initialState: {
   user?: User;
@@ -11,13 +11,13 @@ const initialState: {
   userIsLoading: true,
 };
 
-type RootState = typeof initialState;
+type UserState = typeof initialState;
 type Action =
   | { type: "SIGN_IN"; user: User }
   | { type: "SIGN_OUT" }
   | { type: "SET_LOCATION"; location: Location };
 
-const rootReducer = (prevState: RootState, action: Action) => {
+const userReducer = (prevState: UserState, action: Action) => {
   switch (action.type) {
     case "SIGN_IN": {
       return { ...prevState, user: action.user, userIsLoading: false };
@@ -33,19 +33,19 @@ const rootReducer = (prevState: RootState, action: Action) => {
   }
 };
 
-export const RootStateContext = createContext<null | RootState>(null);
-export const RootDispatchContext = createContext<null | Dispatch<Action>>(null);
+export const UserStateContext = createContext<null | UserState>(null);
+export const UserDispatchContext = createContext<null | Dispatch<Action>>(null);
 
-export const RootStateProvider: FC<{ children: ReactElement }> = ({
+export const UserStateProvider: FC<{ children: ReactElement }> = ({
   children,
 }) => {
-  const [state, dispatch] = useReducer(rootReducer, initialState);
+  const [state, dispatch] = useReducer(userReducer, initialState);
 
   return (
-    <RootStateContext.Provider value={state}>
-      <RootDispatchContext.Provider value={dispatch}>
+    <UserStateContext.Provider value={state}>
+      <UserDispatchContext.Provider value={dispatch}>
         {children}
-      </RootDispatchContext.Provider>
-    </RootStateContext.Provider>
+      </UserDispatchContext.Provider>
+    </UserStateContext.Provider>
   );
 };

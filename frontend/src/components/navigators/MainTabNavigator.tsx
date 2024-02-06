@@ -3,18 +3,18 @@ import {
   BottomTabNavigationEventMap,
   createBottomTabNavigator,
 } from "@react-navigation/bottom-tabs";
-import { TabsParamList } from "../types";
-import { HereScreen } from "../screens/Here";
+import { TabsParamList } from "../../types";
+import { HereScreen } from "../../screens/Here";
 import { FC, Fragment } from "react";
-import { MySpacesScreen } from "../screens/MySpaces";
+import { MySpacesScreen } from "../../screens/MySpaces";
 import { Pressable, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { HereIcon } from "./icons/HereIcon";
-import { MySpacesIcon } from "./icons/MySpacesIcon";
-import { AddSpaceIcon } from "./icons/AddSpaceIcon";
-import { template } from "../styles/template";
+import { HereIcon } from "../icons/HereIcon";
+import { MySpacesIcon } from "../icons/MySpacesIcon";
+import { AddSpaceIcon } from "../icons/AddSpaceIcon";
+import { template } from "../../styles/template";
 import { NavigationHelpers, ParamListBase } from "@react-navigation/native";
-import { HereIconAcive } from "./icons/HereIconActice";
+import { HereIconAcive } from "../icons/HereIconActice";
 
 const Tabs = createBottomTabNavigator<TabsParamList>();
 
