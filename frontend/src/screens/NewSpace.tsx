@@ -9,12 +9,12 @@ import { template } from "../styles/template";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Header } from "../modules/new_space/Header";
 import { Text } from "../components/Text";
-import { Slider } from "../components/form/Slider";
 import { TextInput } from "../components/form/TextInput";
 import { Label } from "../components/form/Label";
 import { ColorPicker } from "../modules/new_space/ColorPicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../components/form/PrimaryButton";
+import { Slider } from "../components/form/Slider";
 
 const screenPaddingHorizontal = 20;
 const gapSize = 10; // This is the uniform gap size you want
@@ -39,54 +39,6 @@ const colors = [
   template.colors.purple,
   "#ddd",
 ];
-
-const RadiusSection: FC<{
-  radius: number;
-  setRadius: (newRadius: number) => void;
-  color: string;
-}> = ({ setRadius, radius, color }) => {
-  return (
-    <View style={{ marginBottom: template.margins.md }}>
-      <Label style={{ marginBottom: 10 }}>Radius</Label>
-      <Slider setRadius={setRadius} radius={radius} color={color} />
-    </View>
-  );
-};
-
-const ColorSection: FC<{
-  selectedColorIndex: number;
-  setSelectedColorIndex: (newColorIndex: number) => void;
-}> = ({ selectedColorIndex, setSelectedColorIndex }) => {
-  return (
-    <View>
-      <Label style={{ marginBottom: 10 }}>Color</Label>
-      <ColorPicker
-        colors={colors}
-        selectedIndex={selectedColorIndex}
-        setSelectedColorIndex={setSelectedColorIndex}
-        gapSize={gapSize}
-        numberOfColumns={numberOfColumns}
-        screenPaddingHorizontal={screenPaddingHorizontal}
-      />
-    </View>
-  );
-};
-
-const NameSection: FC<{
-  spaceName: string;
-  setSpaceName: (newSpaceName: string) => void;
-}> = ({ spaceName, setSpaceName }) => {
-  return (
-    <View style={{ marginBottom: template.margins.md }}>
-      <Label style={{ marginBottom: 10 }}>Name</Label>
-      <TextInput
-        value={spaceName}
-        setValue={setSpaceName}
-        placeholder="Space Name"
-      />
-    </View>
-  );
-};
 
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
@@ -159,6 +111,63 @@ export const NewSpaceScreen: FC<
           </PrimaryButton>
         </View>
       </BottomSheetScrollView>
+    </View>
+  );
+};
+
+const RadiusSection: FC<{
+  radius: number;
+  setRadius: (newRadius: number) => void;
+  color: string;
+}> = ({ setRadius, radius, color }) => {
+  return (
+    <View style={{ marginBottom: template.margins.md }}>
+      <Label style={{ marginBottom: 10 }}>Radius</Label>
+      <Slider
+        initialValue={radius}
+        maximumValue={100}
+        onValueChange={setRadius}
+        style={{ height: 35 }}
+        thumbStyle={{ width: 35, backgroundColor: color }}
+        trackStyle={{ height: 7, borderRadius: 4 }}
+        minimumTrackTintColor={color}
+        minimumValue={10}
+      />
+    </View>
+  );
+};
+
+const ColorSection: FC<{
+  selectedColorIndex: number;
+  setSelectedColorIndex: (newColorIndex: number) => void;
+}> = ({ selectedColorIndex, setSelectedColorIndex }) => {
+  return (
+    <View>
+      <Label style={{ marginBottom: 10 }}>Color</Label>
+      <ColorPicker
+        colors={colors}
+        selectedIndex={selectedColorIndex}
+        setSelectedColorIndex={setSelectedColorIndex}
+        gapSize={gapSize}
+        numberOfColumns={numberOfColumns}
+        screenPaddingHorizontal={screenPaddingHorizontal}
+      />
+    </View>
+  );
+};
+
+const NameSection: FC<{
+  spaceName: string;
+  setSpaceName: (newSpaceName: string) => void;
+}> = ({ spaceName, setSpaceName }) => {
+  return (
+    <View style={{ marginBottom: template.margins.md }}>
+      <Label style={{ marginBottom: 10 }}>Name</Label>
+      <TextInput
+        value={spaceName}
+        setValue={setSpaceName}
+        placeholder="Space Name"
+      />
     </View>
   );
 };
