@@ -56,31 +56,36 @@ export const PrimaryButton: FC<{
         style,
       ]}
     >
-      <Animated.View
-        style={[
-          {
-            paddingHorizontal: 29,
-            paddingVertical: 13,
-            borderRadius: 10,
-          },
-          animatedBackgroundColor,
-        ]}
-      >
-        <AnimatedText
-          style={[
-            {
-              textAlign: "center",
-              fontSize: 16,
-              fontWeight: "700",
-              letterSpacing: 0.36,
-              textTransform: "uppercase",
-            },
-            animatedTextColor,
-          ]}
-        >
-          {children}
-        </AnimatedText>
-      </Animated.View>
+      {({ pressed }) => {
+        return (
+          <Animated.View
+            style={[
+              {
+                paddingHorizontal: 29,
+                paddingVertical: 13,
+                borderRadius: 10,
+                opacity: pressed ? 0.8 : 1,
+              },
+              animatedBackgroundColor,
+            ]}
+          >
+            <AnimatedText
+              style={[
+                {
+                  textAlign: "center",
+                  fontSize: 16,
+                  fontWeight: "700",
+                  letterSpacing: 0.36,
+                  textTransform: "uppercase",
+                },
+                animatedTextColor,
+              ]}
+            >
+              {children}
+            </AnimatedText>
+          </Animated.View>
+        );
+      }}
     </Pressable>
   );
 };
