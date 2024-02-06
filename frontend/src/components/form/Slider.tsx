@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useCallback, useState } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
+import { throttle } from "../../utils/throttle";
 
 export const Slider: FC<{
   initialValue: number;
@@ -38,6 +39,8 @@ export const Slider: FC<{
   const valueSv = useSharedValue(initialValue);
   const translateX = useSharedValue(0);
 
+  const throttledOnValueChange = useCallback(throttle(onValueChange, 10), []);
+
   const panGesture = Gesture.Pan()
     .onStart(() => {
       startValue.value = valueSv.value;
@@ -55,7 +58,7 @@ export const Slider: FC<{
         minimumValue
       );
 
-      runOnJS(onValueChange)(valueSv.value);
+      runOnJS(throttledOnValueChange)(valueSv.value);
     });
 
   const animatedThumbStyle = useAnimatedStyle(() => {
