@@ -15,6 +15,7 @@ import { ColorPicker } from "../modules/new_space/ColorPicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../components/form/PrimaryButton";
 import { Slider } from "../components/form/Slider";
+import { useNewSpaceState } from "../components/context/NewSpaceContext";
 
 const screenPaddingHorizontal = 20;
 const gapSize = 10; // This is the uniform gap size you want
@@ -43,9 +44,20 @@ const colors = [
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
 > = () => {
-  const [radius, setRadius] = useState(25);
-  const [spaceName, setSpaceName] = useState("");
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
+  const [newSpaceState, dispatch] = useNewSpaceState();
+  const { radius, name, selectedColorIndex } = newSpaceState;
+
+  const handleRadiusChange = (newRadius: number) => {
+    dispatch!({ type: "SET_RADIUS", newRadius });
+  };
+
+  const handleNameChange = (newName: string) => {
+    dispatch!({ type: "SET_NAME", newName });
+  };
+
+  const handleSelectedColorIndexChange = (newIndex: number) => {
+    dispatch!({ type: "SELECT_COLOR_INDEX", newIndex });
+  };
 
   const { location, permissionGranted } = useLocation();
   const insets = useSafeAreaInsets();
@@ -83,7 +95,7 @@ export const NewSpaceScreen: FC<
         <MapboxMap
           radius={radius}
           location={location}
-          spaceName={spaceName || undefined}
+          spaceName={name || undefined}
           color={colors[selectedColorIndex]}
           style={{
             marginBottom: template.margins.md,
@@ -91,13 +103,13 @@ export const NewSpaceScreen: FC<
         />
         <RadiusSection
           radius={radius}
-          setRadius={setRadius}
+          setRadius={handleRadiusChange}
           color={colors[selectedColorIndex]}
         />
-        <NameSection spaceName={spaceName} setSpaceName={setSpaceName} />
+        <NameSection spaceName={name} setSpaceName={handleNameChange} />
         <ColorSection
           selectedColorIndex={selectedColorIndex}
-          setSelectedColorIndex={setSelectedColorIndex}
+          setSelectedColorIndex={handleSelectedColorIndexChange}
         />
         <View
           style={{
