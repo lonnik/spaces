@@ -39,7 +39,7 @@ export const Slider: FC<{
   const valueSv = useSharedValue(initialValue);
   const translateX = useSharedValue(0);
 
-  const throttledOnValueChange = useCallback(throttle(onValueChange, 10), []);
+  const throttledOnValueChange = useCallback(throttle(onValueChange, 3), []);
 
   const panGesture = Gesture.Pan()
     .onStart(() => {

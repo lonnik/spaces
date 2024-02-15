@@ -1,5 +1,11 @@
 import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import MapboxGL, { Camera, MapView } from "@rnmapbox/maps";
+import MapboxGL, {
+  Camera,
+  MapView,
+  LineLayer,
+  FillLayer,
+  ShapeSource,
+} from "@rnmapbox/maps";
 import { StyleProp, View, ViewStyle, useWindowDimensions } from "react-native";
 import { Location } from "../../types";
 import { debounce } from "../../utils/debounce";
@@ -86,19 +92,19 @@ export const MapboxMap: FC<{
           </Text>
         </View>
         <Camera bounds={bounds} animationDuration={100} />
-        <MapboxGL.ShapeSource id="circleSource" shape={geoJSONCircle}>
-          <MapboxGL.FillLayer
+        <ShapeSource id="circleSource" shape={geoJSONCircle} tolerance={0.1}>
+          <FillLayer
             id="circleFill"
             style={{
               fillColor: color,
               fillOpacity: 0.18,
             }}
           />
-          <MapboxGL.LineLayer
+          <LineLayer
             id="circleLine"
             style={{ lineColor: color, lineWidth: 1 }}
           />
-        </MapboxGL.ShapeSource>
+        </ShapeSource>
       </MapView>
     </View>
   );
