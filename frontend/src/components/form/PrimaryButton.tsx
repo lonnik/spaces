@@ -16,7 +16,7 @@ export const PrimaryButton: FC<{
   textColor?: string;
   style?: StyleProp<ViewStyle>;
   animationDuration?: number;
-}> = ({ children, color, textColor, style, animationDuration = 150 }) => {
+}> = ({ children, color, textColor, style, animationDuration = 100 }) => {
   const sharedBackgroundColorValue = useSharedValue(
     color || template.colors.purple
   );

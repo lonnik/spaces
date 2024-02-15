@@ -21,7 +21,7 @@ export const ColorPicker: FC<{
   gapSize,
   numberOfColumns,
   screenPaddingHorizontal,
-  animationDuration = 150,
+  animationDuration = 100,
 }) => {
   const { width: screenWidth } = useWindowDimensions();
   const containerWidth = screenWidth - screenPaddingHorizontal * 2;
@@ -78,7 +78,7 @@ const Color: FC<{
   gapSize,
   onPress,
   itemWidth,
-  animationDuration = 150,
+  animationDuration = 100,
 }) => {
   const isSelectedSv = useSharedValue(isSelected);
 

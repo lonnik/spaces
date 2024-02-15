@@ -38,7 +38,7 @@ export const Slider: FC<{
   maximumValue = 100,
   hitRectFactor = 2,
   scaleFactor,
-  animationDuration = 150,
+  animationDuration = 100,
 }) => {
   const [sliderWidth, setSliderWidth] = useState(0);
   const thumbSize = (StyleSheet.flatten([thumbStyle]).width || 30) as number;
