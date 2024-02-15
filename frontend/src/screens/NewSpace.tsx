@@ -144,6 +144,7 @@ const RadiusSection: FC<{
         trackStyle={{ height: 7, borderRadius: 4 }}
         minimumTrackTintColor={color}
         minimumValue={10}
+        scaleFactor={1.7}
       />
     </View>
   );

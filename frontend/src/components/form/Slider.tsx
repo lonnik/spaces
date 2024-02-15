@@ -5,9 +5,13 @@ import Animated, {
   runOnJS,
   useSharedValue,
   withTiming,
+  withSpring,
 } from "react-native-reanimated";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { throttle } from "../../utils/throttle";
+import { Text } from "../Text";
+
+const AnimatedText = Animated.createAnimatedComponent(Text);
 
 export const Slider: FC<{
   initialValue: number;
@@ -19,6 +23,8 @@ export const Slider: FC<{
   maximumValue?: number;
   minimumTrackTintColor?: string;
   maximumTrackTintColor?: string;
+  hitRectFactor?: number;
+  scaleFactor?: number;
 }> = ({
   initialValue,
   onValueChange,
@@ -29,6 +35,8 @@ export const Slider: FC<{
   maximumTrackTintColor = "#ddd",
   minimumValue = 0,
   maximumValue = 100,
+  hitRectFactor = 2,
+  scaleFactor,
 }) => {
   const [sliderWidth, setSliderWidth] = useState(0);
   const thumbSize = (StyleSheet.flatten([thumbStyle]).width || 30) as number;
@@ -36,19 +44,26 @@ export const Slider: FC<{
     .backgroundColor || "blue") as string;
 
   const startValue = useSharedValue(initialValue);
-  const valueSv = useSharedValue(initialValue);
+  const currentValue = useSharedValue(initialValue);
   const translateX = useSharedValue(0);
+  const isPressing = useSharedValue(false);
 
   const throttledOnValueChange = useCallback(throttle(onValueChange, 3), []);
 
   const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      isPressing.value = true;
+    })
+    .onFinalize(() => {
+      isPressing.value = false;
+    })
     .onStart(() => {
-      startValue.value = valueSv.value;
+      startValue.value = currentValue.value;
     })
     .minDistance(0)
     .onUpdate((event) => {
       translateX.value = event.translationX;
-      valueSv.value = Math.max(
+      currentValue.value = Math.max(
         Math.min(
           startValue.value +
             (event.translationX / (sliderWidth - thumbSize)) *
@@ -58,23 +73,55 @@ export const Slider: FC<{
         minimumValue
       );
 
-      runOnJS(throttledOnValueChange)(valueSv.value);
+      runOnJS(throttledOnValueChange)(currentValue.value);
     });
 
-  const animatedThumbStyle = useAnimatedStyle(() => {
+  const animatedThumbContainerStyles = useAnimatedStyle(() => {
     const translateX =
-      ((valueSv.value - minimumValue) / (maximumValue - minimumValue)) *
-      (sliderWidth - thumbSize);
+      ((currentValue.value - minimumValue) / (maximumValue - minimumValue)) *
+        (sliderWidth - thumbSize) -
+      ((hitRectFactor - 1) * thumbSize) / 2;
 
     return {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      width: thumbSize * hitRectFactor,
+      height: thumbSize * hitRectFactor,
+      position: "absolute",
       transform: [{ translateX }],
+    };
+  });
+
+  const animatedTextStyles = useAnimatedStyle(() => {
+    return {
+      color: thumbBackgroundColor,
+      transform: [{ translateY: -40 }],
+      fontSize: 30,
+      opacity: withTiming(isPressing.value ? 1 : 0, { duration: 100 }),
+    };
+  });
+
+  const animatedThumbStyles = useAnimatedStyle(() => {
+    const size = isPressing.value
+      ? Math.min(
+          thumbSize * hitRectFactor,
+          thumbSize * (scaleFactor || hitRectFactor)
+        )
+      : thumbSize;
+
+    return {
+      alignItems: "center",
+      borderRadius: 999,
       backgroundColor: withTiming(thumbBackgroundColor),
+      width: withSpring(size, { duration: 500 }),
+      height: withSpring(size, { duration: 500 }),
     };
   });
 
   const animatedMimimumTrackStyle = useAnimatedStyle(() => {
     const width =
-      ((valueSv.value - minimumValue) / (maximumValue - minimumValue)) *
+      ((currentValue.value - minimumValue) / (maximumValue - minimumValue)) *
         (sliderWidth - thumbSize) +
       thumbSize / 2;
 
@@ -86,7 +133,8 @@ export const Slider: FC<{
 
   const animatedMaximumTrackStyle = useAnimatedStyle(() => {
     const width =
-      (Math.abs(valueSv.value - maximumValue) / (maximumValue - minimumValue)) *
+      (Math.abs(currentValue.value - maximumValue) /
+        (maximumValue - minimumValue)) *
         (sliderWidth - thumbSize) +
       thumbSize / 2;
 
@@ -128,18 +176,13 @@ export const Slider: FC<{
         ]}
       />
       <GestureDetector gesture={panGesture}>
-        <Animated.View
-          style={[
-            {
-              position: "absolute",
-              width: thumbSize,
-              height: thumbSize,
-              borderRadius: thumbSize / 2,
-            },
-            thumbStyle,
-            animatedThumbStyle,
-          ]}
-        />
+        <Animated.View style={animatedThumbContainerStyles}>
+          <Animated.View style={[thumbStyle, animatedThumbStyles]}>
+            <AnimatedText style={animatedTextStyles}>
+              {Math.round(currentValue.value)}
+            </AnimatedText>
+          </Animated.View>
+        </Animated.View>
       </GestureDetector>
     </View>
   );
