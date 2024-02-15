@@ -93,12 +93,25 @@ export const Slider: FC<{
     };
   });
 
+  const animatedTextContainerStyles = useAnimatedStyle(() => {
+    return {
+      backgroundColor: "white",
+      padding: isPressing.value ? 3 : 0,
+      borderRadius: 999,
+      transform: [
+        {
+          translateY: withTiming(isPressing.value ? -50 : -23, {
+            duration: 100,
+          }),
+        },
+      ],
+    };
+  });
+
   const animatedTextStyles = useAnimatedStyle(() => {
     return {
+      fontSize: withTiming(isPressing.value ? 30 : 17, { duration: 100 }),
       color: thumbBackgroundColor,
-      transform: [{ translateY: -40 }],
-      fontSize: 30,
-      opacity: withTiming(isPressing.value ? 1 : 0, { duration: 100 }),
     };
   });
 
@@ -150,7 +163,7 @@ export const Slider: FC<{
         const { width } = event.nativeEvent.layout;
         setSliderWidth(width);
       }}
-      style={[{ justifyContent: "center" }, style]}
+      style={[{ justifyContent: "center", marginTop: 20 }, style]}
     >
       <Animated.View
         style={[
@@ -178,9 +191,11 @@ export const Slider: FC<{
       <GestureDetector gesture={panGesture}>
         <Animated.View style={animatedThumbContainerStyles}>
           <Animated.View style={[thumbStyle, animatedThumbStyles]}>
-            <AnimatedText style={animatedTextStyles}>
-              {Math.round(currentValue.value)}
-            </AnimatedText>
+            <Animated.View style={animatedTextContainerStyles}>
+              <AnimatedText style={animatedTextStyles}>
+                {Math.round(currentValue.value)}
+              </AnimatedText>
+            </Animated.View>
           </Animated.View>
         </Animated.View>
       </GestureDetector>
