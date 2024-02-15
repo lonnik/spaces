@@ -12,11 +12,21 @@ const AnimatedText = Animated.createAnimatedComponent(Text);
 
 export const PrimaryButton: FC<{
   children: ReactNode;
+  onPress: () => void;
+  isDisabled?: boolean;
   color?: string;
   textColor?: string;
   style?: StyleProp<ViewStyle>;
   animationDuration?: number;
-}> = ({ children, color, textColor, style, animationDuration = 100 }) => {
+}> = ({
+  children,
+  color,
+  textColor,
+  style,
+  animationDuration = 100,
+  isDisabled = false,
+  onPress,
+}) => {
   const sharedBackgroundColorValue = useSharedValue(
     color || template.colors.purple
   );
@@ -54,6 +64,7 @@ export const PrimaryButton: FC<{
 
   return (
     <Pressable
+      onPress={isDisabled ? () => {} : onPress}
       style={[
         {
           marginHorizontal: "auto",

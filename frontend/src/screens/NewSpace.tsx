@@ -1,6 +1,6 @@
 import { KeyboardAvoidingView, View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { TabsParamList } from "../types";
 import { useLocation } from "../hooks/use_location";
 // import { RnMap } from "../modules/new_space/RnMap";
@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../components/form/PrimaryButton";
 import { Slider } from "../components/form/Slider";
 import { useNewSpaceState } from "../components/context/NewSpaceContext";
+import { ZodError, z } from "zod";
 
 const screenPaddingHorizontal = 20;
 const gapSize = 10; // This is the uniform gap size you want
@@ -44,8 +45,22 @@ const colors = [
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
 > = () => {
+  const [spaceNameErrors, setSpaceNameErrors] = useState<string[]>([]);
+
   const [newSpaceState, dispatch] = useNewSpaceState();
   const { radius, name, selectedColorIndex } = newSpaceState;
+
+  useEffect(() => {
+    try {
+      z.string().max(40).parse(name);
+
+      setSpaceNameErrors([]);
+    } catch (error: ZodError | any) {
+      if (error instanceof ZodError) {
+        setSpaceNameErrors(error.errors.map((e) => e.message));
+      }
+    }
+  }, [name]);
 
   const handleRadiusChange = (newRadius: number) => {
     dispatch!({ type: "SET_RADIUS", newRadius });
@@ -61,6 +76,10 @@ export const NewSpaceScreen: FC<
 
   const { location, permissionGranted } = useLocation();
   const insets = useSafeAreaInsets();
+
+  const handleSubmit = () => {
+    console.log("submitting");
+  };
 
   if (!permissionGranted) {
     return (
@@ -111,7 +130,11 @@ export const NewSpaceScreen: FC<
             setRadius={handleRadiusChange}
             color={colors[selectedColorIndex]}
           />
-          <NameSection spaceName={name} setSpaceName={handleNameChange} />
+          <NameSection
+            spaceName={name}
+            setSpaceName={handleNameChange}
+            errors={spaceNameErrors}
+          />
           <ColorSection
             selectedColorIndex={selectedColorIndex}
             setSelectedColorIndex={handleSelectedColorIndexChange}
@@ -123,7 +146,11 @@ export const NewSpaceScreen: FC<
               marginBottom: insets.bottom + 20,
             }}
           >
-            <PrimaryButton color={colors[selectedColorIndex]}>
+            <PrimaryButton
+              color={colors[selectedColorIndex]}
+              onPress={handleSubmit}
+              isDisabled={spaceNameErrors.length > 0}
+            >
               Create Space
             </PrimaryButton>
           </View>
@@ -178,13 +205,15 @@ const ColorSection: FC<{
 const NameSection: FC<{
   spaceName: string;
   setSpaceName: (newSpaceName: string) => void;
-}> = ({ spaceName, setSpaceName }) => {
+  errors: string[];
+}> = ({ spaceName, setSpaceName, errors }) => {
   return (
     <View style={{ marginBottom: template.margins.md }}>
       <Label style={{ marginBottom: 10 }}>Name</Label>
       <TextInput
-        value={spaceName}
-        setValue={setSpaceName}
+        errors={errors}
+        text={spaceName}
+        setText={setSpaceName}
         placeholder="Space Name"
       />
     </View>

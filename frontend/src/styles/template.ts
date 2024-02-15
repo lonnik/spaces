@@ -6,6 +6,7 @@ export const template = {
     text: "#444",
     textLight: "#888",
     white: "#fff",
+    error: "#ff0000",
   },
   paddings: {
     screen: 20,
