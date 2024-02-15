@@ -1,5 +1,10 @@
-import { FC } from "react";
+import { FC, useEffect } from "react";
 import { Pressable, View, useWindowDimensions } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 export const ColorPicker: FC<{
   colors: string[];
@@ -8,6 +13,7 @@ export const ColorPicker: FC<{
   gapSize: number;
   numberOfColumns: number;
   screenPaddingHorizontal: number;
+  animationDuration?: number;
 }> = ({
   colors,
   selectedIndex,
@@ -15,6 +21,7 @@ export const ColorPicker: FC<{
   gapSize,
   numberOfColumns,
   screenPaddingHorizontal,
+  animationDuration = 150,
 }) => {
   const { width: screenWidth } = useWindowDimensions();
   const containerWidth = screenWidth - screenPaddingHorizontal * 2;
@@ -35,39 +42,94 @@ export const ColorPicker: FC<{
         const isSelected = selectedIndex === index;
 
         return (
-          <Pressable
+          <Color
             key={index}
+            animationDuration={animationDuration}
+            color={color}
+            gapSize={gapSize}
+            isLastColumnItem={isLastColumnItem}
+            isLastRowItem={isLastRowItem}
+            isSelected={isSelected}
+            itemWidth={itemWidth}
             onPress={() => setSelectedColorIndex(index)}
-            style={[
-              {
-                borderRadius: 10,
-                overflow: "hidden",
-                width: itemWidth,
-                height: itemWidth,
-                marginBottom: isLastColumnItem ? 0 : gapSize,
-                marginRight: isLastRowItem ? 0 : gapSize,
-                borderWidth: 3,
-                borderColor: "transparent",
-              },
-              isSelected && {
-                borderColor: color,
-              },
-            ]}
-          >
-            <View
-              style={[
-                {
-                  flex: 1,
-                  overflow: "hidden",
-                  backgroundColor: color,
-                  opacity: 0.7,
-                },
-                !isSelected && { borderRadius: 10 },
-              ]}
-            />
-          </Pressable>
+          />
         );
       })}
     </View>
+  );
+};
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
+
+const Color: FC<{
+  color: string;
+  isSelected: boolean;
+  itemWidth: number;
+  onPress: () => void;
+  isLastRowItem: boolean;
+  isLastColumnItem: boolean;
+  gapSize: number;
+  animationDuration: number;
+}> = ({
+  color,
+  isSelected,
+  isLastRowItem,
+  isLastColumnItem,
+  gapSize,
+  onPress,
+  itemWidth,
+  animationDuration = 150,
+}) => {
+  const isSelectedSv = useSharedValue(isSelected);
+
+  useEffect(() => {
+    isSelectedSv.value = isSelected;
+  }, [isSelected]);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      borderColor: withTiming(isSelectedSv.value ? color : "transparent", {
+        duration: animationDuration,
+      }),
+    };
+  });
+
+  const animatedBorderRadius = useAnimatedStyle(() => {
+    return {
+      borderRadius: withTiming(isSelectedSv.value ? 0 : 10, {
+        duration: animationDuration,
+      }),
+    };
+  });
+
+  return (
+    <AnimatedPressable
+      hitSlop={10}
+      onPress={onPress}
+      style={[
+        {
+          borderRadius: 10,
+          overflow: "hidden",
+          width: itemWidth,
+          height: itemWidth,
+          marginBottom: isLastColumnItem ? 0 : gapSize,
+          marginRight: isLastRowItem ? 0 : gapSize,
+          borderWidth: 3,
+        },
+        animatedStyle,
+      ]}
+    >
+      <Animated.View
+        style={[
+          {
+            flex: 1,
+            overflow: "hidden",
+            backgroundColor: color,
+            opacity: 0.7,
+          },
+          animatedBorderRadius,
+        ]}
+      />
+    </AnimatedPressable>
   );
 };
