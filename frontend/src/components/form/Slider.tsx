@@ -25,6 +25,7 @@ export const Slider: FC<{
   maximumTrackTintColor?: string;
   hitRectFactor?: number;
   scaleFactor?: number;
+  animationDuration?: number;
 }> = ({
   initialValue,
   onValueChange,
@@ -37,6 +38,7 @@ export const Slider: FC<{
   maximumValue = 100,
   hitRectFactor = 2,
   scaleFactor,
+  animationDuration = 150,
 }) => {
   const [sliderWidth, setSliderWidth] = useState(0);
   const thumbSize = (StyleSheet.flatten([thumbStyle]).width || 30) as number;
@@ -126,7 +128,9 @@ export const Slider: FC<{
     return {
       alignItems: "center",
       borderRadius: 999,
-      backgroundColor: withTiming(thumbBackgroundColor),
+      backgroundColor: withTiming(thumbBackgroundColor, {
+        duration: animationDuration,
+      }),
       width: withSpring(size, { duration: 500 }),
       height: withSpring(size, { duration: 500 }),
     };
@@ -140,7 +144,9 @@ export const Slider: FC<{
 
     return {
       width,
-      backgroundColor: withTiming(minimumTrackTintColor),
+      backgroundColor: withTiming(minimumTrackTintColor, {
+        duration: animationDuration,
+      }),
     };
   });
 
@@ -153,7 +159,9 @@ export const Slider: FC<{
 
     return {
       width,
-      backgroundColor: withTiming(maximumTrackTintColor),
+      backgroundColor: withTiming(maximumTrackTintColor, {
+        duration: animationDuration,
+      }),
     };
   });
 
