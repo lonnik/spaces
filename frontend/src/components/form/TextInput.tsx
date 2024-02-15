@@ -12,6 +12,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { WarningIcon } from "../icons/WarningIcon";
 
 const AnimatedTextInput = Animated.createAnimatedComponent(NativeTextInput);
 
@@ -53,12 +54,14 @@ export const TextInput: FC<{
         style={[
           {
             borderRadius: 7,
-            padding: 12,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
             backgroundColor: "#eee",
-            fontSize: 17,
+            fontSize: template.fontSizes.md,
             fontWeight: "500",
             borderWidth: 3,
             color: template.colors.text,
+            marginBottom: 5,
           },
           style,
           animatedBorderColor,
@@ -69,7 +72,7 @@ export const TextInput: FC<{
           return <Error error={error} key={error} />;
         })
       ) : (
-        <Error error="" />
+        <View style={{ height: 20 }} />
       )}
     </View>
   );
@@ -102,17 +105,25 @@ const Error: FC<{ error: string }> = ({ error }) => {
   });
 
   return (
-    <Animated.View style={animatedStyle}>
+    <Animated.View
+      style={[
+        { flex: 1, flexDirection: "row", alignItems: "center", height: 20 },
+        animatedStyle,
+      ]}
+    >
+      <WarningIcon
+        fill={template.colors.error}
+        style={{ height: 17, width: 17, marginRight: 5 }}
+      />
       <Text
         style={[
           {
-            color: error.length > 0 ? template.colors.error : "transparent",
-            marginTop: 5,
+            color: template.colors.error,
             fontSize: 14,
           },
         ]}
       >
-        {error || "no error"}
+        {error}
       </Text>
     </Animated.View>
   );

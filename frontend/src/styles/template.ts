@@ -6,7 +6,7 @@ export const template = {
     text: "#444",
     textLight: "#888",
     white: "#fff",
-    error: "#ff0000",
+    error: "#f009",
   },
   paddings: {
     screen: 20,
@@ -19,5 +19,10 @@ export const template = {
   },
   height: {
     header: 56,
+  },
+  fontSizes: {
+    sm: 12,
+    md: 16,
+    lg: 20,
   },
 };

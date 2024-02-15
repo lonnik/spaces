@@ -10,6 +10,7 @@ import Animated, {
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { throttle } from "../../utils/throttle";
 import { Text } from "../Text";
+import { template } from "../../styles/template";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
@@ -112,8 +113,9 @@ export const Slider: FC<{
 
   const animatedTextStyles = useAnimatedStyle(() => {
     return {
-      fontSize: withTiming(isPressing.value ? 30 : 17, { duration: 100 }),
-      color: thumbBackgroundColor,
+      fontSize: withTiming(isPressing.value ? 30 : template.fontSizes.md, {
+        duration: 100,
+      }),
     };
   });
 
@@ -171,7 +173,7 @@ export const Slider: FC<{
         const { width } = event.nativeEvent.layout;
         setSliderWidth(width);
       }}
-      style={[{ justifyContent: "center", marginTop: 20 }, style]}
+      style={[{ justifyContent: "center", marginTop: 25 }, style]}
     >
       <Animated.View
         style={[
@@ -200,7 +202,9 @@ export const Slider: FC<{
         <Animated.View style={animatedThumbContainerStyles}>
           <Animated.View style={[thumbStyle, animatedThumbStyles]}>
             <Animated.View style={animatedTextContainerStyles}>
-              <AnimatedText style={animatedTextStyles}>
+              <AnimatedText
+                style={[{ color: template.colors.text }, animatedTextStyles]}
+              >
                 {Math.round(currentValue.value)}
               </AnimatedText>
             </Animated.View>
