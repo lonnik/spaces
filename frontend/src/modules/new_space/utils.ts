@@ -9,20 +9,26 @@ export const createGeoJSONCircle = (
   return circle(center, radiusM, { steps, units: "meters" });
 };
 
-export const getBoundingBox = (center: number[], radius: number) => {
+// the north/south bounds encompass the radius plus radius/2 padding
+export const getBoundingBox = (
+  center: number[],
+  radius: number,
+  aspectRatio: number
+) => {
   if (radius < minRadiusForBounds) {
     radius = minRadiusForBounds;
   }
 
   const [longitude, latitude] = center;
-  const radiusInDegrees = (radius / 111000) * 2; // Convert radius to degrees (approx) * 2 (for padding)
+  const radiusInDegreesLatitude = (radius / 111000) * 1.5; // Convert radius to degrees (approx) * 1.5 (for padding).
+  const radiusInDegreesLongitude = radiusInDegreesLatitude * aspectRatio;
 
-  const north = latitude + radiusInDegrees;
-  const south = latitude - radiusInDegrees;
+  const north = latitude + radiusInDegreesLatitude;
+  const south = latitude - radiusInDegreesLatitude;
   const east =
-    longitude + radiusInDegrees / Math.cos((latitude * Math.PI) / 180);
+    longitude + radiusInDegreesLongitude / Math.cos((latitude * Math.PI) / 180);
   const west =
-    longitude - radiusInDegrees / Math.cos((latitude * Math.PI) / 180);
+    longitude - radiusInDegreesLongitude / Math.cos((latitude * Math.PI) / 180);
 
   return { sw: [west, south], ne: [east, north] };
 };

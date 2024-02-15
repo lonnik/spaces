@@ -26,6 +26,8 @@ export const MapboxMap: FC<{
   color: string;
   style?: StyleProp<ViewStyle>;
 }> = ({ radius, spaceName = "Your space", location, color, style }) => {
+  const aspectRatio = 1.5;
+
   const { width: screenWidth } = useWindowDimensions();
 
   const centerCoordinate = useMemo(
@@ -34,12 +36,12 @@ export const MapboxMap: FC<{
   );
 
   const [bounds, setBounds] = useState(
-    getBoundingBox(centerCoordinate, radius)
+    getBoundingBox(centerCoordinate, radius, aspectRatio)
   );
 
   const debouncedSetBounds = useCallback(
     debounce((radius: number) => {
-      const bounds = getBoundingBox(centerCoordinate, radius);
+      const bounds = getBoundingBox(centerCoordinate, radius, aspectRatio);
       setBounds(bounds);
     }, 40),
     [centerCoordinate]
@@ -51,6 +53,7 @@ export const MapboxMap: FC<{
 
   const geoJSONCircle = createGeoJSONCircle(centerCoordinate, radius, 60);
 
+  // TODO: adapt to aspect ratio of not 1
   const spaceNameTextMaxWidth =
     170 * Math.min(radius / minRadiusForBounds, 1) * (screenWidth / 430);
 
@@ -64,7 +67,12 @@ export const MapboxMap: FC<{
   return (
     <View
       style={[
-        { width: "100%", aspectRatio: 1, borderRadius: 10, overflow: "hidden" },
+        {
+          width: "100%",
+          aspectRatio,
+          borderRadius: 10,
+          overflow: "hidden",
+        },
         style,
       ]}
     >
