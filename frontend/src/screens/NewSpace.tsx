@@ -1,6 +1,6 @@
-import { View } from "react-native";
+import { KeyboardAvoidingView, View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
-import { FC, useState } from "react";
+import { FC } from "react";
 import { TabsParamList } from "../types";
 import { useLocation } from "../hooks/use_location";
 // import { RnMap } from "../modules/new_space/RnMap";
@@ -85,44 +85,50 @@ export const NewSpaceScreen: FC<
       }}
     >
       <Header />
-      <BottomSheetScrollView
-        style={{
-          flex: 1,
-          paddingHorizontal: screenPaddingHorizontal,
-          flexDirection: "column",
-        }}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior="padding"
+        keyboardVerticalOffset={0}
       >
-        <MapboxMap
-          radius={radius}
-          location={location}
-          spaceName={name || undefined}
-          color={colors[selectedColorIndex]}
+        <BottomSheetScrollView
           style={{
-            marginBottom: template.margins.md,
-          }}
-        />
-        <RadiusSection
-          radius={radius}
-          setRadius={handleRadiusChange}
-          color={colors[selectedColorIndex]}
-        />
-        <NameSection spaceName={name} setSpaceName={handleNameChange} />
-        <ColorSection
-          selectedColorIndex={selectedColorIndex}
-          setSelectedColorIndex={handleSelectedColorIndexChange}
-        />
-        <View
-          style={{
-            alignItems: "center",
-            marginTop: template.margins.md + 10,
-            marginBottom: insets.bottom + 20,
+            flex: 1,
+            paddingHorizontal: screenPaddingHorizontal,
+            flexDirection: "column",
           }}
         >
-          <PrimaryButton color={colors[selectedColorIndex]}>
-            Create Space
-          </PrimaryButton>
-        </View>
-      </BottomSheetScrollView>
+          <MapboxMap
+            radius={radius}
+            location={location}
+            spaceName={name || undefined}
+            color={colors[selectedColorIndex]}
+            style={{
+              marginBottom: template.margins.md,
+            }}
+          />
+          <RadiusSection
+            radius={radius}
+            setRadius={handleRadiusChange}
+            color={colors[selectedColorIndex]}
+          />
+          <NameSection spaceName={name} setSpaceName={handleNameChange} />
+          <ColorSection
+            selectedColorIndex={selectedColorIndex}
+            setSelectedColorIndex={handleSelectedColorIndexChange}
+          />
+          <View
+            style={{
+              alignItems: "center",
+              marginTop: template.margins.md + 10,
+              marginBottom: insets.bottom + 20,
+            }}
+          >
+            <PrimaryButton color={colors[selectedColorIndex]}>
+              Create Space
+            </PrimaryButton>
+          </View>
+        </BottomSheetScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
