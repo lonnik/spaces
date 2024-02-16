@@ -21,3 +21,18 @@ export const getAddress = async (loc: Location) => {
 
   return fetchApi<Address>(`/address${queryStr}`);
 };
+
+type SpaceParams = {
+  name: string;
+  themeColorHexaCode: string;
+  radius: number;
+  location: Location;
+};
+
+export const createSpace = async (spaceParams: SpaceParams) => {
+  console.log("JSON.stringify(spaceParams) :>> ", JSON.stringify(spaceParams));
+  return fetchApi<Space>("/spaces", {
+    method: "POST",
+    body: JSON.stringify(spaceParams),
+  });
+};

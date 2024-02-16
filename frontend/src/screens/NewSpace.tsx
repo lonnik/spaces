@@ -9,7 +9,7 @@ import { template } from "../styles/template";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Header } from "../modules/new_space/Header";
 import { Text } from "../components/Text";
-import { TextInput } from "../components/form/TextInput";
+import { TextInput, TextInputError } from "../components/form/TextInput";
 import { Label } from "../components/form/Label";
 import { ColorPicker } from "../modules/new_space/ColorPicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -17,6 +17,8 @@ import { PrimaryButton } from "../components/form/PrimaryButton";
 import { Slider } from "../components/form/Slider";
 import { useNewSpaceState } from "../components/context/NewSpaceContext";
 import { ZodError, z } from "zod";
+import { useMutation } from "@tanstack/react-query";
+import { createSpace } from "../utils/queries";
 
 const screenPaddingHorizontal = 20;
 const gapSize = 10; // This is the uniform gap size you want
@@ -42,25 +44,27 @@ const colors = [
   "#ddd",
 ];
 
+const getSpaceNameErrors = (name: string): TextInputError[] => {
+  try {
+    z.string().min(2).max(40).parse(name);
+
+    return [];
+  } catch (error: ZodError | any) {
+    if (error instanceof ZodError) {
+      return error.errors.map((e) => ({ code: e.code, message: e.message }));
+    }
+
+    return [{ code: "unknown", message: error?.message }];
+  }
+};
+
 export const NewSpaceScreen: FC<
   BottomTabScreenProps<TabsParamList, "NewSpace">
 > = () => {
-  const [spaceNameErrors, setSpaceNameErrors] = useState<string[]>([]);
+  const [spaceNameErrors, setSpaceNameErrors] = useState<TextInputError[]>([]);
 
   const [newSpaceState, dispatch] = useNewSpaceState();
   const { radius, name, selectedColorIndex } = newSpaceState;
-
-  useEffect(() => {
-    try {
-      z.string().max(40).parse(name);
-
-      setSpaceNameErrors([]);
-    } catch (error: ZodError | any) {
-      if (error instanceof ZodError) {
-        setSpaceNameErrors(error.errors.map((e) => e.message));
-      }
-    }
-  }, [name]);
 
   const handleRadiusChange = (newRadius: number) => {
     dispatch!({ type: "SET_RADIUS", newRadius });
@@ -70,6 +74,32 @@ export const NewSpaceScreen: FC<
     dispatch!({ type: "SET_NAME", newName });
   };
 
+  // sets spaceNameErrors to empty arry when there are no errors
+  // when there are errors, it adds those errors to spaceNameErrors while ignoring a NEW "too_small" error (but not ignoring an existing "too_small" error)
+  useEffect(() => {
+    const errors = getSpaceNameErrors(name);
+
+    if (errors.length === 0) {
+      setSpaceNameErrors([]);
+
+      return;
+    }
+
+    setSpaceNameErrors((oldErrors) => {
+      return oldErrors
+        .concat(errors.filter((error) => error.code !== "too_small"))
+        .reduce<TextInputError[]>((acc, error) => {
+          return acc.some((e) => e.code === error.code)
+            ? acc
+            : acc.concat(error);
+        }, []);
+    });
+  }, [name]);
+
+  const handleNameBlur = () => {
+    setSpaceNameErrors(getSpaceNameErrors(name));
+  };
+
   const handleSelectedColorIndexChange = (newIndex: number) => {
     dispatch!({ type: "SELECT_COLOR_INDEX", newIndex });
   };
@@ -77,8 +107,33 @@ export const NewSpaceScreen: FC<
   const { location, permissionGranted } = useLocation();
   const insets = useSafeAreaInsets();
 
+  const {
+    mutate: createNewSpace,
+    error,
+    isSuccess,
+  } = useMutation({
+    mutationFn: createSpace,
+    mutationKey: ["createSpace"],
+    onSuccess(data, variables, context) {
+      console.log("data :>> ", data);
+    },
+  });
+
   const handleSubmit = () => {
-    console.log("submitting");
+    if (!location) return;
+
+    const errors = getSpaceNameErrors(name);
+    if (errors.length > 0) {
+      setSpaceNameErrors(errors);
+      return;
+    }
+
+    createNewSpace({
+      location,
+      name,
+      radius,
+      themeColorHexaCode: colors[selectedColorIndex],
+    });
   };
 
   if (!permissionGranted) {
@@ -133,6 +188,7 @@ export const NewSpaceScreen: FC<
           <NameSection
             spaceName={name}
             setSpaceName={handleNameChange}
+            handleBlur={handleNameBlur}
             errors={spaceNameErrors}
           />
           <ColorSection
@@ -166,7 +222,7 @@ const RadiusSection: FC<{
   color: string;
 }> = ({ setRadius, radius, color }) => {
   return (
-    <View style={{ marginBottom: template.margins.md }}>
+    <View style={{ marginBottom: template.margins.md + 20 }}>
       <Label style={{ marginBottom: 10 }}>Radius</Label>
       <Slider
         initialValue={radius}
@@ -205,8 +261,9 @@ const ColorSection: FC<{
 const NameSection: FC<{
   spaceName: string;
   setSpaceName: (newSpaceName: string) => void;
-  errors: string[];
-}> = ({ spaceName, setSpaceName, errors }) => {
+  errors: TextInputError[];
+  handleBlur: () => void;
+}> = ({ spaceName, setSpaceName, errors, handleBlur }) => {
   return (
     <View style={{ marginBottom: template.margins.md }}>
       <Label style={{ marginBottom: 10 }}>Name</Label>
@@ -214,6 +271,7 @@ const NameSection: FC<{
         errors={errors}
         text={spaceName}
         setText={setSpaceName}
+        onBlur={handleBlur}
         placeholder="Space Name"
       />
     </View>
