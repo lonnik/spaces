@@ -18,7 +18,7 @@ export const throttle = (func: (...arg: any[]) => void, limit: number) => {
 
     currentArgs = args;
     timeout = setTimeout(() => {
-      func(currentArgs);
+      func(...currentArgs);
     }, limit);
   };
 };
