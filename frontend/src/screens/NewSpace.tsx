@@ -1,7 +1,7 @@
 import { KeyboardAvoidingView, View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useEffect, useState } from "react";
-import { TabsParamList } from "../types";
+import { RootStackParamList, TabsParamList } from "../types";
 import { useLocation } from "../hooks/use_location";
 // import { RnMap } from "../modules/new_space/RnMap";
 import { MapboxMap } from "../modules/new_space/MapboxMap";
@@ -19,6 +19,8 @@ import { useNewSpaceState } from "../components/context/NewSpaceContext";
 import { ZodError, z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { createSpace } from "../utils/queries";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 const screenPaddingHorizontal = 20;
 const gapSize = 10; // This is the uniform gap size you want
@@ -46,7 +48,10 @@ const colors = [
 
 const getSpaceNameErrors = (name: string): TextInputError[] => {
   try {
-    z.string().min(2).max(40).parse(name);
+    z.string()
+      .min(2, { message: "space name must have at least two characters" })
+      .max(40, { message: "space name must have less than 40 characters" })
+      .parse(name);
 
     return [];
   } catch (error: ZodError | any) {
@@ -107,15 +112,22 @@ export const NewSpaceScreen: FC<
   const { location, permissionGranted } = useLocation();
   const insets = useSafeAreaInsets();
 
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+
   const {
     mutate: createNewSpace,
+    isPending,
     error,
     isSuccess,
   } = useMutation({
     mutationFn: createSpace,
     mutationKey: ["createSpace"],
-    onSuccess(data, variables, context) {
-      console.log("data :>> ", data);
+    onSuccess(data) {
+      dispatch!({ type: "SET_NAME", newName: "" });
+      dispatch!({ type: "SET_RADIUS", newRadius: 20 });
+      dispatch!({ type: "SELECT_COLOR_INDEX", newIndex: 0 });
+
+      navigation.replace("Space" as any, { spaceId: data.spaceId });
     },
   });
 
