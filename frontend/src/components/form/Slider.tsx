@@ -116,6 +116,12 @@ export const Slider: FC<{
       fontSize: withTiming(isPressing.value ? 30 : template.fontSizes.md, {
         duration: 100,
       }),
+      color: withTiming(
+        isPressing.value ? thumbBackgroundColor : template.colors.text,
+        {
+          duration: animationDuration,
+        }
+      ),
     };
   });
 
@@ -173,7 +179,7 @@ export const Slider: FC<{
         const { width } = event.nativeEvent.layout;
         setSliderWidth(width);
       }}
-      style={[{ justifyContent: "center", marginTop: 25 }, style]}
+      style={[{ justifyContent: "center", marginTop: 19 }, style]}
     >
       <Animated.View
         style={[
