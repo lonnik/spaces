@@ -129,16 +129,6 @@ func (ss *SpaceService) GetThreadWithMessages(ctx context.Context, spaceId, thre
 func (ss *SpaceService) CreateSpace(ctx context.Context, newSpace models.NewSpace) (uuid.Uuid, error) {
 	const op errors.Op = "services.SpaceService.CreateSpace"
 
-	// verify that user with id == newSpace.AdminId exists
-	_, err := ss.cacheRepo.GetUserById(ctx, newSpace.AdminId)
-	switch {
-	case errors.Is(err, common.ErrNotFound):
-		err := errors.New("admin id does not belong to existing user")
-		return uuid.Nil, errors.E(op, err, http.StatusBadRequest)
-	case err != nil:
-		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
-	}
-
 	spaceId, err := ss.cacheRepo.SetSpace(ctx, newSpace)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)

@@ -132,13 +132,19 @@ func (uc *SpaceController) CreateSpace(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.CreateSpace"
 	var ctx = c.Request.Context()
 
-	var body models.NewSpace
+	user, err := utils.GetUserFromContext(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	var body models.BaseSpace
 	if err := c.ShouldBindJSON(&body); err != nil {
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
 	}
 
-	spaceId, err := uc.spaceService.CreateSpace(ctx, body)
+	spaceId, err := uc.spaceService.CreateSpace(ctx, models.NewSpace{BaseSpace: body, AdminId: user.ID})
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return

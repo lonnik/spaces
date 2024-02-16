@@ -427,12 +427,12 @@ func (repo *RedisRepository) parseSpace(spaceMap map[string]string) (*models.Spa
 	return &models.Space{
 		ID:        uuid.Nil,
 		CreatedAt: createdAt,
+		AdminId:   adminId,
 		BaseSpace: models.BaseSpace{
 			Name:               name,
 			ThemeColorHexaCode: themeColor,
 			Radius:             radius,
 			Location:           location,
-			AdminId:            adminId,
 		},
 	}, nil
 }
