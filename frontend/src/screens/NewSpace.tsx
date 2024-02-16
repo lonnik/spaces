@@ -21,6 +21,7 @@ import { useMutation } from "@tanstack/react-query";
 import { createSpace } from "../utils/queries";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { showErrorNotification } from "../utils/notifications";
 
 const screenPaddingHorizontal = 20;
 const gapSize = 10; // This is the uniform gap size you want
@@ -136,7 +137,12 @@ export const NewSpaceScreen: FC<
 
     const errors = getSpaceNameErrors(name);
     if (errors.length > 0) {
+      showErrorNotification(
+        "Something went wrong 😕",
+        "Please change the name of the space"
+      );
       setSpaceNameErrors(errors);
+
       return;
     }
 
@@ -217,7 +223,6 @@ export const NewSpaceScreen: FC<
             <PrimaryButton
               color={colors[selectedColorIndex]}
               onPress={handleSubmit}
-              isDisabled={spaceNameErrors.length > 0}
             >
               Create Space
             </PrimaryButton>

@@ -7652,6 +7652,11 @@ react-native-maps@1.7.1:
   dependencies:
     "@types/geojson" "^7946.0.10"
 
+react-native-notifier@^1.9.0:
+  version "1.9.0"
+  resolved "https://registry.yarnpkg.com/react-native-notifier/-/react-native-notifier-1.9.0.tgz#22351619063620af0371e8fb5583fee47edf0836"
+  integrity sha512-p9NpDCCSNNpfiJTRSu2rtSGGxekejDWSh3mX5rvjMllGCPyoJS3d36x9O+roYcH8qSqLf4QDcmwCMSUuaGTgXg==
+
 react-native-ratings@^8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/react-native-ratings/-/react-native-ratings-8.1.0.tgz#3fa9ad29128dc3a88e59518ba151e61c59dd0647"

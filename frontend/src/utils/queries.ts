@@ -30,7 +30,6 @@ type SpaceParams = {
 };
 
 export const createSpace = async (spaceParams: SpaceParams) => {
-  console.log("JSON.stringify(spaceParams) :>> ", JSON.stringify(spaceParams));
   return fetchApi<{ spaceId: Uuid }>("/spaces", {
     method: "POST",
     body: JSON.stringify(spaceParams),

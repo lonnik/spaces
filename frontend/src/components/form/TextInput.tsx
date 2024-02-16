@@ -19,8 +19,7 @@ const AnimatedTextInput = Animated.createAnimatedComponent(NativeTextInput);
 
 const animationDuration = 200;
 
-const errorColor = hexToRgb(template.colors.error, 0.8);
-const backGroundErrorColor = hexToRgb(template.colors.error, 0.4)!;
+const backGroundErrorColor = hexToRgb(template.colors.error, 0.7)!;
 
 export type TextInputError = {
   code: string;
@@ -121,13 +120,13 @@ const Error: FC<{ error: string }> = ({ error }) => {
       ]}
     >
       <WarningIcon
-        fill={errorColor}
+        fill={template.colors.error}
         style={{ height: 17, width: 17, marginRight: 5 }}
       />
       <Text
         style={[
           {
-            color: errorColor,
+            color: template.colors.error,
             fontSize: 14,
           },
         ]}
