@@ -21,10 +21,10 @@ import { useMutation } from "@tanstack/react-query";
 import { createSpace } from "../utils/queries";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { showErrorNotification } from "../utils/notifications";
+import { useNotification } from "../utils/notifications";
 
 const screenPaddingHorizontal = 20;
-const gapSize = 10; // This is the uniform gap size you want
+const gapSize = 14; // This is the uniform gap size you want
 const numberOfColumns = 7;
 
 const colors = [
@@ -115,15 +115,18 @@ export const NewSpaceScreen: FC<
 
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
 
-  const {
-    mutate: createNewSpace,
-    isPending,
-    error,
-    isSuccess,
-  } = useMutation({
+  const notification = useNotification();
+
+  const { mutate: createNewSpace } = useMutation({
     mutationFn: createSpace,
     mutationKey: ["createSpace"],
     onSuccess(data) {
+      notification.updateNotification({
+        title: "Space Created 🚀",
+        description: "You're all set!",
+        type: "success",
+      });
+
       dispatch!({ type: "SET_NAME", newName: "" });
       dispatch!({ type: "SET_RADIUS", newRadius: 20 });
       dispatch!({ type: "SELECT_COLOR_INDEX", newIndex: 0 });
@@ -137,14 +140,21 @@ export const NewSpaceScreen: FC<
 
     const errors = getSpaceNameErrors(name);
     if (errors.length > 0) {
-      showErrorNotification(
-        "Something went wrong 😕",
-        "Please change the name of the space"
-      );
+      notification.showNotification({
+        title: "Something went wrong 😕",
+        description: "Please change the name of the space",
+        type: "error",
+      });
+
       setSpaceNameErrors(errors);
 
       return;
     }
+
+    notification.showNotification({
+      title: "Creating Space ...",
+      type: "loading",
+    });
 
     createNewSpace({
       location,
@@ -246,7 +256,7 @@ const RadiusSection: FC<{
         maximumValue={100}
         onValueChange={setRadius}
         style={{ height: 35 }}
-        thumbStyle={{ width: 35, backgroundColor: color }}
+        thumbStyle={{ width: 28, backgroundColor: color }}
         trackStyle={{ height: 7, borderRadius: 4 }}
         minimumTrackTintColor={color}
         minimumValue={10}

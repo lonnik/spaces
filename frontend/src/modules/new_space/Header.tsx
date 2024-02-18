@@ -36,7 +36,7 @@ export const Header: FC = () => {
           New Space
         </Text>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Pressable onPress={navigation.goBack}>
+          <Pressable onPress={navigation.goBack} hitSlop={15}>
             {({ pressed }) => {
               return <CloseIcon fill={pressed ? "#aaa" : "#ddd"} />;
             }}
