@@ -65,6 +65,7 @@ export const PrimaryButton: FC<{
   return (
     <Pressable
       onPress={isDisabled ? () => {} : onPress}
+      hitSlop={10}
       style={[
         {
           marginHorizontal: "auto",
@@ -77,8 +78,8 @@ export const PrimaryButton: FC<{
           <Animated.View
             style={[
               {
-                paddingHorizontal: 29,
-                paddingVertical: 13,
+                paddingHorizontal: 25,
+                paddingVertical: 9,
                 borderRadius: 10,
                 opacity: pressed ? 0.8 : 1,
               },

@@ -16,7 +16,7 @@ export const Header: FC<{
     <View
       style={{
         height: template.height.header,
-        paddingHorizontal: 10,
+        paddingHorizontal: 12,
       }}
     >
       <View
@@ -30,7 +30,7 @@ export const Header: FC<{
         <View
           style={{
             paddingHorizontal: 11,
-            paddingVertical: 5,
+            paddingVertical: 5.5,
             backgroundColor: template.colors.gray,
             borderRadius: 10,
           }}
@@ -51,8 +51,12 @@ export const Header: FC<{
         <View style={{ flex: 1, alignItems: "flex-end" }}>
           <TouchableOpacity
             onPress={() => navigation.navigate("Profile" as any)}
+            hitSlop={5}
           >
-            <ProfileIcon fill={template.colors.purple} />
+            <ProfileIcon
+              fill={template.colors.purple}
+              style={{ width: 29, height: 30 }}
+            />
           </TouchableOpacity>
         </View>
       </View>

@@ -104,7 +104,7 @@ const Color: FC<{
 
   return (
     <AnimatedPressable
-      hitSlop={10}
+      hitSlop={7}
       onPress={onPress}
       style={[
         {

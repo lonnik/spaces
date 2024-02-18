@@ -80,7 +80,7 @@ export const TextInput: FC<{
           return <Error error={error.message} key={error.message} />;
         })
       ) : (
-        <View style={{ height: 20 }} />
+        <View style={{ height: 20, marginTop: 6 }} />
       )}
     </View>
   );
@@ -115,19 +115,26 @@ const Error: FC<{ error: string }> = ({ error }) => {
   return (
     <Animated.View
       style={[
-        { flex: 1, flexDirection: "row", alignItems: "center", height: 20 },
+        {
+          flex: 1,
+          flexDirection: "row",
+          alignItems: "center",
+          height: 20,
+          marginTop: 6,
+          marginLeft: 2,
+        },
         animatedStyle,
       ]}
     >
       <WarningIcon
         fill={template.colors.error}
-        style={{ height: 17, width: 17, marginRight: 5 }}
+        style={{ height: "100%", aspectRatio: 1, marginRight: 7 }}
       />
       <Text
         style={[
           {
             color: template.colors.error,
-            fontSize: 14,
+            fontSize: 15,
           },
         ]}
       >

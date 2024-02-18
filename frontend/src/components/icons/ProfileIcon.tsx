@@ -1,7 +1,7 @@
 import Svg, { SvgProps, Ellipse, Path } from "react-native-svg";
 
 export const ProfileIcon = (props: SvgProps) => (
-  <Svg width={28} height={29} fill="none" {...props}>
+  <Svg viewBox="0 0 28 29" fill="none" {...props}>
     <Ellipse cx={14.05} cy={11.266} rx={5.007} ry={5.563} />
     <Path
       fillRule="evenodd"
