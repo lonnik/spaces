@@ -8,6 +8,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const backgroundColors: Record<NotificationType, string> = {
   info: template.colors.purple,
@@ -26,6 +27,8 @@ export const CustomNotification: FC<{
   const [notificationState] = useNotificationState();
   const heightSv = useSharedValue(0);
 
+  const insets = useSafeAreaInsets();
+
   const typeSv = useSharedValue(notificationState?.type);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ export const CustomNotification: FC<{
       notificationState?.description,
     ].filter((a) => !!a).length;
 
-    heightSv.value = numberElements * 20 + 30;
+    heightSv.value = numberElements * 20 + 24;
   }, [notificationState?.title, notificationState?.description]);
 
   const animatedBackgroundColor = useAnimatedStyle(() => {
@@ -72,7 +75,13 @@ export const CustomNotification: FC<{
   ) : null;
 
   return (
-    <Animated.View style={[styles.container, animatedBackgroundColor]}>
+    <Animated.View
+      style={[
+        styles.container,
+        { paddingTop: insets.top },
+        animatedBackgroundColor,
+      ]}
+    >
       <Animated.View style={[styles.innerContainer, animatedHeight]}>
         {loadingIndicator}
         <View>
@@ -85,7 +94,7 @@ export const CustomNotification: FC<{
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, paddingTop: 50 },
+  container: { flex: 1 },
   innerContainer: {
     width: "100%",
     flexDirection: "row",

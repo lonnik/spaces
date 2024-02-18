@@ -15,19 +15,19 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#000" }}>
       <NotificationStateProvider>
-        <NotifierWrapper>
-          <UserStateProvider>
-            <NewSpaceStateProvider>
-              <QueryClientProvider client={queryClient}>
-                <NavigationContainer>
-                  <SafeAreaProvider>
+        <UserStateProvider>
+          <NewSpaceStateProvider>
+            <QueryClientProvider client={queryClient}>
+              <NavigationContainer>
+                <SafeAreaProvider>
+                  <NotifierWrapper>
                     <RootStackNavigator />
-                  </SafeAreaProvider>
-                </NavigationContainer>
-              </QueryClientProvider>
-            </NewSpaceStateProvider>
-          </UserStateProvider>
-        </NotifierWrapper>
+                  </NotifierWrapper>
+                </SafeAreaProvider>
+              </NavigationContainer>
+            </QueryClientProvider>
+          </NewSpaceStateProvider>
+        </UserStateProvider>
       </NotificationStateProvider>
     </GestureHandlerRootView>
   );

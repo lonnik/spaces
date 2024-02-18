@@ -49,7 +49,9 @@ export const useNotification = () => {
       duration: 999999,
       animationDuration: 200,
       easing: Easing.ease,
-      containerStyle: {},
+      containerStyle: {
+        zIndex: 9999,
+      },
       Component: CustomNotification,
       componentProps: {
         type,
