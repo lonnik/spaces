@@ -14,7 +14,7 @@ const backgroundColors: Record<NotificationType, string> = {
   info: template.colors.purple,
   error: template.colors.error,
   success: template.colors.success,
-  loading: template.colors.purple,
+  loading: template.colors.purpleLight,
 };
 
 // TODO: make safe area insets work
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     color: template.colors.white,
     textAlign: "center",
     fontWeight: "700",
-    fontSize: 15,
+    fontSize: 16,
   },
   description: {
     color: template.colors.white,
