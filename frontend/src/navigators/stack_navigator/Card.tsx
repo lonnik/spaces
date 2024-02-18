@@ -29,7 +29,10 @@ export const Card: FC<{
       break;
     case "slideInFromBottom":
       card = (
-        <CardWithSlideInFromBotomAnimation goBack={props.goBack}>
+        <CardWithSlideInFromBotomAnimation
+          goBack={props.goBack}
+          relativeIndex={relativeIndex}
+        >
           {props.children}
         </CardWithSlideInFromBotomAnimation>
       );
@@ -47,19 +50,14 @@ export const Card: FC<{
     };
   });
 
-  const zIndexStyle = { zIndex: relativeIndex === 0 ? 10 : 0 };
-
   return (
     <Animated.View
       style={[
         StyleSheet.absoluteFill,
         {
           marginTop: insets.top,
-          display: relativeIndex < -1 || relativeIndex > 1 ? "none" : "flex",
         },
-        props.tabNavigationOptions.animation === "slideInFromRight"
-          ? animatedZIndexStyle
-          : zIndexStyle,
+        animatedZIndexStyle,
       ]}
     >
       {card}

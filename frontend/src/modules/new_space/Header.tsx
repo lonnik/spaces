@@ -3,10 +3,10 @@ import { Pressable, View } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 import { CloseIcon } from "../../components/icons/CloseIcon";
-import { useNavigation } from "@react-navigation/native";
+import { useCustomNavigation } from "../../components/context/GoBackContext";
 
 export const Header: FC = () => {
-  const navigation = useNavigation();
+  const navigation = useCustomNavigation();
 
   return (
     <View
