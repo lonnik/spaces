@@ -7,25 +7,28 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { NewSpaceStateProvider } from "./src/components/context/NewSpaceContext";
 import { NotifierWrapper } from "react-native-notifier";
+import { NotificationStateProvider } from "./src/components/context/NotificationContext";
 
 const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: "#000" }}>
-      <NotifierWrapper>
-        <UserStateProvider>
-          <NewSpaceStateProvider>
-            <QueryClientProvider client={queryClient}>
-              <NavigationContainer>
-                <SafeAreaProvider>
-                  <RootStackNavigator />
-                </SafeAreaProvider>
-              </NavigationContainer>
-            </QueryClientProvider>
-          </NewSpaceStateProvider>
-        </UserStateProvider>
-      </NotifierWrapper>
+      <NotificationStateProvider>
+        <NotifierWrapper>
+          <UserStateProvider>
+            <NewSpaceStateProvider>
+              <QueryClientProvider client={queryClient}>
+                <NavigationContainer>
+                  <SafeAreaProvider>
+                    <RootStackNavigator />
+                  </SafeAreaProvider>
+                </NavigationContainer>
+              </QueryClientProvider>
+            </NewSpaceStateProvider>
+          </UserStateProvider>
+        </NotifierWrapper>
+      </NotificationStateProvider>
     </GestureHandlerRootView>
   );
 }

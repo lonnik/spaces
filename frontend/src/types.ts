@@ -42,3 +42,5 @@ export type Address = {
   street: string;
   streetNumber: string;
 };
+
+export type NotificationType = "error" | "success" | "loading" | "info";
