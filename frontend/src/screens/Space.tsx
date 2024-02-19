@@ -8,6 +8,9 @@ import { LoadingScreen } from "./Loading";
 import { Header } from "../components/Header";
 import { template } from "../styles/template";
 import { InfoSection } from "../modules/space/InfoSection";
+import { PrimaryButton } from "../components/form/PrimaryButton";
+import { Text } from "../components/Text";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // TODO info component:
 // improve function for radius calculation
@@ -19,6 +22,8 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
   route,
 }) => {
   const { spaceId } = route.params;
+
+  const insets = useSafeAreaInsets();
 
   const { data: space, isLoading } = useQuery({
     queryKey: ["spaces", spaceId],
@@ -34,6 +39,17 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
   return (
     <View style={{ flex: 1 }}>
       <Header text={`${space?.name} 🏠`} />
+      <PrimaryButton
+        onPress={() => {}}
+        style={{
+          alignSelf: "center",
+          position: "absolute",
+          bottom: insets.bottom + template.paddings.md,
+          zIndex: 1000,
+        }}
+      >
+        <Text style={{ color: template.colors.white }}>Write something</Text>
+      </PrimaryButton>
       <ScrollView
         style={{
           flex: 1,
@@ -46,6 +62,12 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
           radius={space?.radius!}
           spaceMembers={spaceMembers}
         />
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "black",
+          }}
+        ></View>
       </ScrollView>
     </View>
   );
