@@ -10,15 +10,10 @@ import { template } from "../styles/template";
 import { InfoSection } from "../modules/space/InfoSection";
 
 // TODO info component:
-// extract component
-// use pressable
-// use animated for pressing effect
-// clean up positioning
 // improve function for radius calculation
 
 // TODO:
 // improve loading/error screen
-// join button
 
 export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
   route,
@@ -34,7 +29,7 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
     return <LoadingScreen />;
   }
 
-  const spaceMembers = Array.from({ length: 9 });
+  const spaceMembers = Array.from({ length: 8 });
 
   return (
     <View style={{ flex: 1 }}>
