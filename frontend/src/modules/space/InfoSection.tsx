@@ -12,6 +12,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useNotification } from "../../utils/notifications";
 
 const color = template.colors.purple;
 
@@ -30,7 +31,23 @@ export const InfoSection: FC<{
     };
   });
 
+  const notification = useNotification();
+
   const handleJoin = () => {
+    if (joined) {
+      notification.showNotification({
+        title: "Left",
+        description: "You have left the space",
+        type: "info",
+      });
+    } else {
+      notification.showNotification({
+        title: "Joined",
+        description: "You have joined the space",
+        type: "success",
+      });
+    }
+
     setJoined((oldJoined) => !oldJoined);
   };
 
@@ -71,7 +88,7 @@ export const InfoSection: FC<{
             StyleSheet.absoluteFillObject,
           ]}
         >
-          <JoinButton onPress={handleJoin} useHasJoined={joined} />
+          <JoinButton onPress={handleJoin} userHasJoined={joined} />
           <View
             style={{
               alignItems: "center",
@@ -89,8 +106,8 @@ export const InfoSection: FC<{
   );
 };
 
-const JoinButton: FC<{ useHasJoined: boolean; onPress: () => void }> = ({
-  useHasJoined,
+const JoinButton: FC<{ userHasJoined: boolean; onPress: () => void }> = ({
+  userHasJoined,
   onPress,
 }) => {
   return (
@@ -99,21 +116,25 @@ const JoinButton: FC<{ useHasJoined: boolean; onPress: () => void }> = ({
       onPress={onPress}
       style={{
         alignSelf: "flex-end",
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingVertical: 9,
+        paddingHorizontal: 15,
         borderRadius: 8,
-        backgroundColor: template.colors.purple,
+        backgroundColor: userHasJoined
+          ? template.colors.white
+          : template.colors.purple,
+        borderWidth: 1,
+        borderColor: userHasJoined ? template.colors.purple : "transparent",
       }}
     >
       <Text
         style={{
-          color: template.colors.white,
+          color: userHasJoined ? template.colors.purple : template.colors.white,
           fontWeight: "500",
           fontSize: 15,
           letterSpacing: 1,
         }}
       >
-        {useHasJoined ? "joined" : "join"}
+        {userHasJoined ? "joined" : "join"}
       </Text>
     </Pressable>
   );
