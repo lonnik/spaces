@@ -1,21 +1,11 @@
-import { FC, useCallback, useEffect, useMemo, useState } from "react";
-import MapboxGL, {
-  Camera,
-  MapView,
-  LineLayer,
-  FillLayer,
-  ShapeSource,
-} from "@rnmapbox/maps";
+import { FC, useMemo } from "react";
+import MapboxGL, { LineLayer, FillLayer, ShapeSource } from "@rnmapbox/maps";
 import { StyleProp, View, ViewStyle, useWindowDimensions } from "react-native";
 import { Location } from "../../types";
-import { debounce } from "../../utils/debounce";
-import {
-  calculateFontSize,
-  createGeoJSONCircle,
-  getBoundingBox,
-} from "./utils";
+import { calculateFontSize, createGeoJSONCircle } from "./utils";
 import { minRadiusForBounds } from "./constants";
 import { Text } from "../../components/Text";
+import { Map } from "../../components/Map";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
@@ -24,32 +14,22 @@ export const MapboxMap: FC<{
   spaceName?: string;
   location: Location;
   color: string;
+  aspectRatio?: number;
   style?: StyleProp<ViewStyle>;
-}> = ({ radius, spaceName = "Your space", location, color, style }) => {
-  const aspectRatio = 1.5;
-
+}> = ({
+  radius,
+  spaceName = "Your space",
+  location,
+  color,
+  style,
+  aspectRatio = 1.8,
+}) => {
   const { width: screenWidth } = useWindowDimensions();
 
   const centerCoordinate = useMemo(
-    () => [location.longitude, location.latitude],
+    () => [location.longitude, location.latitude] as [number, number],
     [location.latitude, location.longitude]
   );
-
-  const [bounds, setBounds] = useState(
-    getBoundingBox(centerCoordinate, radius, aspectRatio)
-  );
-
-  const debouncedSetBounds = useCallback(
-    debounce((radius: number) => {
-      const bounds = getBoundingBox(centerCoordinate, radius, aspectRatio);
-      setBounds(bounds);
-    }, 40),
-    [centerCoordinate]
-  );
-
-  useEffect(() => {
-    debouncedSetBounds(radius);
-  }, [radius, debouncedSetBounds]);
 
   const geoJSONCircle = createGeoJSONCircle(centerCoordinate, radius, 60);
 
@@ -65,25 +45,13 @@ export const MapboxMap: FC<{
   );
 
   return (
-    <View
-      style={[
-        {
-          width: "100%",
-          aspectRatio,
-          borderRadius: 10,
-          overflow: "hidden",
-        },
-        style,
-      ]}
+    <Map
+      radius={radius < minRadiusForBounds ? minRadiusForBounds : radius}
+      aspectRatio={aspectRatio}
+      style={style}
+      centerCoordinate={centerCoordinate}
     >
-      <MapView
-        style={{ flex: 1 }}
-        logoEnabled={false}
-        scaleBarEnabled={false}
-        zoomEnabled={false}
-        scrollEnabled={false}
-        attributionEnabled={false}
-      >
+      <>
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
@@ -99,7 +67,6 @@ export const MapboxMap: FC<{
             {spaceName}
           </Text>
         </View>
-        <Camera bounds={bounds} animationDuration={100} />
         <ShapeSource id="circleSource" shape={geoJSONCircle} tolerance={0.1}>
           <FillLayer
             id="circleFill"
@@ -113,7 +80,7 @@ export const MapboxMap: FC<{
             style={{ lineColor: color, lineWidth: 1 }}
           />
         </ShapeSource>
-      </MapView>
-    </View>
+      </>
+    </Map>
   );
 };
