@@ -1,11 +1,11 @@
 import { FC } from "react";
 import { Pressable, View } from "react-native";
-import { template } from "../../styles/template";
-import { Text } from "../../components/Text";
-import { CloseIcon } from "../../components/icons/CloseIcon";
-import { useCustomNavigation } from "../../components/context/GoBackContext";
+import { template } from "../styles/template";
+import { Text } from "./Text";
+import { CloseIcon } from "./icons/CloseIcon";
+import { useCustomNavigation } from "./context/GoBackContext";
 
-export const Header: FC = () => {
+export const Header: FC<{ text: string }> = ({ text }) => {
   const navigation = useCustomNavigation();
 
   return (
@@ -33,7 +33,7 @@ export const Header: FC = () => {
             letterSpacing: 0.32,
           }}
         >
-          New Space
+          {text}
         </Text>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
           <Pressable onPress={navigation.goBack} hitSlop={15}>

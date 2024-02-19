@@ -41,7 +41,7 @@ export const CustomNotification: FC<{
       notificationState?.description,
     ].filter((a) => !!a).length;
 
-    heightSv.value = numberElements * 20 + 24;
+    heightSv.value = numberElements * 22 + 24;
   }, [notificationState?.title, notificationState?.description]);
 
   const animatedBackgroundColor = useAnimatedStyle(() => {
@@ -111,6 +111,6 @@ const styles = StyleSheet.create({
   description: {
     color: template.colors.white,
     textAlign: "center",
-    marginTop: 2,
+    marginTop: 3,
   },
 });

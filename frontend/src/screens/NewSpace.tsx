@@ -7,7 +7,7 @@ import { useLocation } from "../hooks/use_location";
 import { MapboxMap } from "../modules/new_space/MapboxMap";
 import { template } from "../styles/template";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import { Header } from "../modules/new_space/Header";
+import { Header } from "../components/Header";
 import { Text } from "../components/Text";
 import { TextInput, TextInputError } from "../components/form/TextInput";
 import { Label } from "../components/form/Label";
@@ -23,7 +23,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNotification } from "../utils/notifications";
 
-const screenPaddingHorizontal = 20;
+const screenPaddingHorizontal = template.paddings.md;
 const gapSize = 14; // This is the uniform gap size you want
 const numberOfColumns = 7;
 
@@ -186,7 +186,7 @@ export const NewSpaceScreen: FC<
         flex: 1,
       }}
     >
-      <Header />
+      <Header text="New Space" />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior="padding"

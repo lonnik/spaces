@@ -10,10 +10,11 @@ export const template = {
     success: "#4CAF50",
   },
   paddings: {
-    screen: 20,
+    md: 15,
+    screen: 25,
   },
   margins: {
-    md: 30,
+    md: 25,
   },
   borderRadius: {
     screen: 7,
