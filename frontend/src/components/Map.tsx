@@ -1,4 +1,4 @@
-import { FC, useCallback, useEffect, useState } from "react";
+import { FC, ReactNode, useCallback, useEffect, useState } from "react";
 import MapboxGL, { Camera, MapView } from "@rnmapbox/maps";
 import { StyleProp, View, ViewStyle } from "react-native";
 import { debounce } from "../utils/debounce";
@@ -10,7 +10,7 @@ MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 export const Map: FC<{
   radius: number;
   centerCoordinate: Location;
-  children?: JSX.Element;
+  children?: ReactNode;
   aspectRatio?: number;
   style?: StyleProp<ViewStyle>;
 }> = ({ radius, centerCoordinate, aspectRatio = 1.8, style, children }) => {

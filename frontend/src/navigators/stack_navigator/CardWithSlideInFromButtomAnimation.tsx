@@ -1,11 +1,11 @@
-import { JSX, FC, useCallback, useRef, useEffect } from "react";
+import { FC, useCallback, useRef, useEffect, ReactNode } from "react";
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet";
 import { template } from "../../styles/template";
 import { GoBackContext } from "../../components/context/GoBackContext";
 
 export const CardWithSlideInFromBotomAnimation: FC<{
   goBack: () => void;
-  children: JSX.Element;
+  children: ReactNode;
   relativeIndex: number;
 }> = ({ goBack, children, relativeIndex }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);

@@ -1,4 +1,4 @@
-import { useEffect, JSX, FC } from "react";
+import { useEffect, FC, ReactNode } from "react";
 import { useWindowDimensions } from "react-native";
 import Animated, {
   runOnJS,
@@ -15,7 +15,7 @@ export const CardWithSlideInFromRightAnimation: FC<{
   goBack: () => void;
   currentIndex: number;
   index: number;
-  children: JSX.Element;
+  children: ReactNode;
 }> = ({ goBack, currentIndex, index, children }) => {
   const relativeIndex = index - currentIndex;
 

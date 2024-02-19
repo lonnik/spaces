@@ -1,10 +1,10 @@
 import {
   FC,
   createContext,
-  ReactElement,
   useReducer,
   Dispatch,
   useContext,
+  ReactNode,
 } from "react";
 
 const initialState = {
@@ -43,7 +43,7 @@ const NewSpaceStateDispatchContext = createContext<null | Dispatch<Action>>(
   null
 );
 
-export const NewSpaceStateProvider: FC<{ children: ReactElement }> = ({
+export const NewSpaceStateProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(newSpaceStateReducer, initialState);

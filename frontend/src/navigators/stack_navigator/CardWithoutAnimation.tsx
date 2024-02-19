@@ -1,9 +1,9 @@
-import { JSX, FC } from "react";
+import { FC, ReactNode } from "react";
 import { View } from "react-native";
 import { template } from "../../styles/template";
 
 export const CardWithoutAnimation: FC<{
-  children: JSX.Element;
+  children: ReactNode;
 }> = ({ children }) => {
   return (
     <View

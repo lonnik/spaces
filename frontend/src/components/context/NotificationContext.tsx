@@ -1,4 +1,4 @@
-import { FC, ReactElement, createContext, useContext, useState } from "react";
+import { FC, ReactNode, createContext, useContext, useState } from "react";
 import { NotificationType } from "../../types";
 
 type NotificationState = {
@@ -12,7 +12,7 @@ const NotificationSetStateContext = createContext<
   React.Dispatch<React.SetStateAction<NotificationState | null>>
 >(() => {});
 
-export const NotificationStateProvider: FC<{ children: ReactElement }> = ({
+export const NotificationStateProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [state, setState] = useState<NotificationState | null>(null);

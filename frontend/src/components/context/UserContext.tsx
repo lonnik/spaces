@@ -2,10 +2,10 @@ import { User } from "firebase/auth";
 import {
   FC,
   createContext,
-  ReactElement,
   useReducer,
   Dispatch,
   useContext,
+  ReactNode,
 } from "react";
 import { Location } from "../../types";
 
@@ -43,7 +43,7 @@ const userReducer = (prevState: UserState, action: Action) => {
 const UserStateContext = createContext<null | UserState>(null);
 const UserDispatchContext = createContext<null | Dispatch<Action>>(null);
 
-export const UserStateProvider: FC<{ children: ReactElement }> = ({
+export const UserStateProvider: FC<{ children: ReactNode }> = ({
   children,
 }) => {
   const [state, dispatch] = useReducer(userReducer, initialState);
