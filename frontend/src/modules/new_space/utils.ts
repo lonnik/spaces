@@ -1,13 +1,4 @@
-import { circle } from "@turf/turf";
 import { minRadiusForBounds } from "./constants";
-
-export const createGeoJSONCircle = (
-  center: [number, number],
-  radiusM: number,
-  steps: number
-) => {
-  return circle(center, radiusM, { steps, units: "meters" });
-};
 
 // the north/south bounds encompass the radius plus radius/2 padding
 export const getBoundingBox = (

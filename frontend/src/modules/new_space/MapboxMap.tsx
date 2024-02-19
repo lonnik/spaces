@@ -2,10 +2,11 @@ import { FC, useMemo } from "react";
 import MapboxGL, { LineLayer, FillLayer, ShapeSource } from "@rnmapbox/maps";
 import { StyleProp, View, ViewStyle, useWindowDimensions } from "react-native";
 import { Location } from "../../types";
-import { calculateFontSize, createGeoJSONCircle } from "./utils";
+import { calculateFontSize } from "./utils";
 import { minRadiusForBounds } from "./constants";
 import { Text } from "../../components/Text";
 import { Map } from "../../components/Map";
+import { createGeoJSONCircle } from "../../utils/map";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
@@ -26,12 +27,10 @@ export const MapboxMap: FC<{
 }) => {
   const { width: screenWidth } = useWindowDimensions();
 
-  const centerCoordinate = useMemo(
-    () => [location.longitude, location.latitude] as [number, number],
-    [location.latitude, location.longitude]
+  const geoJSONCircle = useMemo(
+    () => createGeoJSONCircle(location, radius, 60),
+    [location, radius]
   );
-
-  const geoJSONCircle = createGeoJSONCircle(centerCoordinate, radius, 60);
 
   // TODO: adapt to aspect ratio of not 1
   const spaceNameTextMaxWidth =
@@ -49,7 +48,7 @@ export const MapboxMap: FC<{
       radius={radius < minRadiusForBounds ? minRadiusForBounds : radius}
       aspectRatio={aspectRatio}
       style={style}
-      centerCoordinate={centerCoordinate}
+      centerCoordinate={location}
     >
       <>
         <View

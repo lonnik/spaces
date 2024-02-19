@@ -3,12 +3,13 @@ import MapboxGL, { Camera, MapView } from "@rnmapbox/maps";
 import { StyleProp, View, ViewStyle } from "react-native";
 import { debounce } from "../utils/debounce";
 import { getBoundingBox } from "../utils/map";
+import { Location } from "../types";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
 export const Map: FC<{
   radius: number;
-  centerCoordinate: [number, number];
+  centerCoordinate: Location;
   children?: JSX.Element;
   aspectRatio?: number;
   style?: StyleProp<ViewStyle>;
@@ -35,8 +36,6 @@ export const Map: FC<{
         {
           width: "100%",
           aspectRatio,
-          borderRadius: 10,
-          overflow: "hidden",
         },
         style,
       ]}

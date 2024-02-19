@@ -206,6 +206,8 @@ export const NewSpaceScreen: FC<
             color={colors[selectedColorIndex]}
             style={{
               marginBottom: template.margins.md,
+              borderRadius: 10,
+              overflow: "hidden",
             }}
           />
           <RadiusSection
