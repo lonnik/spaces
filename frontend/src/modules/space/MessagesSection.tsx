@@ -3,18 +3,8 @@ import { View } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 
-export const MessagesSection: FC = () => {
-  return (
-    <View style={{ flex: 1 }}>
-      {Array.from({ length: 20 }).map((_, index) => {
-        return <Message key={index} />;
-      })}
-    </View>
-  );
-};
-
 // from, when, answers count, like action, answer action
-const Message: FC = () => {
+export const Message: FC = () => {
   return (
     <View style={{ flex: 1, marginBottom: 20, flexDirection: "row" }}>
       <View

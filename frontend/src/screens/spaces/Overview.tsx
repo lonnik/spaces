@@ -1,7 +1,7 @@
 import { StackNavigationProp } from "@react-navigation/stack";
 import { SpaceStackParamList } from "../../types";
 import { FC } from "react";
-import { ScrollView, View } from "react-native";
+import { FlatList, ListRenderItem, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 import { getSpaceById } from "../../utils/queries";
 import { LoadingScreen } from "../Loading";
@@ -11,7 +11,7 @@ import { InfoSection } from "../../modules/space/InfoSection";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { MessagesSection } from "../../modules/space/MessagesSection";
+import { Message } from "../../modules/space/MessagesSection";
 import { useNavigation } from "@react-navigation/native";
 
 export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
@@ -23,6 +23,43 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   });
 
   const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
+
+  const data = [
+    undefined,
+    undefined,
+    ...Array.from({ length: 8 }).map(() => undefined),
+  ];
+
+  const renderItem: ListRenderItem<undefined> = ({ index }) => {
+    switch (index) {
+      case 0:
+        return (
+          <View style={{ marginBottom: template.margins.md }}>
+            <InfoSection
+              onPress={() => navigation.navigate("Info")}
+              location={space?.location!}
+              radius={space?.radius!}
+              spaceMembers={spaceMembers}
+            />
+          </View>
+        );
+      case 1:
+        return (
+          <View
+            style={{
+              backgroundColor: template.colors.white,
+              marginBottom: template.margins.md,
+            }}
+          >
+            <Text style={{ fontSize: 30 }}>All</Text>
+          </View>
+        );
+      case data.length - 1:
+        return <View style={{ height: insets.bottom + 50 }} />;
+      default:
+        return <Message />;
+    }
+  };
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -44,24 +81,17 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
       >
         <Text style={{ color: template.colors.white }}>Share something</Text>
       </PrimaryButton>
-      <ScrollView
+      <FlatList
+        data={data}
         style={{
           flex: 1,
           paddingHorizontal: template.paddings.md,
           flexDirection: "column",
+          paddingBottom: insets.bottom + 50,
         }}
-      >
-        <View style={{ marginBottom: template.margins.md }}>
-          <InfoSection
-            onPress={() => navigation.navigate("Info")}
-            location={space?.location!}
-            radius={space?.radius!}
-            spaceMembers={spaceMembers}
-          />
-        </View>
-        <MessagesSection />
-        <View style={{ height: insets.bottom + 50 }} />
-      </ScrollView>
+        stickyHeaderIndices={[1]}
+        renderItem={renderItem}
+      />
     </View>
   );
 };
