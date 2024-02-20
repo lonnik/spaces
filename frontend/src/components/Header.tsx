@@ -5,7 +5,10 @@ import { Text } from "./Text";
 import { CloseIcon } from "./icons/CloseIcon";
 import { useCustomNavigation } from "./context/GoBackContext";
 
-export const Header: FC<{ text: string }> = ({ text }) => {
+export const Header: FC<{ text: string; onClose?: () => void }> = ({
+  text,
+  onClose,
+}) => {
   const navigation = useCustomNavigation();
 
   return (
@@ -36,7 +39,16 @@ export const Header: FC<{ text: string }> = ({ text }) => {
           {text}
         </Text>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Pressable onPress={navigation.goBack} hitSlop={15}>
+          <Pressable
+            onPress={() => {
+              if (onClose) {
+                onClose();
+              }
+
+              navigation.goBack();
+            }}
+            hitSlop={15}
+          >
             {({ pressed }) => {
               return <CloseIcon fill={pressed ? "#aaa" : "#ddd"} />;
             }}
