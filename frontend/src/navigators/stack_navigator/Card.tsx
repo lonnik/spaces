@@ -10,7 +10,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 import { animationDuration } from "./constants";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export const Card: FC<{
   tabNavigationOptions: TabNavigationOptions;
@@ -19,7 +18,6 @@ export const Card: FC<{
   index: number;
   children: JSX.Element;
 }> = (props) => {
-  const insets = useSafeAreaInsets();
   const relativeIndex = props.index - props.currentIndex;
 
   let card: JSX.Element | null = null;
@@ -30,6 +28,7 @@ export const Card: FC<{
     case "slideInFromBottom":
       card = (
         <CardWithSlideInFromBotomAnimation
+          snapPoint={props.tabNavigationOptions.snapPoint}
           goBack={props.goBack}
           relativeIndex={relativeIndex}
         >
@@ -51,15 +50,7 @@ export const Card: FC<{
   });
 
   return (
-    <Animated.View
-      style={[
-        StyleSheet.absoluteFill,
-        {
-          marginTop: insets.top,
-        },
-        animatedZIndexStyle,
-      ]}
-    >
+    <Animated.View style={[StyleSheet.absoluteFill, animatedZIndexStyle]}>
       {card}
     </Animated.View>
   );

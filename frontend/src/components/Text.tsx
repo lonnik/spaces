@@ -1,4 +1,4 @@
-import { FC, forwardRef } from "react";
+import { forwardRef } from "react";
 import { Text as ReactText, TextProps } from "react-native";
 import { template } from "../styles/template";
 

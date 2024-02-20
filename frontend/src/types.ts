@@ -11,6 +11,12 @@ export type RootStackParamList = {
   NewSpace: undefined;
 };
 
+export type SpaceStackParamList = {
+  Overview: undefined;
+  Info: undefined;
+  Share: undefined;
+};
+
 export type TabsParamList = {
   Here: undefined;
   MySpaces: undefined;

@@ -20,7 +20,8 @@ export const InfoSection: FC<{
   location: Location;
   radius: number;
   spaceMembers: any[];
-}> = ({ location, radius, spaceMembers }) => {
+  onPress: () => void;
+}> = ({ location, radius, spaceMembers, onPress }) => {
   const [joined, setJoined] = useState(false);
 
   const isPressedSv = useSharedValue(false);
@@ -59,6 +60,7 @@ export const InfoSection: FC<{
       onPressOut={() => {
         isPressedSv.value = false;
       }}
+      onPress={onPress}
     >
       <Animated.View
         style={[

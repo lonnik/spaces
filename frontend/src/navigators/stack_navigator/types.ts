@@ -3,6 +3,7 @@ import { JSX } from "react";
 // Supported screen options
 export type TabNavigationOptions = {
   animation?: "slideInFromRight" | "slideInFromBottom";
+  snapPoint?: string;
 };
 
 // Map of event name and the type of data (in event.data)

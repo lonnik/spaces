@@ -7,7 +7,8 @@ export const CardWithSlideInFromBotomAnimation: FC<{
   goBack: () => void;
   children: ReactNode;
   relativeIndex: number;
-}> = ({ goBack, children, relativeIndex }) => {
+  snapPoint?: string;
+}> = ({ goBack, children, relativeIndex, snapPoint = "100%" }) => {
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export const CardWithSlideInFromBotomAnimation: FC<{
 
   return (
     <BottomSheet
-      snapPoints={["100%"]}
+      snapPoints={[snapPoint]}
       ref={bottomSheetRef}
       enablePanDownToClose={true}
       onClose={handleOnClose}
