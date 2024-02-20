@@ -24,8 +24,8 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNotification } from "../utils/notifications";
 
 const screenPaddingHorizontal = template.paddings.md;
-const gapSize = 14; // This is the uniform gap size you want
-const numberOfColumns = 7;
+const gapSize = 8; // This is the uniform gap size you want
+const numberOfColumns = 8;
 
 const colors = [
   template.colors.purple,
@@ -190,7 +190,7 @@ export const NewSpaceScreen: FC<
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior="padding"
-        keyboardVerticalOffset={0}
+        keyboardVerticalOffset={insets.top}
       >
         <BottomSheetScrollView
           style={{
@@ -302,6 +302,7 @@ const NameSection: FC<{
         setText={setSpaceName}
         onBlur={handleBlur}
         placeholder="Space Name"
+        returnKeyType="next"
       />
     </View>
   );

@@ -2,6 +2,7 @@ import { FC, useEffect } from "react";
 import {
   TextInput as NativeTextInput,
   StyleProp,
+  TextInputProps,
   TextStyle,
   View,
 } from "react-native";
@@ -26,14 +27,24 @@ export type TextInputError = {
   message: string;
 };
 
-export const TextInput: FC<{
-  text: string;
-  setText: (newText: string) => void;
-  placeholder: string;
-  errors: TextInputError[];
-  onBlur?: () => void;
-  style?: StyleProp<TextStyle>;
-}> = ({ text, setText, placeholder, errors, style, onBlur = () => {} }) => {
+export const TextInput: FC<
+  {
+    text: string;
+    setText: (newText: string) => void;
+    placeholder: string;
+    errors: TextInputError[];
+    onBlur?: () => void;
+    style?: StyleProp<TextStyle>;
+  } & TextInputProps
+> = ({
+  text,
+  setText,
+  placeholder,
+  errors,
+  style,
+  onBlur = () => {},
+  ...props
+}) => {
   const hasErrors = errors.length > 0;
   const hasErrorsSv = useSharedValue(hasErrors);
 
@@ -59,8 +70,8 @@ export const TextInput: FC<{
         value={text}
         onChangeText={setText}
         onBlur={onBlur}
-        returnKeyType="next"
         placeholderTextColor={template.colors.textLight}
+        {...props}
         style={[
           {
             borderRadius: 7,
