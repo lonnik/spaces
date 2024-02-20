@@ -2,6 +2,8 @@ import { FC } from "react";
 import { View } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
+import { CommentIcon } from "../../components/icons/CommentIcon";
+import { HeartIcon } from "../../components/icons/HeartIcon";
 
 // from, when, answers count, like action, answer action
 export const Message: FC = () => {
@@ -45,20 +47,31 @@ export const Message: FC = () => {
           odio nec leo lacinia
         </Text>
         <View style={{ flex: 1, flexDirection: "row" }}>
-          {["like", "comment"].map((action, index) => {
+          {[
+            <CommentIcon
+              style={{ width: 14, height: 14 }}
+              stroke={template.colors.textLight}
+            />,
+            <HeartIcon
+              style={{ width: 14, height: 14 }}
+              fill={template.colors.textLight}
+            />,
+          ].map((icon, index) => {
             return (
               <View
-                key={index}
                 style={{
-                  paddingHorizontal: 15,
-                  paddingVertical: 3,
-                  borderRadius: 5,
-                  borderWidth: 1,
-                  borderColor: template.colors.textLight,
+                  flexDirection: "row",
+                  alignItems: "center",
                   marginRight: 10,
                 }}
+                key={index}
               >
-                <Text>{action}</Text>
+                {icon}
+                <Text
+                  style={{ color: template.colors.textLight, marginLeft: 2 }}
+                >
+                  3
+                </Text>
               </View>
             );
           })}

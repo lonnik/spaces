@@ -13,7 +13,6 @@ import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Message } from "../../modules/space/MessagesSection";
 import { useNavigation } from "@react-navigation/native";
-import { hexToRgb } from "../../utils/hex_to_rgb";
 
 export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   const insets = useSafeAreaInsets();
