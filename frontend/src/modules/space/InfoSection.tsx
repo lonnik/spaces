@@ -134,7 +134,7 @@ const JoinButton: FC<{ userHasJoined: boolean; onPress: () => void }> = ({
           letterSpacing: 1,
         }}
       >
-        {userHasJoined ? "joined" : "join"}
+        {userHasJoined ? "subscribed" : "subscribe"}
       </Text>
     </Pressable>
   );

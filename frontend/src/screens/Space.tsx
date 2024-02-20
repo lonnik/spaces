@@ -11,6 +11,7 @@ import { InfoSection } from "../modules/space/InfoSection";
 import { PrimaryButton } from "../components/form/PrimaryButton";
 import { Text } from "../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { MessagesSection } from "../modules/space/MessagesSection";
 
 // TODO info component:
 // improve function for radius calculation
@@ -48,7 +49,7 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
           zIndex: 1000,
         }}
       >
-        <Text style={{ color: template.colors.white }}>Write something</Text>
+        <Text style={{ color: template.colors.white }}>Share something</Text>
       </PrimaryButton>
       <ScrollView
         style={{
@@ -57,17 +58,15 @@ export const SpaceScreen: FC<StackScreenProps<RootStackParamList, "Space">> = ({
           flexDirection: "column",
         }}
       >
-        <InfoSection
-          location={space?.location!}
-          radius={space?.radius!}
-          spaceMembers={spaceMembers}
-        />
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "black",
-          }}
-        ></View>
+        <View style={{ marginBottom: template.margins.md }}>
+          <InfoSection
+            location={space?.location!}
+            radius={space?.radius!}
+            spaceMembers={spaceMembers}
+          />
+        </View>
+        <MessagesSection />
+        <View style={{ height: insets.bottom + 50 }} />
       </ScrollView>
     </View>
   );
