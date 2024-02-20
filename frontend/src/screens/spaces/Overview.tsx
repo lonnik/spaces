@@ -13,6 +13,7 @@ import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Message } from "../../modules/space/MessagesSection";
 import { useNavigation } from "@react-navigation/native";
+import { hexToRgb } from "../../utils/hex_to_rgb";
 
 export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   const insets = useSafeAreaInsets();
@@ -27,7 +28,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   const data = [
     undefined,
     undefined,
-    ...Array.from({ length: 8 }).map(() => undefined),
+    ...Array.from({ length: 20 }).map(() => undefined),
   ];
 
   const renderItem: ListRenderItem<undefined> = ({ index }) => {
@@ -44,16 +45,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
           </View>
         );
       case 1:
-        return (
-          <View
-            style={{
-              backgroundColor: template.colors.white,
-              marginBottom: template.margins.md,
-            }}
-          >
-            <Text style={{ fontSize: 30 }}>All</Text>
-          </View>
-        );
+        return <ButtonSection />;
       case data.length - 1:
         return <View style={{ height: insets.bottom + 50 }} />;
       default:
@@ -92,6 +84,53 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
         stickyHeaderIndices={[1]}
         renderItem={renderItem}
       />
+    </View>
+  );
+};
+
+const ButtonSection: FC = () => {
+  return (
+    <View
+      style={{
+        flex: 1,
+        marginBottom: template.margins.md,
+        position: "relative",
+      }}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          width: "100%",
+          height: 10,
+          backgroundColor: template.colors.white,
+        }}
+      />
+      <View
+        style={{
+          backgroundColor: "#eee",
+          borderRadius: 10,
+          padding: 10,
+          flex: 1,
+          flexDirection: "row",
+        }}
+      >
+        {["Threads", "Images", ""].map((text, index) => {
+          return (
+            <Text
+              key={text}
+              style={{
+                fontSize: 18,
+                color: template.colors.text,
+                fontWeight: index === 0 ? "600" : "400",
+                marginRight: 20,
+              }}
+            >
+              {text}
+            </Text>
+          );
+        })}
+      </View>
     </View>
   );
 };
