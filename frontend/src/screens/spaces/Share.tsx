@@ -2,7 +2,6 @@ import { FC, forwardRef, useEffect, useRef, useState } from "react";
 import {
   Keyboard,
   Platform,
-  Pressable,
   TextInput,
   TextInputProps,
   View,
@@ -13,6 +12,7 @@ import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { GalleryIcon } from "../../components/icons/GalleryIcon";
 import { useCustomNavigation } from "../../components/context/GoBackContext";
+import { PressableOverlay } from "../../components/PressableOverlay";
 
 export const SpaceShareScreen: FC = () => {
   const [firstMessageText, setFirstMessageText] = useState("");
@@ -103,8 +103,6 @@ export const SpaceShareScreen: FC = () => {
   );
 };
 
-// TODO: create OverlayPressable component
-
 const ContentInput = forwardRef<
   TextInput,
   {
@@ -130,12 +128,12 @@ const ContentInput = forwardRef<
         {...props}
       />
       <View style={{ flexDirection: "row", gap: 10 }}>
-        <Pressable hitSlop={5}>
+        <PressableOverlay onPress={() => {}} hitSlop={10}>
           <GalleryIcon
             style={{ width: 22, height: 22 }}
             fill={template.colors.text}
           />
-        </Pressable>
+        </PressableOverlay>
       </View>
     </View>
   );

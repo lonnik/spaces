@@ -7,12 +7,9 @@ import { FillLayer, LineLayer, ShapeSource } from "@rnmapbox/maps";
 import { createGeoJSONCircle } from "../../utils/map";
 import { hexToRgb } from "../../utils/hex_to_rgb";
 import { Text } from "../../components/Text";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
+
 import { useNotification } from "../../utils/notifications";
+import { PressableOverlay } from "../../components/PressableOverlay";
 
 const color = template.colors.purple;
 
@@ -23,14 +20,6 @@ export const InfoSection: FC<{
   onPress: () => void;
 }> = ({ location, radius, spaceMembers, onPress }) => {
   const [joined, setJoined] = useState(false);
-
-  const isPressedSv = useSharedValue(false);
-
-  const animatedOpacity = useAnimatedStyle(() => {
-    return {
-      opacity: withTiming(isPressedSv.value ? 0.1 : 0, { duration: 100 }),
-    };
-  });
 
   const notification = useNotification();
 
@@ -53,29 +42,8 @@ export const InfoSection: FC<{
   };
 
   return (
-    <Pressable
-      onPressIn={() => {
-        isPressedSv.value = true;
-      }}
-      onPressOut={() => {
-        isPressedSv.value = false;
-      }}
-      onPress={onPress}
-    >
-      <Animated.View
-        style={[
-          StyleSheet.absoluteFill,
-          {
-            backgroundColor: "black",
-            pointerEvents: "none",
-            borderRadius: 10,
-            overflow: "hidden",
-            zIndex: 1,
-          },
-          animatedOpacity,
-        ]}
-      />
-      <Animated.View style={[{ position: "relative" }]}>
+    <PressableOverlay onPress={onPress}>
+      <View style={{ position: "relative" }}>
         <View
           style={[
             {
@@ -103,8 +71,8 @@ export const InfoSection: FC<{
           </View>
         </View>
         <BackgroundMap location={location} radius={radius} />
-      </Animated.View>
-    </Pressable>
+      </View>
+    </PressableOverlay>
   );
 };
 
