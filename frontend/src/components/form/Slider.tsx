@@ -34,7 +34,7 @@ export const Slider: FC<{
   thumbStyle,
   trackStyle,
   minimumTrackTintColor = "blue",
-  maximumTrackTintColor = "#ddd",
+  maximumTrackTintColor = "#eee",
   minimumValue = 0,
   maximumValue = 100,
   hitRectFactor = 2,

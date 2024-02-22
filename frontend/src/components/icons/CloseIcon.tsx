@@ -4,7 +4,7 @@ export const CloseIcon = (props: SvgProps) => (
   <Svg width={24} height={24} fill="none" {...props}>
     <Circle cx={12} cy={12} r={12} fill={props.fill} />
     <Path
-      stroke="#222"
+      stroke="#777"
       strokeLinecap="round"
       strokeLinejoin="round"
       strokeWidth={1.2}

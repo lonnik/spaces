@@ -94,42 +94,10 @@ const ButtonSection: FC = () => {
         flex: 1,
         marginBottom: template.margins.md,
         position: "relative",
+        backgroundColor: template.colors.white,
       }}
     >
-      <View
-        style={{
-          position: "absolute",
-          top: 0,
-          width: "100%",
-          height: 10,
-          backgroundColor: template.colors.white,
-        }}
-      />
-      <View
-        style={{
-          backgroundColor: "#eee",
-          borderRadius: 10,
-          padding: 10,
-          flex: 1,
-          flexDirection: "row",
-        }}
-      >
-        {["Threads", "Images", ""].map((text, index) => {
-          return (
-            <Text
-              key={text}
-              style={{
-                fontSize: 18,
-                color: template.colors.text,
-                fontWeight: index === 0 ? "600" : "400",
-                marginRight: 20,
-              }}
-            >
-              {text}
-            </Text>
-          );
-        })}
-      </View>
+      <Text style={{ fontSize: 30, fontWeight: "600" }}>Threads</Text>
     </View>
   );
 };

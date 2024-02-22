@@ -119,7 +119,7 @@ const BackgroundMap: FC<{ location: Location; radius: number }> = ({
   return (
     <Map
       radius={20}
-      aspectRatio={3}
+      aspectRatio={2.1}
       centerCoordinate={location}
       style={{
         borderRadius: 10,
