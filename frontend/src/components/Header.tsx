@@ -3,7 +3,7 @@ import { Pressable, View } from "react-native";
 import { template } from "../styles/template";
 import { Text } from "./Text";
 import { CloseIcon } from "./icons/CloseIcon";
-import { useCustomNavigation } from "./context/GoBackContext";
+import { useCustomNavigation } from "../hooks/use_custom_navigation";
 
 export const Header: FC<{ text: string; onClose?: () => void }> = ({
   text,

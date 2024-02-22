@@ -11,8 +11,8 @@ import { template } from "../../styles/template";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { GalleryIcon } from "../../components/icons/GalleryIcon";
-import { useCustomNavigation } from "../../components/context/GoBackContext";
 import { PressableOverlay } from "../../components/PressableOverlay";
+import { useCustomNavigation } from "../../hooks/use_custom_navigation";
 
 export const SpaceShareScreen: FC = () => {
   const [firstMessageText, setFirstMessageText] = useState("");
