@@ -29,8 +29,9 @@ export const SpaceRootScreen: FC<
         <Stack.Screen
           name="Share"
           options={{ animation: "slideInFromBottom", snapPoint: "96%" }}
-          component={SpaceShareScreen}
-        />
+        >
+          {() => <SpaceShareScreen spaceId={spaceId} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </View>
   );

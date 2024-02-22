@@ -154,6 +154,7 @@ export const NewSpaceScreen: FC<
     notification.showNotification({
       title: "Creating Space ...",
       type: "loading",
+      duration: 999999,
     });
 
     createNewSpace({

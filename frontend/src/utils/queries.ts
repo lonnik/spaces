@@ -1,4 +1,4 @@
-import { Address, Location, Space, Uuid } from "../types";
+import { Address, Location, Space, Uuid, UserUid } from "../types";
 import { fetchApi } from "./fetch_api";
 import { parseQuery } from "./parse_query";
 
@@ -34,4 +34,11 @@ export const createSpace = async (spaceParams: SpaceParams) => {
     method: "POST",
     body: JSON.stringify(spaceParams),
   });
+};
+
+export const createToplevelThread = async (spaceId: Uuid, content: string) => {
+  return fetchApi<{ threadId: UserUid }>(
+    `/spaces/${encodeURIComponent(spaceId)}/toplevel-threads`,
+    { method: "POST", body: JSON.stringify({ content, type: "text" }) }
+  );
 };

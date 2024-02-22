@@ -13,23 +13,57 @@ import { Text } from "../../components/Text";
 import { GalleryIcon } from "../../components/icons/GalleryIcon";
 import { PressableOverlay } from "../../components/PressableOverlay";
 import { useCustomNavigation } from "../../hooks/use_custom_navigation";
+import { useMutation } from "@tanstack/react-query";
+import { useNotification } from "../../utils/notifications";
+import { createToplevelThread } from "../../utils/queries";
+import { Uuid } from "../../types";
 
-export const SpaceShareScreen: FC = () => {
+// TODO: loading notification and success or error notification
+
+export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const [firstMessageText, setFirstMessageText] = useState("");
   const [secondMessageText, setSecondMessageText] = useState("");
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-
   const navigation = useCustomNavigation();
   const firstMessageRef = useRef<TextInput>(null);
   const secondMessageRef = useRef<TextInput>(null);
+
+  const notification = useNotification();
+
+  const { mutate: createNewTopLevelThread } = useMutation({
+    mutationFn: async (content: string) => {
+      return createToplevelThread(spaceId, content);
+    },
+    mutationKey: ["createToplevelThread"],
+    onError(error) {
+      console.error("error :>> ", error);
+      notification.updateNotification({
+        title: "Error creating new thread",
+        type: "error",
+      });
+    },
+    onSuccess() {
+      navigation.goBack();
+      notification.updateNotification({
+        title: "You started a thread ✉️",
+        type: "success",
+      });
+    },
+  });
 
   const onClose = () => {
     firstMessageRef.current?.blur();
     secondMessageRef.current?.blur();
   };
 
-  const onSend = () => {
-    navigation.goBack();
+  const onSend = async () => {
+    notification.showNotification({
+      title: "Creating New Thread ...",
+      type: "loading",
+      duration: 999999,
+    });
+
+    createNewTopLevelThread(firstMessageText);
   };
 
   useEffect(() => {
