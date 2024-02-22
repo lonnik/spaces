@@ -34,14 +34,11 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
     switch (index) {
       case 0:
         return (
-          <View style={{ marginBottom: template.margins.md }}>
-            <InfoSection
-              onPress={() => navigation.navigate("Info")}
-              location={space?.location!}
-              radius={space?.radius!}
-              spaceMembers={spaceMembers}
-            />
-          </View>
+          <InfoSection
+            spaceMembers={Array.from({ length: 8 })}
+            onPress={() => navigation.navigate("Info")}
+            style={{ marginBottom: template.margins.md }}
+          />
         );
       case 1:
         return <ButtonSection />;

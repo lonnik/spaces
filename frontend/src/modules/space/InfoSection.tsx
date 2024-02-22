@@ -1,24 +1,16 @@
-import { Location } from "../../types";
 import React, { FC, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
-import { Map } from "../../components/Map";
-import { FillLayer, LineLayer, ShapeSource } from "@rnmapbox/maps";
-import { createGeoJSONCircle } from "../../utils/map";
-import { hexToRgb } from "../../utils/hex_to_rgb";
 import { Text } from "../../components/Text";
 
 import { useNotification } from "../../utils/notifications";
 import { PressableOverlay } from "../../components/PressableOverlay";
 
-const color = template.colors.purple;
-
 export const InfoSection: FC<{
-  location: Location;
-  radius: number;
   spaceMembers: any[];
   onPress: () => void;
-}> = ({ location, radius, spaceMembers, onPress }) => {
+  style?: StyleProp<ViewStyle>;
+}> = ({ spaceMembers, onPress, style }) => {
   const [joined, setJoined] = useState(false);
 
   const notification = useNotification();
@@ -42,37 +34,33 @@ export const InfoSection: FC<{
   };
 
   return (
-    <PressableOverlay onPress={onPress}>
-      <View style={{ position: "relative" }}>
+    <View style={style}>
+      <PressableOverlay onPress={onPress}>
         <View
-          style={[
-            {
-              justifyContent: "space-between",
-              paddingHorizontal: 10,
-              paddingVertical: 10,
-              backgroundColor: "rgba(255, 255, 255, 0.4)",
-              zIndex: 10,
-              borderRadius: 10,
-              overflow: "hidden",
-            },
-            StyleSheet.absoluteFillObject,
-          ]}
+          style={{
+            flex: 1,
+            padding: 10,
+            backgroundColor: template.colors.purpleLightBackground,
+            borderRadius: template.borderRadius.md,
+          }}
         >
-          <JoinButton onPress={handleJoin} userHasJoined={joined} />
+          <Text style={{ fontSize: 32, marginBottom: 14 }}>🏠</Text>
           <View
             style={{
-              alignItems: "center",
+              flex: 1,
               flexDirection: "row",
               justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <SpaceMembers spaceMembers={spaceMembers} />
-            <Text style={{ color: template.colors.text }}>3 others online</Text>
+            <Text style={{ color: template.colors.textLight }}>
+              3 others online
+            </Text>
           </View>
         </View>
-        <BackgroundMap location={location} radius={radius} />
-      </View>
-    </PressableOverlay>
+      </PressableOverlay>
+    </View>
   );
 };
 
@@ -110,42 +98,7 @@ const JoinButton: FC<{ userHasJoined: boolean; onPress: () => void }> = ({
   );
 };
 
-const BackgroundMap: FC<{ location: Location; radius: number }> = ({
-  location,
-  radius,
-}) => {
-  const geoJSONCircle = createGeoJSONCircle(location, radius, 60);
-
-  return (
-    <Map
-      radius={20}
-      aspectRatio={2.1}
-      centerCoordinate={location}
-      style={{
-        borderRadius: 10,
-        overflow: "hidden",
-        borderWidth: 1,
-        borderColor: template.colors.gray,
-      }}
-    >
-      <ShapeSource id="circleSource" shape={geoJSONCircle} tolerance={0.1}>
-        <FillLayer
-          id="circleFill"
-          style={{
-            fillColor: hexToRgb(color, 0.18),
-            fillOpacity: 1,
-          }}
-        />
-        <LineLayer
-          id="circleLine"
-          style={{ lineColor: hexToRgb(color, 0.25), lineWidth: 1 }}
-        />
-      </ShapeSource>
-    </Map>
-  );
-};
-
-const SpaceMembers: FC<{ spaceMembers: any[] }> = ({ spaceMembers }) => {
+export const SpaceMembers: FC<{ spaceMembers: any[] }> = ({ spaceMembers }) => {
   return (
     <View
       style={{
