@@ -10,7 +10,7 @@ import (
 
 type BaseMessage struct {
 	Content string      `json:"content" binding:"required"`
-	Type    MessageType `json:"type" binding:"required"`
+	Type    MessageType `json:"type"`
 }
 
 type NewMessageInput BaseMessage

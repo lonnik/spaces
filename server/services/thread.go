@@ -46,7 +46,7 @@ func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessag
 	return thread.ID, nil
 }
 
-func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage, authenticatedUserId models.UserUid) (uuid.Uuid, error) {
+func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
 	const op errors.Op = "services.ThreadService.CreateTopLevelThread"
 
 	createdTopLevelThread, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, newTopLevelThreadFirstMessage)
@@ -54,7 +54,7 @@ func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.
 		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	ts.localMemoryRepo.PublishNewToplevelThread(spaceId, authenticatedUserId, *createdTopLevelThread)
+	ts.localMemoryRepo.PublishNewToplevelThread(spaceId, newTopLevelThreadFirstMessage.SenderId, *createdTopLevelThread)
 
 	return createdTopLevelThread.ID, nil
 }

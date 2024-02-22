@@ -285,13 +285,13 @@ func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {
 	threadId, err := uc.threadService.CreateTopLevelThread(ctx, spaceId, models.NewTopLevelThreadFirstMessage{
 		NewMessageInput: body,
 		SenderId:        authenticatedUser.ID,
-	}, authenticatedUser.ID)
+	})
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": threadId})
+	c.JSON(http.StatusOK, gin.H{"threadId": threadId})
 }
 
 func (uc *SpaceController) CreateThread(c *gin.Context) {
