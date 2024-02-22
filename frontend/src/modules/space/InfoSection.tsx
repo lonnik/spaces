@@ -2,15 +2,16 @@ import React, { FC, useState } from "react";
 import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
-
 import { useNotification } from "../../utils/notifications";
 import { PressableOverlay } from "../../components/PressableOverlay";
+import { hexToRgb } from "../../utils/hex_to_rgb";
 
 export const InfoSection: FC<{
   spaceMembers: any[];
   onPress: () => void;
+  spaceName: string;
   style?: StyleProp<ViewStyle>;
-}> = ({ spaceMembers, onPress, style }) => {
+}> = ({ spaceMembers, onPress, style, spaceName }) => {
   const [joined, setJoined] = useState(false);
 
   const notification = useNotification();
@@ -34,33 +35,40 @@ export const InfoSection: FC<{
   };
 
   return (
-    <View style={style}>
-      <PressableOverlay onPress={onPress}>
+    <PressableOverlay onPress={onPress} style={style}>
+      <View
+        style={{
+          flex: 1,
+          padding: 10,
+          backgroundColor: template.colors.purpleLightBackground,
+          borderRadius: template.borderRadius.md,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 32,
+            marginBottom: 20,
+            fontWeight: "600",
+            color: hexToRgb(template.colors.purple, 0.7),
+          }}
+        >
+          {spaceName}
+        </Text>
         <View
           style={{
             flex: 1,
-            padding: 10,
-            backgroundColor: template.colors.purpleLightBackground,
-            borderRadius: template.borderRadius.md,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
           }}
         >
-          <Text style={{ fontSize: 32, marginBottom: 14 }}>🏠</Text>
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <SpaceMembers spaceMembers={spaceMembers} />
-            <Text style={{ color: template.colors.textLight }}>
-              3 others online
-            </Text>
-          </View>
+          <SpaceMembers spaceMembers={spaceMembers} />
+          <Text style={{ color: template.colors.textLight }}>
+            3 others online
+          </Text>
         </View>
-      </PressableOverlay>
-    </View>
+      </View>
+    </PressableOverlay>
   );
 };
 

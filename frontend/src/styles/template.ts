@@ -4,6 +4,7 @@ export const template = {
     purpleLightBackground: "#F6ECFF",
     purpleLight: "#C081FF",
     purple: "#A347FF",
+    grayLightBackground: "#F5F5F5",
     text: "#444",
     textLight: "#888",
     white: "#fff",
@@ -15,6 +16,7 @@ export const template = {
     screen: 25,
   },
   margins: {
+    sm: 15,
     md: 25,
   },
   borderRadius: {

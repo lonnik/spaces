@@ -11,8 +11,10 @@ import { InfoSection } from "../../modules/space/InfoSection";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Message } from "../../modules/space/MessagesSection";
+import { Message, ThreadItem } from "../../modules/space/ThreadItem";
 import { useNavigation } from "@react-navigation/native";
+
+// TODO: animation from bottom on first render for share something button
 
 export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   const insets = useSafeAreaInsets();
@@ -24,36 +26,96 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
 
   const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
-  const data = [
+  const data: (Message | undefined)[] = [
     undefined,
-    undefined,
-    ...Array.from({ length: 20 }).map(() => undefined),
+    // undefined,
+    {
+      id: "3",
+      from: { avatar: "", id: "", username: "Thenick" },
+      likes: 3,
+      when: new Date(),
+      content: { text: "Lorem Ipsum ..." },
+      answers: [
+        {
+          id: "4",
+          from: { avatar: "", id: "", username: "Thenick" },
+          likes: 3,
+          when: new Date(),
+          content: {
+            text: "Lorem ipsum dolor sit amet, consectetur. adipiscing elit. Vivamus inodio nec leo lacinia",
+          },
+        },
+      ],
+    },
+    {
+      id: "4",
+      from: { avatar: "", id: "", username: "Thenick" },
+      likes: 3,
+      when: new Date(),
+      content: { text: "Lorem Ipsum ..." },
+      answers: [
+        {
+          id: "5",
+          from: { avatar: "", id: "", username: "Thenick" },
+          likes: 3,
+          when: new Date(),
+          content: {
+            text: "Lorem ipsum dolor sit amet, consectetur. adipiscing elit. Vivamus inodio nec leo lacinia",
+          },
+        },
+      ],
+    },
+    {
+      id: "6",
+      from: { avatar: "", id: "", username: "Thenick" },
+      likes: 3,
+      when: new Date(),
+      content: { text: "Lorem Ipsum ..." },
+      answers: [
+        {
+          id: "5",
+          from: { avatar: "", id: "", username: "Thenick" },
+          likes: 3,
+          when: new Date(),
+          content: {
+            text: "Lorem ipsum dolor sit amet, consectetur. adipiscing elit. Vivamus inodio nec leo lacinia",
+          },
+        },
+      ],
+    },
   ];
 
-  const renderItem: ListRenderItem<undefined> = ({ index }) => {
+  const renderItem: ListRenderItem<Message | undefined> = ({ index, item }) => {
+    const isLast = index === data.length - 1;
+
     switch (index) {
       case 0:
         return (
           <InfoSection
             spaceMembers={Array.from({ length: 8 })}
             onPress={() => navigation.navigate("Info")}
-            style={{ marginBottom: template.margins.md }}
+            style={{ marginBottom: 20 }}
+            spaceName={space?.name!}
+            key={index}
           />
         );
-      case 1:
-        return <ButtonSection />;
-      case data.length - 1:
-        return <View style={{ height: insets.bottom + 50 }} />;
       default:
-        return <Message />;
+        return (
+          <>
+            <ThreadItem
+              message={item!}
+              key={index}
+              style={{ marginBottom: 26 }}
+            />
+            {isLast && <View style={{ height: insets.bottom + 50 }} />}
+          </>
+        );
     }
   };
 
   if (isLoading) {
     return <LoadingScreen />;
   }
-
-  const spaceMembers = Array.from({ length: 8 });
 
   return (
     <View style={{ flex: 1 }}>
@@ -77,24 +139,8 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
           flexDirection: "column",
           paddingBottom: insets.bottom + 50,
         }}
-        stickyHeaderIndices={[1]}
         renderItem={renderItem}
       />
-    </View>
-  );
-};
-
-const ButtonSection: FC = () => {
-  return (
-    <View
-      style={{
-        flex: 1,
-        marginBottom: template.margins.md,
-        position: "relative",
-        backgroundColor: template.colors.white,
-      }}
-    >
-      <Text style={{ fontSize: 30, fontWeight: "600" }}>Threads</Text>
     </View>
   );
 };
