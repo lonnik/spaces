@@ -13,6 +13,8 @@ import { parseQuery } from "./parse_query";
 
 const radius = 500;
 
+// ----------------------------- GET --------------------------------
+
 export const getSpacesByLocation = async (loc: Location) => {
   const locationParamValue = `${loc.longitude},${loc.latitude}`;
   const queryStr = parseQuery({ location: locationParamValue, radius });
@@ -70,6 +72,20 @@ export const getUser = async (userId: UserUid) => {
   return fetchApi<User>(url);
 };
 
+export const getSpaceSubscribers = async (
+  spaceId: Uuid,
+  active: boolean,
+  offset: number,
+  count: number
+) => {
+  const queryStr = parseQuery({ offset, count, active });
+
+  const url = `/spaces/${encodeURIComponent(spaceId)}/subscribers${queryStr}`;
+  return fetchApi<User[]>(url);
+};
+
+// ------------------ CREATE -----------------------
+
 type SpaceParams = {
   name: string;
   themeColorHexaCode: string;
@@ -84,6 +100,12 @@ export const createSpace = async (spaceParams: SpaceParams) => {
     method: "POST",
     body: JSON.stringify(spaceParams),
   });
+};
+
+export const createSpaceSubscriber = async (spaceId: Uuid) => {
+  const url = `/spaces/${encodeURIComponent(spaceId)}/subscribers`;
+
+  return fetchApi<"success">(url, { method: "POST" });
 };
 
 export const createToplevelThread = async (spaceId: Uuid, content: string) => {

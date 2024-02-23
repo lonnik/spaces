@@ -5,14 +5,41 @@ import { Text } from "../../components/Text";
 import { useNotification } from "../../utils/notifications";
 import { PressableOverlay } from "../../components/PressableOverlay";
 import { hexToRgb } from "../../utils/hex_to_rgb";
+import { Uuid } from "../../types";
+import { useQueries } from "@tanstack/react-query";
+import { getSpaceSubscribers } from "../../utils/queries";
+import { Avatar } from "../../components/Avatar";
 
 export const InfoSection: FC<{
-  spaceMembers: any[];
   onPress: () => void;
   spaceName: string;
+  spaceId: Uuid;
   style?: StyleProp<ViewStyle>;
-}> = ({ spaceMembers, onPress, style, spaceName }) => {
+}> = ({ onPress, style, spaceName, spaceId }) => {
   const [joined, setJoined] = useState(false);
+
+  let [{ data: activeSpaceSubscribers }, { data: inactiveSpaceSubscribers }] =
+    useQueries({
+      queries: [
+        {
+          queryKey: ["spaces", spaceId, "subscribers", "active"],
+          queryFn: async () => getSpaceSubscribers(spaceId, true, 0, 999),
+        },
+        {
+          queryKey: ["spaces", spaceId, "subscribers", "inactive"],
+          queryFn: async () => getSpaceSubscribers(spaceId, false, 0, 8),
+        },
+      ],
+    });
+
+  activeSpaceSubscribers = activeSpaceSubscribers?.slice(0, 8);
+
+  const allSpaceSubscribers = activeSpaceSubscribers
+    ?.slice(0, 8)
+    .concat(
+      inactiveSpaceSubscribers?.slice(0, 8 - activeSpaceSubscribers.length) ||
+        []
+    );
 
   const notification = useNotification();
 
@@ -62,9 +89,17 @@ export const InfoSection: FC<{
             alignItems: "center",
           }}
         >
-          <SpaceMembers spaceMembers={spaceMembers} />
+          <View
+            style={{
+              flexDirection: "row",
+            }}
+          >
+            {(allSpaceSubscribers || []).map((spaceSubscriber) => {
+              return <Avatar key={spaceSubscriber.id} size={32} />;
+            })}
+          </View>
           <Text style={{ color: template.colors.textLight }}>
-            3 others online
+            {activeSpaceSubscribers?.length} others online
           </Text>
         </View>
       </View>
@@ -103,32 +138,5 @@ const JoinButton: FC<{ userHasJoined: boolean; onPress: () => void }> = ({
         {userHasJoined ? "subscribed" : "subscribe"}
       </Text>
     </Pressable>
-  );
-};
-
-export const SpaceMembers: FC<{ spaceMembers: any[] }> = ({ spaceMembers }) => {
-  return (
-    <View
-      style={{
-        flexDirection: "row",
-      }}
-    >
-      {spaceMembers.map((_, index) => {
-        return (
-          <View
-            key={index}
-            style={{
-              height: 32,
-              aspectRatio: 1,
-              backgroundColor: template.colors.gray,
-              borderRadius: 999,
-              borderWidth: 1,
-              borderColor: "#aaa",
-              marginRight: -10,
-            }}
-          />
-        );
-      })}
-    </View>
   );
 };

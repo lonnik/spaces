@@ -100,7 +100,7 @@ func main() {
 	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.GetSpaces)
 	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.CreateSpace)
 	api.GET("/spaces/:spaceid", spaceController.GetSpace)
-	api.GET("/space/:spaceid/updates/ws",
+	api.GET("/spaces/:spaceid/updates/ws",
 		middlewares.EnsureAuthenticated(logger, redisRepo, true, true),
 		isSpaceSubscriberMiddleware,
 		spaceController.SpaceConnect,
