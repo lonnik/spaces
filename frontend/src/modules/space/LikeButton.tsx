@@ -13,12 +13,12 @@ const AnimatedHeartIcon = Animated.createAnimatedComponent(HeartIcon);
 export const LikeButton: FC<{
   likes: number;
   onPress: () => void;
-  isLiked?: boolean;
-}> = ({ likes, onPress, isLiked = false }) => {
+  isLikedByUser: boolean;
+}> = ({ likes, onPress, isLikedByUser }) => {
   const [internalLikes, setInternalLikes] = useState(likes);
 
   const isScaledDownSv = useSharedValue(false);
-  const isSelected = useSharedValue(isLiked);
+  const isSelected = useSharedValue(isLikedByUser);
 
   useEffect(() => {
     setInternalLikes(likes);
@@ -80,7 +80,9 @@ export const LikeButton: FC<{
         <Animated.Text
           style={[
             {
-              color: isLiked ? template.colors.white : template.colors.purple,
+              color: isLikedByUser
+                ? template.colors.white
+                : template.colors.purple,
               fontWeight: "400",
               fontSize: 13,
             },

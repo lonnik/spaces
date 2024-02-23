@@ -84,6 +84,7 @@ export const ThreadItem: FC<{
           style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
           displayLikeButton={true}
           displayAnswersCount={true}
+          spaceId={spaceId}
         />
       </View>
       {firstAnswer ? (
@@ -93,6 +94,7 @@ export const ThreadItem: FC<{
             message={firstAnswer}
             style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
             fontSize={14}
+            spaceId={spaceId}
           />
         </View>
       ) : null}

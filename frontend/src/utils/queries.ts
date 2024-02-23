@@ -86,6 +86,20 @@ export const getSpaceSubscribers = async (
 
 // ------------------ CREATE -----------------------
 
+export const createMessageLike = async (
+  spaceId: Uuid,
+  threadId: Uuid,
+  messageId: Uuid
+) => {
+  const url = `/spaces/${encodeURIComponent(
+    spaceId
+  )}/threads/${encodeURIComponent(threadId)}/messages/${encodeURIComponent(
+    messageId
+  )}/likes`;
+
+  return fetchApi<"success">(url, { method: "POST" });
+};
+
 type SpaceParams = {
   name: string;
   themeColorHexaCode: string;

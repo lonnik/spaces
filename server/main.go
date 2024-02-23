@@ -137,7 +137,8 @@ func main() {
 		isSpaceSubscriberMiddleware,
 		spaceController.CreateMessage,
 	)
-	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/like",
+	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/likes",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
 		validateThreadInSpaceMiddleware,
 		validateMessageInThreadMiddleware,
 		spaceController.LikeMessage,
