@@ -26,8 +26,9 @@ func (us *UserService) GetUser(ctx context.Context, userId models.UserUid) (*mod
 	switch {
 	case err != nil:
 		return nil, errors.E(op, err, http.StatusInternalServerError)
-	case !user.IsSignedUp:
-		return nil, errors.E(op, common.ErrUserNotSignedUp, http.StatusNotFound)
+		// TODO:
+		// case !user.IsSignedUp:
+		// 	return nil, errors.E(op, common.ErrUserNotSignedUp, http.StatusNotFound)
 	}
 
 	return user, nil

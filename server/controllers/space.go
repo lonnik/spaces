@@ -282,7 +282,7 @@ func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {
 		return
 	}
 
-	threadId, err := uc.threadService.CreateTopLevelThread(ctx, spaceId, models.NewTopLevelThreadFirstMessage{
+	threadId, messageId, err := uc.threadService.CreateTopLevelThread(ctx, spaceId, models.NewTopLevelThreadFirstMessage{
 		NewMessageInput: body,
 		SenderId:        authenticatedUser.ID,
 	})
@@ -291,7 +291,7 @@ func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"threadId": threadId})
+	c.JSON(http.StatusOK, gin.H{"data": map[string]any{"threadId": threadId, "firstMessageId": messageId}})
 }
 
 func (uc *SpaceController) CreateThread(c *gin.Context) {
@@ -322,7 +322,7 @@ func (uc *SpaceController) CreateThread(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": threadId})
+	c.JSON(http.StatusOK, gin.H{"data": map[string]any{"threadId": threadId}})
 }
 
 func (uc *SpaceController) CreateMessage(c *gin.Context) {
@@ -363,7 +363,7 @@ func (uc *SpaceController) CreateMessage(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": messageId})
+	c.JSON(http.StatusOK, gin.H{"data": map[string]any{"messageId": messageId}})
 }
 
 func (uc *SpaceController) LikeMessage(c *gin.Context) {

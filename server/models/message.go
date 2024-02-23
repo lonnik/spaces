@@ -29,7 +29,7 @@ type NewMessage struct {
 type Message struct {
 	NewMessage
 	ID            uuid.Uuid `json:"id"`
-	CreatedAt     time.Time `json:"created_at"`
+	CreatedAt     time.Time `json:"createdAt"`
 	ChildThreadId uuid.Uuid `json:"childThreadId"`
 	Likes         int       `json:"likesCount"`
 }

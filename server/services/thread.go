@@ -46,15 +46,15 @@ func (ts *ThreadService) CreateThread(ctx context.Context, spaceId, parentMessag
 	return thread.ID, nil
 }
 
-func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, error) {
+func (ts *ThreadService) CreateTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newTopLevelThreadFirstMessage models.NewTopLevelThreadFirstMessage) (uuid.Uuid, uuid.Uuid, error) {
 	const op errors.Op = "services.ThreadService.CreateTopLevelThread"
 
-	createdTopLevelThread, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, newTopLevelThreadFirstMessage)
+	createdTopLevelThread, createdFirstMessage, err := ts.cacheRepo.SetTopLevelThread(ctx, spaceId, newTopLevelThreadFirstMessage)
 	if err != nil {
-		return uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
+		return uuid.Nil, uuid.Nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
 	ts.localMemoryRepo.PublishNewToplevelThread(spaceId, newTopLevelThreadFirstMessage.SenderId, *createdTopLevelThread)
 
-	return createdTopLevelThread.ID, nil
+	return createdTopLevelThread.ID, createdFirstMessage.ID, nil
 }

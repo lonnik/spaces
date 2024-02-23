@@ -86,7 +86,7 @@ func main() {
 
 	// USERS
 	api.POST("/users", userController.CreateUserFromIdToken)
-	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, true), userController.GetUser)
+	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), userController.GetUser)
 
 	// AUTHENTICATED USER
 	api.GET("/user",
@@ -113,6 +113,7 @@ func main() {
 		spaceController.AddSpaceSubscriber,
 	)
 	api.GET("/spaces/:spaceid/toplevel-threads",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
 		spaceController.GetTopLevelThreads,
 	)
 	api.POST("/spaces/:spaceid/toplevel-threads",
@@ -121,6 +122,7 @@ func main() {
 		spaceController.CreateTopLevelThread,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
 		validateThreadInSpaceMiddleware,
 		validateMessageInThreadMiddleware,
 		spaceController.CreateThread,

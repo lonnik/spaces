@@ -108,7 +108,7 @@ func (repo *RedisRepository) SetThread(ctx context.Context, spaceId, parentMessa
 }
 
 // add new thread to space toplevel sets, set first message
-func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (*models.TopLevelThread, error) {
+func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid.Uuid, newMessage models.NewTopLevelThreadFirstMessage) (*models.TopLevelThread, *models.Message, error) {
 	const op errors.Op = "redis_repo.RedisRepository.SetTopLevelThread"
 	var threadId = uuid.New()
 	var createdAt = time.Now()
@@ -120,7 +120,7 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 		SenderId:    newMessage.SenderId,
 	})
 	if err != nil {
-		return nil, errors.E(op, err)
+		return nil, nil, errors.E(op, err)
 	}
 
 	var createdTopLevelThread = &models.TopLevelThread{
@@ -141,7 +141,7 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 		threadFields.createdAtField:       strconv.FormatInt(createdAt.UnixMilli(), 10),
 		threadFields.spaceIdField:         spaceId.String(),
 	}).Err(); err != nil {
-		return nil, errors.E(op, err)
+		return nil, nil, errors.E(op, err)
 	}
 
 	// add to space thread toplevel sets
@@ -150,7 +150,7 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 		Score:  float64(createdAt.UnixMilli()),
 		Member: threadId.String(),
 	}).Err(); err != nil {
-		return nil, errors.E(op, err)
+		return nil, nil, errors.E(op, err)
 	}
 
 	var spaceToplevelThreadsByPopularityKey = getSpaceToplevelThreadsByPopularityKey(spaceId)
@@ -158,10 +158,10 @@ func (repo *RedisRepository) SetTopLevelThread(ctx context.Context, spaceId uuid
 		Score:  0,
 		Member: threadId.String(),
 	}).Err(); err != nil {
-		return nil, errors.E(op, err)
+		return nil, nil, errors.E(op, err)
 	}
 
-	return createdTopLevelThread, nil
+	return createdTopLevelThread, createdFirstMessage, nil
 }
 
 func (repo *RedisRepository) HasThreadMessage(ctx context.Context, threadId, messageId uuid.Uuid) (bool, error) {
