@@ -1,11 +1,5 @@
-import { FC, forwardRef, useEffect, useRef, useState } from "react";
-import {
-  Keyboard,
-  Platform,
-  TextInput,
-  TextInputProps,
-  View,
-} from "react-native";
+import { FC, forwardRef, useCallback, useRef, useState } from "react";
+import { TextInput, TextInputProps, View } from "react-native";
 import { Header } from "../../components/Header";
 import { template } from "../../styles/template";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
@@ -13,41 +7,100 @@ import { Text } from "../../components/Text";
 import { GalleryIcon } from "../../components/icons/GalleryIcon";
 import { PressableOverlay } from "../../components/PressableOverlay";
 import { useCustomNavigation } from "../../hooks/use_custom_navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNotification } from "../../utils/notifications";
-import { createToplevelThread } from "../../utils/queries";
+import {
+  createMessage,
+  createThread,
+  createToplevelThread,
+} from "../../utils/queries";
 import { Uuid } from "../../types";
+import { useKeyboardHeight } from "../../modules/space/hooks/use_keyboard_height";
+import { useOnClose } from "../../modules/space/hooks/use_on_close";
+
+const createThreadAndMessage = async ({
+  topLevelThreadId,
+  firstMessageId,
+  spaceId,
+  messageContent,
+}: {
+  topLevelThreadId: Uuid;
+  firstMessageId: Uuid;
+  spaceId: Uuid;
+  messageContent: string;
+}) => {
+  const { threadId } = await createThread(
+    spaceId,
+    topLevelThreadId,
+    firstMessageId
+  );
+
+  return createMessage(spaceId, threadId, messageContent);
+};
 
 // TODO: loading notification and success or error notification
 
 export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const [firstMessageText, setFirstMessageText] = useState("");
   const [secondMessageText, setSecondMessageText] = useState("");
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const keyboardHeight = useKeyboardHeight();
   const navigation = useCustomNavigation();
   const firstMessageRef = useRef<TextInput>(null);
   const secondMessageRef = useRef<TextInput>(null);
-
   const notification = useNotification();
+  const queryClient = useQueryClient();
+
+  const onSuccess = useCallback(() => {
+    queryClient.invalidateQueries({
+      queryKey: ["spaces", spaceId],
+    });
+    notification.updateNotification({
+      title: "You started a thread ✉️",
+      type: "success",
+    });
+    navigation.goBack();
+  }, []);
+
+  const onError = useCallback((error: Error) => {
+    console.error("error :>> ", error);
+    notification.updateNotification({
+      title: "Error creating new thread",
+      type: "error",
+    });
+  }, []);
+
+  const { mutate: createNewMessage } = useMutation({
+    mutationKey: ["createMessage"],
+    mutationFn: createThreadAndMessage,
+    onError(error) {
+      onError(error);
+    },
+    onSuccess() {
+      onSuccess();
+    },
+  });
 
   const { mutate: createNewTopLevelThread } = useMutation({
+    mutationKey: ["createToplevelThread"],
     mutationFn: async (content: string) => {
       return createToplevelThread(spaceId, content);
     },
-    mutationKey: ["createToplevelThread"],
     onError(error) {
-      console.error("error :>> ", error);
-      notification.updateNotification({
-        title: "Error creating new thread",
-        type: "error",
-      });
+      onError(error);
     },
-    onSuccess() {
-      navigation.goBack();
-      notification.updateNotification({
-        title: "You started a thread ✉️",
-        type: "success",
-      });
+    onSuccess(data) {
+      if (secondMessageText) {
+        createNewMessage({
+          topLevelThreadId: data.threadId,
+          firstMessageId: data.firstMessageId,
+          spaceId,
+          messageContent: secondMessageText,
+        });
+
+        return;
+      }
+
+      onSuccess();
     },
   });
 
@@ -55,6 +108,8 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     firstMessageRef.current?.blur();
     secondMessageRef.current?.blur();
   };
+
+  useOnClose(onClose);
 
   const onSend = async () => {
     notification.showNotification({
@@ -65,29 +120,6 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
 
     createNewTopLevelThread(firstMessageText);
   };
-
-  useEffect(() => {
-    const keyboardDidShowListener = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
-      (e) => setKeyboardHeight(e.endCoordinates.height)
-    );
-
-    const keyboardDidHideListener = Keyboard.addListener(
-      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
-      () => setKeyboardHeight(0)
-    );
-
-    return () => {
-      keyboardDidShowListener.remove();
-      keyboardDidHideListener.remove();
-    };
-  }, []);
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", onClose);
-
-    return unsubscribe;
-  }, [navigation]);
 
   return (
     <View style={{ flex: 1 }}>

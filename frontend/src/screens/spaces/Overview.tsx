@@ -1,9 +1,9 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import { SpaceStackParamList } from "../../types";
-import { FC } from "react";
+import { Message, SpaceStackParamList } from "../../types";
+import { FC, useState } from "react";
 import { FlatList, ListRenderItem, View } from "react-native";
-import { useQuery } from "@tanstack/react-query";
-import { getSpaceById } from "../../utils/queries";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
+import { getSpaceById, getToplevelThreads } from "../../utils/queries";
 import { LoadingScreen } from "../Loading";
 import { Header } from "../../components/Header";
 import { template } from "../../styles/template";
@@ -11,111 +11,92 @@ import { InfoSection } from "../../modules/space/InfoSection";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { Message, ThreadItem } from "../../modules/space/ThreadItem";
+import { ThreadItem } from "../../modules/space/ThreadItem";
 import { useNavigation } from "@react-navigation/native";
+
+type MessageListItem = {
+  type: "message";
+  message: Message;
+};
+
+type SpaceInfoListItem = {
+  type: "info";
+};
+
+type ListItem = MessageListItem | SpaceInfoListItem;
 
 // TODO: animation from bottom on first render for share something button
 
 export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   const insets = useSafeAreaInsets();
 
-  const { data: space, isLoading } = useQuery({
-    queryKey: ["spaces", spaceId],
-    queryFn: () => getSpaceById(spaceId),
+  const [
+    { data: space, isLoading: isLoadingSpace },
+    { data: topLevelThreads, isLoading: isLoadingThreads },
+  ] = useQueries({
+    queries: [
+      {
+        queryKey: ["spaces", spaceId],
+        queryFn: () => getSpaceById(spaceId),
+      },
+      {
+        queryKey: ["spaces", spaceId, "toplevel-threads"],
+        queryFn: () => getToplevelThreads(spaceId),
+      },
+    ],
   });
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.refetchQueries({ queryKey: ["spaces", spaceId] });
+    setRefreshing(false);
+  };
+
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
 
   const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
-  const data: (Message | undefined)[] = [
-    undefined,
-    // undefined,
-    {
-      id: "3",
-      from: { avatar: "", id: "", username: "Thenick" },
-      likes: 3,
-      when: new Date(),
-      content: { text: "Lorem Ipsum ..." },
-      answers: [
-        {
-          id: "4",
-          from: { avatar: "", id: "", username: "Thenick" },
-          likes: 3,
-          when: new Date(),
-          content: {
-            text: "Lorem ipsum dolor sit amet, consectetur. adipiscing elit. Vivamus inodio nec leo lacinia",
-          },
-        },
-      ],
-    },
-    {
-      id: "4",
-      from: { avatar: "", id: "", username: "Thenick" },
-      likes: 3,
-      when: new Date(),
-      content: { text: "Lorem Ipsum ..." },
-      answers: [
-        {
-          id: "5",
-          from: { avatar: "", id: "", username: "Thenick" },
-          likes: 3,
-          when: new Date(),
-          content: {
-            text: "Lorem ipsum dolor sit amet, consectetur. adipiscing elit. Vivamus inodio nec leo lacinia",
-          },
-        },
-      ],
-    },
-    {
-      id: "6",
-      from: { avatar: "", id: "", username: "Thenick" },
-      likes: 3,
-      when: new Date(),
-      content: { text: "Lorem Ipsum ..." },
-      answers: [
-        {
-          id: "5",
-          from: { avatar: "", id: "", username: "Thenick" },
-          likes: 3,
-          when: new Date(),
-          content: {
-            text: "Lorem ipsum dolor sit amet, consectetur. adipiscing elit. Vivamus inodio nec leo lacinia",
-          },
-        },
-      ],
-    },
-  ];
-
-  const renderItem: ListRenderItem<Message | undefined> = ({ index, item }) => {
-    const isLast = index === data.length - 1;
-
-    switch (index) {
-      case 0:
-        return (
-          <InfoSection
-            spaceMembers={Array.from({ length: 8 })}
-            onPress={() => navigation.navigate("Info")}
-            style={{ marginBottom: 20 }}
-            spaceName={space?.name!}
-            key={index}
-          />
-        );
-      default:
-        return (
-          <>
-            <ThreadItem
-              message={item!}
-              key={index}
-              style={{ marginBottom: 26 }}
-            />
-            {isLast && <View style={{ height: insets.bottom + 50 }} />}
-          </>
-        );
+  const renderItem: ListRenderItem<ListItem> = ({ index, item }) => {
+    if (item.type === "info") {
+      return (
+        <InfoSection
+          key={index}
+          spaceMembers={Array.from({ length: 8 })}
+          onPress={() => navigation.navigate("Info")}
+          style={{ marginBottom: 20 }}
+          spaceName={space?.name!}
+        />
+      );
     }
+
+    const isLast = index === topLevelThreads?.length;
+
+    return (
+      <>
+        <ThreadItem
+          key={index}
+          spaceId={spaceId}
+          message={item.message}
+          style={{ marginBottom: 26 }}
+        />
+        {isLast && <View style={{ height: insets.bottom + 50 }} />}
+      </>
+    );
   };
 
-  if (isLoading) {
+  if (isLoadingSpace || isLoadingThreads) {
     return <LoadingScreen />;
   }
+
+  const data = [
+    { type: "info" } as SpaceInfoListItem,
+    ...topLevelThreads!.map<MessageListItem>((thread) => ({
+      type: "message",
+      message: thread.firstMessage!,
+    })),
+  ];
 
   return (
     <View style={{ flex: 1 }}>
@@ -133,6 +114,8 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
       </PrimaryButton>
       <FlatList
         data={data}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
         style={{
           flex: 1,
           paddingHorizontal: template.paddings.md,
