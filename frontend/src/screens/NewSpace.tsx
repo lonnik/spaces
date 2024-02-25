@@ -211,16 +211,16 @@ export const NewSpaceScreen: FC<
               overflow: "hidden",
             }}
           />
-          <RadiusSection
-            radius={radius}
-            setRadius={handleRadiusChange}
-            color={colors[selectedColorIndex]}
-          />
           <NameSection
             spaceName={name}
             setSpaceName={handleNameChange}
             handleBlur={handleNameBlur}
             errors={spaceNameErrors}
+          />
+          <RadiusSection
+            radius={radius}
+            setRadius={handleRadiusChange}
+            color={colors[selectedColorIndex]}
           />
           <ColorSection
             selectedColorIndex={selectedColorIndex}

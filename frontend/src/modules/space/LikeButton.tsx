@@ -58,7 +58,11 @@ export const LikeButton: FC<{
   };
 
   return (
-    <Pressable onPress={onPressHandler} hitSlop={10}>
+    <Pressable
+      onPress={onPressHandler}
+      hitSlop={10}
+      style={{ alignSelf: "flex-start" }}
+    >
       <Animated.View
         style={[
           {

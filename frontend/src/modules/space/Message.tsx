@@ -65,15 +65,17 @@ export const Message: FC<{
             flex: 1,
             flexDirection: "row",
             alignItems: "center",
-            gap: 8,
+            gap: 5,
           }}
         >
           {displayLikeButton ? (
-            <LikeButton
-              likes={message.likesCount}
-              onPress={onPress}
-              isLikedByUser={isLiked}
-            />
+            <View style={{ minWidth: 55 }}>
+              <LikeButton
+                likes={message.likesCount}
+                onPress={onPress}
+                isLikedByUser={isLiked}
+              />
+            </View>
           ) : null}
           {displayAnswersCount ? (
             <Text
