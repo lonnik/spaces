@@ -6,7 +6,7 @@ import { Uuid, type Message as TMessage } from "../../types";
 import { LikeButton } from "./LikeButton";
 import { useMutation } from "@tanstack/react-query";
 import { createMessageLike } from "../../utils/queries";
-import { PressableOverlay } from "../../components/PressableOverlay";
+import { PressableTransformation } from "../../components/PressableTransformation";
 
 // TODO:
 // prop should exist that says if the message is liked by the user
@@ -51,7 +51,7 @@ export const Message: FC<{
     displayAnswersCount && !!message.childThreadMessagesCount;
 
   return (
-    <PressableOverlay onPress={onPress}>
+    <PressableTransformation onPress={onPress}>
       <View
         style={[
           {
@@ -89,6 +89,6 @@ export const Message: FC<{
           </View>
         ) : null}
       </View>
-    </PressableOverlay>
+    </PressableTransformation>
   );
 };

@@ -3,12 +3,12 @@ import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 import { useNotification } from "../../utils/notifications";
-import { PressableOverlay } from "../../components/PressableOverlay";
 import { hexToRgb } from "../../utils/hex_to_rgb";
 import { Uuid } from "../../types";
 import { useQueries } from "@tanstack/react-query";
 import { getSpaceSubscribers } from "../../utils/queries";
 import { Avatar } from "../../components/Avatar";
+import { PressableTransformation } from "../../components/PressableTransformation";
 
 export const InfoSection: FC<{
   onPress: () => void;
@@ -62,7 +62,7 @@ export const InfoSection: FC<{
   };
 
   return (
-    <PressableOverlay onPress={onPress} style={style}>
+    <PressableTransformation onPress={onPress} style={style}>
       <View
         style={{
           flex: 1,
@@ -103,7 +103,7 @@ export const InfoSection: FC<{
           </Text>
         </View>
       </View>
-    </PressableOverlay>
+    </PressableTransformation>
   );
 };
 
