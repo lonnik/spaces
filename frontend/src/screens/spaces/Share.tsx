@@ -17,6 +17,7 @@ import {
 import { Uuid } from "../../types";
 import { useKeyboardHeight } from "../../modules/space/hooks/use_keyboard_height";
 import { useOnClose } from "../../modules/space/hooks/use_on_close";
+import { cleanString } from "../../utils/strings";
 
 const createThreadAndMessage = async ({
   topLevelThreadId,
@@ -90,11 +91,13 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     },
     onSuccess(data) {
       if (secondMessageText) {
+        const firstMessageTextClean = cleanString(firstMessageText);
+
         createNewMessage({
           topLevelThreadId: data.threadId,
           firstMessageId: data.firstMessageId,
           spaceId,
-          messageContent: secondMessageText,
+          messageContent: firstMessageTextClean,
         });
 
         return;
@@ -112,13 +115,15 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   useOnClose(onClose);
 
   const onSend = async () => {
+    const firstMessageTextClean = cleanString(firstMessageText);
+
     notification.showNotification({
       title: "Creating New Thread ...",
       type: "loading",
       duration: 999999,
     });
 
-    createNewTopLevelThread(firstMessageText);
+    createNewTopLevelThread(firstMessageTextClean);
   };
 
   return (
