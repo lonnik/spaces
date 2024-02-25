@@ -15,6 +15,9 @@ export type SpaceStackParamList = {
   Overview: undefined;
   Info: undefined;
   Share: undefined;
+  Thread: {
+    threadId: Uuid;
+  };
 };
 
 export type TabsParamList = {

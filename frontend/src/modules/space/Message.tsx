@@ -6,6 +6,7 @@ import { Uuid, type Message as TMessage } from "../../types";
 import { LikeButton } from "./LikeButton";
 import { useMutation } from "@tanstack/react-query";
 import { createMessageLike } from "../../utils/queries";
+import { PressableOverlay } from "../../components/PressableOverlay";
 
 // TODO:
 // prop should exist that says if the message is liked by the user
@@ -18,6 +19,7 @@ export const Message: FC<{
   spaceId: Uuid;
   displayLikeButton?: boolean;
   displayAnswersCount?: boolean;
+  onPress: () => void;
   style?: StyleProp<ViewStyle>;
   fontSize?: number;
 }> = ({
@@ -25,6 +27,7 @@ export const Message: FC<{
   spaceId,
   style,
   fontSize = 26,
+  onPress,
   displayLikeButton = false,
   displayAnswersCount = false,
 }) => {
@@ -40,7 +43,7 @@ export const Message: FC<{
     },
   });
 
-  const onPress = () => {
+  const onLikeButtonPress = () => {
     createNewMessageLike();
   };
 
@@ -48,42 +51,44 @@ export const Message: FC<{
     displayAnswersCount && !!message.childThreadMessagesCount;
 
   return (
-    <View
-      style={[
-        {
-          backgroundColor: template.colors.grayLightBackground,
-          borderRadius: template.borderRadius.md,
-          flex: 1,
-        },
-        style,
-      ]}
-    >
-      <Text style={{ fontSize }}>{message.content}</Text>
-      {displayLikeButton || displayAnswersCount ? (
-        <View
-          style={{
+    <PressableOverlay onPress={onPress}>
+      <View
+        style={[
+          {
+            backgroundColor: template.colors.grayLightBackground,
+            borderRadius: template.borderRadius.md,
             flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-          }}
-        >
-          {displayLikeButton ? (
-            <View style={{ minWidth: 55 }}>
-              <LikeButton
-                likes={message.likesCount}
-                onPress={onPress}
-                isLikedByUser={isLiked}
-              />
-            </View>
-          ) : null}
-          {displayAnswersCount ? (
-            <Text
-              style={{ color: template.colors.textLight }}
-            >{`${message.childThreadMessagesCount} answers`}</Text>
-          ) : null}
-        </View>
-      ) : null}
-    </View>
+          },
+          style,
+        ]}
+      >
+        <Text style={{ fontSize }}>{message.content}</Text>
+        {displayLikeButton || displayAnswersCount ? (
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+            }}
+          >
+            {displayLikeButton ? (
+              <View style={{ minWidth: 55 }}>
+                <LikeButton
+                  likes={message.likesCount}
+                  onPress={onLikeButtonPress}
+                  isLikedByUser={isLiked}
+                />
+              </View>
+            ) : null}
+            {displayAnswersCount ? (
+              <Text
+                style={{ color: template.colors.textLight }}
+              >{`${message.childThreadMessagesCount} answers`}</Text>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
+    </PressableOverlay>
   );
 };

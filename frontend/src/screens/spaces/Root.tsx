@@ -6,6 +6,7 @@ import { SpaceOverviewScreen } from "./Overview";
 import { SpaceShareScreen } from "./Share";
 import { View } from "react-native";
 import { SpaceInfoScreen } from "./Info";
+import { ThreadScreen } from "./Thread";
 
 const Stack = createCustomStackNavigator<SpaceStackParamList>();
 
@@ -31,6 +32,9 @@ export const SpaceRootScreen: FC<
           options={{ animation: "slideInFromBottom", snapPoint: "96%" }}
         >
           {() => <SpaceShareScreen spaceId={spaceId} />}
+        </Stack.Screen>
+        <Stack.Screen name="Thread" options={{ animation: "slideInFromRight" }}>
+          {() => <ThreadScreen spaceId={spaceId} />}
         </Stack.Screen>
       </Stack.Navigator>
     </View>

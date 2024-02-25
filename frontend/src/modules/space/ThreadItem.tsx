@@ -3,11 +3,17 @@ import { StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 import { PointIcon } from "../../components/icons/PointIcon";
-import { type Message as TMessage, Uuid } from "../../types";
+import {
+  type Message as TMessage,
+  Uuid,
+  SpaceStackParamList,
+} from "../../types";
 import { useQueries } from "@tanstack/react-query";
 import { getThreadWithMessages, getUser } from "../../utils/queries";
 import { Avatar } from "../../components/Avatar";
 import { Message } from "./Message";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 // TODO:
 // display date function
@@ -57,6 +63,8 @@ export const ThreadItem: FC<{
 
   const firstAnswer = answerThread?.messages?.[0];
 
+  const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
+
   return (
     <View style={[{ flex: 1 }, style]}>
       <View
@@ -85,6 +93,9 @@ export const ThreadItem: FC<{
           displayLikeButton={true}
           displayAnswersCount={true}
           spaceId={spaceId}
+          onPress={() => {
+            navigation.navigate("Thread", { threadId: message.id });
+          }}
         />
       </View>
       {firstAnswer ? (
@@ -95,6 +106,9 @@ export const ThreadItem: FC<{
             style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
             fontSize={14}
             spaceId={spaceId}
+            onPress={() => {
+              navigation.navigate("Thread", { threadId: firstAnswer.threadId });
+            }}
           />
         </View>
       ) : null}
