@@ -91,13 +91,13 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     },
     onSuccess(data) {
       if (secondMessageText) {
-        const firstMessageTextClean = cleanString(firstMessageText);
+        const secondMessageTextClean = cleanString(secondMessageText);
 
         createNewMessage({
           topLevelThreadId: data.threadId,
           firstMessageId: data.firstMessageId,
           spaceId,
-          messageContent: firstMessageTextClean,
+          messageContent: secondMessageTextClean,
         });
 
         return;
