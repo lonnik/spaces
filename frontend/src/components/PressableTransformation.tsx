@@ -6,6 +6,8 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+const duration = 100;
+
 export const PressableTransformation: FC<
   {
     children: ReactNode;
@@ -20,31 +22,28 @@ export const PressableTransformation: FC<
   const isPressedSv = useSharedValue(false);
 
   const animatedOpacity = useAnimatedStyle(() => {
+    const heightTranslation = Math.max(dimensions.height * 0.005, 1);
+    const widthTranslation = Math.max(dimensions.width * 0.005, 1);
+
     return {
       transform: [
         {
-          scale: withTiming(isPressedSv.value ? 0.99 : 1, { duration: 75 }),
+          scale: withTiming(isPressedSv.value ? 0.98 : 1, { duration }),
         },
+        // {
+        //   skewY: withTiming(isPressedSv.value ? "0.5deg" : "0deg", {
+        //     duration,
+        //   }),
+        // },
         {
-          skewY: withTiming(isPressedSv.value ? "0.5deg" : "0deg", {
-            duration: 75,
+          translateX: withTiming(isPressedSv.value ? widthTranslation : 0, {
+            duration,
           }),
         },
         {
-          translateX: withTiming(
-            isPressedSv.value ? dimensions.width * 0.007 : 0,
-            {
-              duration: 75,
-            }
-          ),
-        },
-        {
-          translateY: withTiming(
-            isPressedSv.value ? dimensions.height * 0.007 : 0,
-            {
-              duration: 75,
-            }
-          ),
+          translateY: withTiming(isPressedSv.value ? heightTranslation : 0, {
+            duration,
+          }),
         },
       ],
     };
