@@ -366,6 +366,25 @@ func (uc *SpaceController) CreateMessage(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": map[string]any{"messageId": messageId}})
 }
 
+func (uc *SpaceController) GetMessage(c *gin.Context) {
+	const op errors.Op = "controllers.SpaceController.GetMessage"
+	var ctx = c.Request.Context()
+
+	messageId, err := utils.GetMessageIdFromPath(c)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
+
+	message, err := uc.messageService.GetMessage(ctx, messageId)
+	if err != nil {
+		utils.WriteError(c, errors.E(op, err), uc.logger)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": message})
+}
+
 func (uc *SpaceController) LikeMessage(c *gin.Context) {
 	const op errors.Op = "controllers.SpaceController.LikeMessage"
 	var ctx = c.Request.Context()

@@ -43,6 +43,20 @@ func (ts *MessageService) CreateMessage(ctx context.Context, spaceId uuid.Uuid, 
 	return createdMessage.ID, nil
 }
 
+func (ts *MessageService) GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.MessageWithChildThreadMessagesCount, error) {
+	const op errors.Op = "services.MessageService.GetMessage"
+
+	message, err := ts.cacheRepo.GetMessage(ctx, messageId)
+	switch {
+	case errors.Is(err, common.ErrNotFound):
+		return nil, errors.E(op, err, http.StatusBadRequest)
+	case err != nil:
+		return nil, errors.E(op, err, http.StatusInternalServerError)
+	}
+
+	return message, nil
+}
+
 func (ts *MessageService) LikeMessage(ctx context.Context, spaceId, threadId, likedMessageId uuid.Uuid, authenticatedUserId models.UserUid) error {
 	const op errors.Op = "services.MessageService.LikeMessage"
 

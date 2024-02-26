@@ -121,12 +121,6 @@ func main() {
 		isSpaceSubscriberMiddleware,
 		spaceController.CreateTopLevelThread,
 	)
-	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		validateThreadInSpaceMiddleware,
-		validateMessageInThreadMiddleware,
-		spaceController.CreateThread,
-	)
 	api.GET("/spaces/:spaceid/threads/:threadid",
 		validateThreadInSpaceMiddleware,
 		spaceController.GetThreadWithMessages,
@@ -136,6 +130,18 @@ func main() {
 		validateThreadInSpaceMiddleware,
 		isSpaceSubscriberMiddleware,
 		spaceController.CreateMessage,
+	)
+	api.GET("/spaces/:spaceid/threads/:threadid/messages/:messageid",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		validateThreadInSpaceMiddleware,
+		validateMessageInThreadMiddleware,
+		spaceController.GetMessage,
+	)
+	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
+		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		validateThreadInSpaceMiddleware,
+		validateMessageInThreadMiddleware,
+		spaceController.CreateThread,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/likes",
 		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),

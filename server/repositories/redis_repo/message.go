@@ -13,16 +13,16 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func (repo *RedisRepository) GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.Message, error) {
+func (repo *RedisRepository) GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.MessageWithChildThreadMessagesCount, error) {
 	const op errors.Op = "redis_repo.RedisRepository.GetMessage"
 	var messageKey = getMessageKey(messageId)
 
 	messageMap, err := repo.redisClient.HGetAll(ctx, messageKey).Result()
 	switch {
 	case err != nil:
-		return &models.Message{}, errors.E(op, err)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, err)
 	case len(messageMap) == 0:
-		return &models.Message{}, errors.E(op, common.ErrNotFound)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, common.ErrNotFound)
 	}
 
 	childThreadIdStr := messageMap[messageFields.childThreadIdField]
@@ -38,44 +38,52 @@ func (repo *RedisRepository) GetMessage(ctx context.Context, messageId uuid.Uuid
 	case uuid.IsInvalidLengthError(err):
 		break
 	case err != nil:
-		return &models.Message{}, errors.E(op, err)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, err)
+	}
+
+	var childThreadMessagesByTimeKey = getThreadMessagesByTimeKey(childThreadId)
+	childThreadMessagesCount, err := repo.redisClient.ZCard(ctx, childThreadMessagesByTimeKey).Result()
+	if err != nil {
+		return nil, errors.E(op, err)
 	}
 
 	likes, err := strconv.Atoi(likesStr)
 	if err != nil {
-		return &models.Message{}, errors.E(op, err)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, err)
 	}
 
 	senderId := models.UserUid(senderIdStr)
 
 	threadId, err := uuid.Parse(threadIdStr)
 	if err != nil {
-		return &models.Message{}, errors.E(op, err)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, err)
 	}
 
 	createdAt, err := utils.StringToTime(createdAtMilliStr)
 	if err != nil {
-		return &models.Message{}, errors.E(op, err)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, err)
 	}
 
 	var messageType models.MessageType
 	if err := messageType.Parse(messageTypeStr); err != nil {
-		return &models.Message{}, errors.E(op, err)
+		return &models.MessageWithChildThreadMessagesCount{}, errors.E(op, err)
 	}
 
-	return &models.Message{
-		ID:            messageId,
-		CreatedAt:     createdAt,
-		ChildThreadId: childThreadId,
-		Likes:         likes,
-		NewMessage: models.NewMessage{
-			BaseMessage: models.BaseMessage{
-				Content: content,
-				Type:    messageType,
-			},
-			SenderId: senderId,
-			ThreadId: threadId,
-		},
+	return &models.MessageWithChildThreadMessagesCount{
+		ChildThreadMessagesCount: childThreadMessagesCount,
+		Message: models.Message{
+			ID:            messageId,
+			CreatedAt:     createdAt,
+			ChildThreadId: childThreadId,
+			Likes:         likes,
+			NewMessage: models.NewMessage{
+				BaseMessage: models.BaseMessage{
+					Content: content,
+					Type:    messageType,
+				},
+				SenderId: senderId,
+				ThreadId: threadId,
+			}},
 	}, nil
 }
 

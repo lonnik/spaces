@@ -49,7 +49,7 @@ type ThreadCacheRepository interface {
 }
 
 type MessageCacheRepository interface {
-	GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.Message, error)
+	GetMessage(ctx context.Context, messageId uuid.Uuid) (*models.MessageWithChildThreadMessagesCount, error)
 	SetMessage(ctx context.Context, newMessage models.NewMessage) (*models.Message, error)
 	IncrementMessageLikesBy(ctx context.Context, threadId, messageId uuid.Uuid, increment int64) error
 }
