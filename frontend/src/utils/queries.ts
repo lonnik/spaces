@@ -16,9 +16,18 @@ const radius = 500;
 
 // ----------------------------- GET --------------------------------
 
-export const getSpacesByLocation = async (loc: Location) => {
+export const getSpacesByLocation = async (
+  loc: Location,
+  count: number | undefined = 10,
+  offset: number | undefined = 0
+) => {
   const locationParamValue = `${loc.longitude},${loc.latitude}`;
-  const queryStr = parseQuery({ location: locationParamValue, radius });
+  const queryStr = parseQuery({
+    location: locationParamValue,
+    radius,
+    count,
+    offset,
+  });
   const url = `/spaces${queryStr}`;
 
   return fetchApi<Space[]>(url);

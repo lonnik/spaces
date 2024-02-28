@@ -14,6 +14,9 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useLocation } from "../hooks/use_location";
+import { template } from "../styles/template";
+
+const maxNumberItems = 11;
 
 export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   navigation,
@@ -31,7 +34,8 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
     queries: [
       {
         queryKey: ["spaces by location", location],
-        queryFn: () => getSpacesByLocation(location as Location),
+        queryFn: () =>
+          getSpacesByLocation(location as Location, maxNumberItems),
         enabled: !!location,
       },
       {
@@ -67,17 +71,26 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   return (
     <View style={{ flex: 1, backgroundColor: "#fff" }}>
       <Header address={address} navigation={navigation} />
-      <Animated.FlatList
-        data={spaces}
-        numColumns={3}
-        onRefresh={onRefresh}
-        refreshing={refreshing}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => {
-          return <SpaceItem data={item} navigation={navigation} />;
+      <View
+        style={{
+          flex: 1,
         }}
-        style={[{ flex: 1, padding: 5 }, animatedOpacityStyles]}
-      />
+      >
+        <Animated.FlatList
+          data={spaces}
+          numColumns={2}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => {
+            return <SpaceItem data={item} navigation={navigation} />;
+          }}
+          contentContainerStyle={{
+            paddingHorizontal: (template.paddings.md * 2) / 3,
+          }}
+          style={[{ flex: 1 }, animatedOpacityStyles]}
+        />
+      </View>
     </View>
   );
 };
