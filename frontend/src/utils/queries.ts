@@ -7,6 +7,7 @@ import {
   User,
   Sorting,
   Thread,
+  Message,
 } from "../types";
 import { fetchApi } from "./fetch_api";
 import { parseQuery } from "./parse_query";
@@ -62,8 +63,19 @@ export const getThreadWithMessages = async (
   const url = `/spaces/${encodeURIComponent(
     spaceId
   )}/threads/${encodeURIComponent(threadId)}${queryStr}`;
+  console.log("url :>> ", url);
 
   return fetchApi<Thread>(url);
+};
+
+export const getMessage = async (
+  spaceId: Uuid,
+  threadId: Uuid,
+  messageId: Uuid
+) => {
+  const url = `/spaces/${spaceId}/threads/${threadId}/messages/${messageId}`;
+
+  return fetchApi<Message>(url);
 };
 
 export const getUser = async (userId: UserUid) => {

@@ -30,11 +30,11 @@ export const PressableTransformation: FC<
         {
           scale: withTiming(isPressedSv.value ? 0.98 : 1, { duration }),
         },
-        // {
-        //   skewY: withTiming(isPressedSv.value ? "0.5deg" : "0deg", {
-        //     duration,
-        //   }),
-        // },
+        {
+          skewY: withTiming(isPressedSv.value ? "0.5deg" : "0deg", {
+            duration,
+          }),
+        },
         {
           translateX: withTiming(isPressedSv.value ? widthTranslation : 0, {
             duration,

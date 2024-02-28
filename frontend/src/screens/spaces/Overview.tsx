@@ -150,29 +150,31 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   return (
     <View style={{ flex: 1 }}>
       <Header text={`${space?.name} 🏠`} />
-      <PrimaryButton
-        onPress={() => navigation.navigate("Share")}
-        style={{
-          alignSelf: "center",
-          position: "absolute",
-          bottom: insets.bottom + template.paddings.md,
-          zIndex: 1000,
-        }}
-      >
-        <Text style={{ color: template.colors.white }}>Share something</Text>
-      </PrimaryButton>
-      <FlatList
-        data={data}
-        onRefresh={onRefresh}
-        refreshing={refreshing}
-        style={{
-          flex: 1,
-          paddingHorizontal: template.paddings.md,
-          flexDirection: "column",
-          paddingBottom: insets.bottom + 50,
-        }}
-        renderItem={renderItem}
-      />
+      <View style={{ flex: 1 }}>
+        <PrimaryButton
+          onPress={() => navigation.navigate("Share")}
+          style={{
+            alignSelf: "center",
+            position: "absolute",
+            bottom: insets.bottom + template.paddings.md,
+            zIndex: 1000,
+          }}
+        >
+          <Text style={{ color: template.colors.white }}>Share something</Text>
+        </PrimaryButton>
+        <FlatList
+          data={data}
+          onRefresh={onRefresh}
+          refreshing={refreshing}
+          style={{
+            flex: 1,
+            paddingHorizontal: template.paddings.md,
+            flexDirection: "column",
+            paddingBottom: insets.bottom + 50,
+          }}
+          renderItem={renderItem}
+        />
+      </View>
     </View>
   );
 };

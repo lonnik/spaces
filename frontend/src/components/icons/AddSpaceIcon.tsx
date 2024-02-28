@@ -2,7 +2,7 @@ import * as React from "react";
 import Svg, { SvgProps, Circle, Path } from "react-native-svg";
 
 export const AddSpaceIcon = (props: SvgProps) => (
-  <Svg width={27} height={27} fill="none" {...props}>
+  <Svg viewBox="0 0 27 27" fill="none" {...props}>
     <Circle
       cx={13.5}
       cy={13.5}

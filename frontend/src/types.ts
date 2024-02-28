@@ -16,7 +16,16 @@ export type SpaceStackParamList = {
   Info: undefined;
   Share: undefined;
   Thread: {
-    threadId: Uuid;
+    spaceId: Uuid;
+    threadId?: Uuid;
+    parentThreadId: Uuid;
+    parentMessageId: Uuid;
+  };
+  Answer: {
+    spaceId: Uuid;
+    threadId?: Uuid;
+    parentThreadId: Uuid;
+    parentMessageId: Uuid;
   };
 };
 

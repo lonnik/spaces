@@ -253,7 +253,7 @@ const RadiusSection: FC<{
 }> = ({ setRadius, radius, color }) => {
   return (
     <View style={{ marginBottom: template.margins.md + 20 }}>
-      <Label style={{ marginBottom: 10 }}>Radius</Label>
+      <Label style={{ marginBottom: 10 }}>Radius (meters)</Label>
       <Slider
         initialValue={radius}
         maximumValue={100}

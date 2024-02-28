@@ -7,6 +7,7 @@ import { minRadiusForBounds } from "./constants";
 import { Text } from "../../components/Text";
 import { Map } from "../../components/Map";
 import { createGeoJSONCircle } from "../../utils/map";
+import { hexToRgb } from "../../utils/hex_to_rgb";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
@@ -76,7 +77,7 @@ export const MapboxMap: FC<{
           />
           <LineLayer
             id="circleLine"
-            style={{ lineColor: color, lineWidth: 1 }}
+            style={{ lineColor: hexToRgb(color, 0.22), lineWidth: 1 }}
           />
         </ShapeSource>
       </>

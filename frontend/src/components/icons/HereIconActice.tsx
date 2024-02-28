@@ -1,8 +1,8 @@
 import * as React from "react";
 import Svg, { SvgProps, Path, Circle } from "react-native-svg";
 
-export const HereIconAcive = (props: SvgProps) => (
-  <Svg width={23} height={27} fill="none" {...props}>
+export const HereIconActive = (props: SvgProps) => (
+  <Svg viewBox="0 0 23 27" fill="none" {...props}>
     <Path
       fill="#444"
       stroke="#444"

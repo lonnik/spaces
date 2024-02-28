@@ -14,7 +14,7 @@ import { MySpacesIcon } from "../icons/MySpacesIcon";
 import { AddSpaceIcon } from "../icons/AddSpaceIcon";
 import { template } from "../../styles/template";
 import { NavigationHelpers, ParamListBase } from "@react-navigation/native";
-import { HereIconAcive } from "../icons/HereIconActice";
+import { HereIconActive } from "../icons/HereIconActice";
 
 const Tabs = createBottomTabNavigator<TabsParamList>();
 
@@ -29,14 +29,21 @@ const MySpacesTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
 
 const HereTabBarIcon: FC<{ focused: boolean }> = ({ focused }) => {
   if (focused) {
-    return <HereIconAcive />;
+    return <HereIconActive style={{ width: 23, height: 27 }} />;
   }
 
-  return <HereIcon stroke={template.colors.text} />;
+  return (
+    <HereIcon stroke={template.colors.text} style={{ width: 23, height: 27 }} />
+  );
 };
 
 const AddSpaceTabBarIcon: FC = () => {
-  return <AddSpaceIcon stroke={template.colors.purple} />;
+  return (
+    <AddSpaceIcon
+      stroke={template.colors.text}
+      style={{ width: 27, height: 27 }}
+    />
+  );
 };
 
 const TabBarItem: FC<{

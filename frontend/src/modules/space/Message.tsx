@@ -19,7 +19,6 @@ export const Message: FC<{
   spaceId: Uuid;
   displayLikeButton?: boolean;
   displayAnswersCount?: boolean;
-  onPress: () => void;
   style?: StyleProp<ViewStyle>;
   fontSize?: number;
 }> = ({
@@ -27,7 +26,6 @@ export const Message: FC<{
   spaceId,
   style,
   fontSize = 26,
-  onPress,
   displayLikeButton = false,
   displayAnswersCount = false,
 }) => {
@@ -51,44 +49,40 @@ export const Message: FC<{
     displayAnswersCount && !!message.childThreadMessagesCount;
 
   return (
-    <PressableTransformation onPress={onPress}>
-      <View
-        style={[
-          {
-            backgroundColor: template.colors.grayLightBackground,
-            borderRadius: template.borderRadius.md,
-            flex: 1,
-          },
-          style,
-        ]}
-      >
-        <Text style={{ fontSize }}>{message.content}</Text>
-        {displayLikeButton || displayAnswersCount ? (
-          <View
-            style={{
-              flex: 1,
-              flexDirection: "row",
-              alignItems: "center",
-              gap: 5,
-            }}
-          >
-            {displayLikeButton ? (
-              <View style={{ minWidth: 55 }}>
-                <LikeButton
-                  likes={message.likesCount}
-                  onPress={onLikeButtonPress}
-                  isLikedByUser={isLiked}
-                />
-              </View>
-            ) : null}
-            {displayAnswersCount ? (
-              <Text
-                style={{ color: template.colors.textLight }}
-              >{`${message.childThreadMessagesCount} answers`}</Text>
-            ) : null}
-          </View>
-        ) : null}
-      </View>
-    </PressableTransformation>
+    <View
+      style={[
+        {
+          backgroundColor: template.colors.grayLightBackground,
+          borderRadius: template.borderRadius.md,
+        },
+        style,
+      ]}
+    >
+      <Text style={{ fontSize }}>{message.content}</Text>
+      {displayLikeButton || displayAnswersCount ? (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 5,
+          }}
+        >
+          {displayLikeButton ? (
+            <View style={{ minWidth: 55 }}>
+              <LikeButton
+                likes={message.likesCount}
+                onPress={onLikeButtonPress}
+                isLikedByUser={isLiked}
+              />
+            </View>
+          ) : null}
+          {displayAnswersCount ? (
+            <Text
+              style={{ color: template.colors.textLight }}
+            >{`${message.childThreadMessagesCount} answers`}</Text>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
   );
 };

@@ -30,7 +30,7 @@ export const Header: FC<{
         <View
           style={{
             paddingHorizontal: 11,
-            paddingVertical: 5.5,
+            paddingVertical: 4,
             backgroundColor: template.colors.gray,
             borderRadius: 10,
           }}
@@ -54,8 +54,8 @@ export const Header: FC<{
             hitSlop={5}
           >
             <ProfileIcon
-              fill={template.colors.purple}
-              style={{ width: 29, height: 30 }}
+              fill={template.colors.text}
+              style={{ width: 26, height: 27 }}
             />
           </TouchableOpacity>
         </View>
