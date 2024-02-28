@@ -58,7 +58,18 @@ export const ThreadItem: FC<{
 
   return (
     <View style={[{ flex: 1 }, style]}>
-      <MessageInfo userId={message.senderId} style={{ marginBottom: 5 }} />
+      <View
+        style={{
+          flex: 1,
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 5,
+          marginBottom: 5,
+        }}
+      >
+        <Avatar size={28} />
+        <MessageInfo userId={message.senderId} />
+      </View>
       <View>
         <PressableTransformation
           onPress={() => {

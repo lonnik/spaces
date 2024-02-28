@@ -5,17 +5,18 @@ import { Text } from "./Text";
 import { CloseIcon } from "./icons/CloseIcon";
 import { useCustomNavigation } from "../hooks/use_custom_navigation";
 
-export const Header: FC<{ text: string; onClose?: () => void }> = ({
-  text,
-  onClose,
-}) => {
+export const Header: FC<{
+  text: string;
+  onClose?: () => void;
+  displayCloseButton?: boolean;
+}> = ({ text, onClose, displayCloseButton = true }) => {
   const navigation = useCustomNavigation();
 
   return (
     <View
       style={{
         height: template.height.header,
-        paddingHorizontal: 20,
+        paddingHorizontal: template.paddings.screen,
       }}
     >
       <View
@@ -39,20 +40,22 @@ export const Header: FC<{ text: string; onClose?: () => void }> = ({
           {text}
         </Text>
         <View style={{ flex: 1, alignItems: "flex-end" }}>
-          <Pressable
-            onPress={() => {
-              if (onClose) {
-                onClose();
-              }
+          {displayCloseButton ? (
+            <Pressable
+              onPress={() => {
+                if (onClose) {
+                  onClose();
+                }
 
-              navigation.goBack();
-            }}
-            hitSlop={15}
-          >
-            {({ pressed }) => {
-              return <CloseIcon fill={pressed ? "#aaa" : "#ddd"} />;
-            }}
-          </Pressable>
+                navigation.goBack();
+              }}
+              hitSlop={15}
+            >
+              {({ pressed }) => {
+                return <CloseIcon fill={pressed ? "#aaa" : "#ddd"} />;
+              }}
+            </Pressable>
+          ) : null}
         </View>
       </View>
     </View>

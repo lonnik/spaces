@@ -3,7 +3,6 @@ import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 import { useNotification } from "../../utils/notifications";
-import { hexToRgb } from "../../utils/hex_to_rgb";
 import { Uuid } from "../../types";
 import { useQueries } from "@tanstack/react-query";
 import { getSpaceSubscribers } from "../../utils/queries";
@@ -12,10 +11,9 @@ import { PressableTransformation } from "../../components/PressableTransformatio
 
 export const InfoSection: FC<{
   onPress: () => void;
-  spaceName: string;
   spaceId: Uuid;
   style?: StyleProp<ViewStyle>;
-}> = ({ onPress, style, spaceName, spaceId }) => {
+}> = ({ onPress, style, spaceId }) => {
   const [joined, setJoined] = useState(false);
 
   let [{ data: activeSpaceSubscribers }, { data: inactiveSpaceSubscribers }] =
@@ -62,7 +60,19 @@ export const InfoSection: FC<{
   };
 
   return (
-    <PressableTransformation onPress={onPress} style={style}>
+    <PressableTransformation
+      onPress={onPress}
+      style={[{ position: "relative" }, style]}
+    >
+      <View
+        style={{
+          position: "absolute",
+          top: 0,
+          width: "100%",
+          height: 10,
+          backgroundColor: "white",
+        }}
+      />
       <View
         style={{
           flex: 1,
@@ -71,16 +81,6 @@ export const InfoSection: FC<{
           borderRadius: template.borderRadius.md,
         }}
       >
-        <Text
-          style={{
-            fontSize: 32,
-            marginBottom: 20,
-            fontWeight: "600",
-            color: hexToRgb(template.colors.purple, 0.7),
-          }}
-        >
-          {spaceName}
-        </Text>
         <View
           style={{
             flex: 1,
@@ -94,8 +94,23 @@ export const InfoSection: FC<{
               flexDirection: "row",
             }}
           >
-            {(allSpaceSubscribers || []).map((spaceSubscriber) => {
-              return <Avatar key={spaceSubscriber.id} size={32} />;
+            {[
+              { id: 1 },
+              { id: 2 },
+              { id: 3 },
+              { id: 4 },
+              { id: 5 },
+              { id: 6 },
+              { id: 7 },
+              { id: 8 },
+            ].map((spaceSubscriber, index) => {
+              return (
+                <Avatar
+                  key={spaceSubscriber.id}
+                  size={32}
+                  style={{ marginLeft: index === 0 ? 0 : -15 }}
+                />
+              );
             })}
           </View>
           <Text style={{ color: template.colors.textLight }}>

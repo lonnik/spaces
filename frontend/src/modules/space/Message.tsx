@@ -3,10 +3,9 @@ import { StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 import { Uuid, type Message as TMessage } from "../../types";
-import { LikeButton } from "./LikeButton";
 import { useMutation } from "@tanstack/react-query";
 import { createMessageLike } from "../../utils/queries";
-import { PressableTransformation } from "../../components/PressableTransformation";
+import { LikeButton2 } from "./LikeButton2";
 
 // TODO:
 // prop should exist that says if the message is liked by the user
@@ -69,7 +68,7 @@ export const Message: FC<{
         >
           {displayLikeButton ? (
             <View style={{ minWidth: 55 }}>
-              <LikeButton
+              <LikeButton2
                 likes={message.likesCount}
                 onPress={onLikeButtonPress}
                 isLikedByUser={isLiked}

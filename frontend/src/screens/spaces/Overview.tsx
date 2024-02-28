@@ -115,7 +115,6 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
           spaceId={spaceId}
           onPress={() => navigation.navigate("Info")}
           style={{ marginBottom: 20 }}
-          spaceName={space?.name!}
         />
       );
     }
@@ -149,7 +148,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header text={`${space?.name} 🏠`} />
+      <Header text={`${space?.name} 🏠`} displayCloseButton={false} />
       <View style={{ flex: 1 }}>
         <PrimaryButton
           onPress={() => navigation.navigate("Share")}
@@ -165,6 +164,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
         <FlatList
           data={data}
           onRefresh={onRefresh}
+          stickyHeaderIndices={[0]}
           refreshing={refreshing}
           style={{
             flex: 1,

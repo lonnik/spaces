@@ -13,6 +13,8 @@ export const Avatar: FC<{ size: number; style?: StyleProp<ViewStyle> }> = ({
           aspectRatio: 1,
           backgroundColor: "#ddd",
           borderRadius: 999,
+          borderWidth: 1,
+          borderColor: "#ccc",
         },
         style,
       ]}
