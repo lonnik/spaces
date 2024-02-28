@@ -175,7 +175,10 @@ export const MessageScreen: FC<
 
   return (
     <View style={{ flex: 1 }}>
-      <Header text={level === "thread" ? "Thread" : "Answers"} />
+      <Header
+        text={level === "thread" ? "Thread" : "Answers"}
+        displayArrowBackButton
+      />
       <PrimaryButton
         onPress={() => navigation.navigate("Share")}
         style={{

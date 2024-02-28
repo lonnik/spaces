@@ -16,7 +16,7 @@ import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ThreadItem } from "../../modules/space/ThreadItem";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { getApiUrl } from "../../utils/get_api_url";
 
 type MessageListItem = {
@@ -148,7 +148,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header text={`${space?.name} 🏠`} displayCloseButton={false} />
+      <Header text={`${space?.name} 🏠`} displayArrowDownButton />
       <View style={{ flex: 1 }}>
         <PrimaryButton
           onPress={() => navigation.navigate("Share")}

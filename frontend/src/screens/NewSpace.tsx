@@ -187,7 +187,7 @@ export const NewSpaceScreen: FC<
         flex: 1,
       }}
     >
-      <Header text="New Space" />
+      <Header text="New Space" displayArrowDownButton />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior="padding"

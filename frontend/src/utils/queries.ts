@@ -72,7 +72,6 @@ export const getThreadWithMessages = async (
   const url = `/spaces/${encodeURIComponent(
     spaceId
   )}/threads/${encodeURIComponent(threadId)}${queryStr}`;
-  console.log("url :>> ", url);
 
   return fetchApi<Thread>(url);
 };

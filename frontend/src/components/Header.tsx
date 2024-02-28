@@ -1,22 +1,57 @@
-import { FC } from "react";
+import { FC, ReactNode } from "react";
 import { Pressable, View } from "react-native";
 import { template } from "../styles/template";
 import { Text } from "./Text";
-import { CloseIcon } from "./icons/CloseIcon";
 import { useCustomNavigation } from "../hooks/use_custom_navigation";
+import { ArrowDownIcon } from "./icons/ArrowDownIcon";
+import { ArrowBackButton } from "./icons/ArrowBackButton";
 
 export const Header: FC<{
   text: string;
   onClose?: () => void;
-  displayCloseButton?: boolean;
-}> = ({ text, onClose, displayCloseButton = true }) => {
+  displayArrowDownButton?: boolean;
+  displayArrowBackButton?: boolean;
+}> = ({
+  text,
+  onClose,
+  displayArrowDownButton = false,
+  displayArrowBackButton = false,
+}) => {
   const navigation = useCustomNavigation();
+
+  const handleOnPress = () => {
+    if (onClose) {
+      onClose();
+    }
+
+    navigation.goBack();
+  };
+
+  const closeButton = displayArrowDownButton ? (
+    <Button onPress={handleOnPress}>
+      <ArrowDownIcon
+        style={{ width: 24, height: 12 }}
+        strokeWidth={12}
+        stroke={template.colors.text}
+      />
+    </Button>
+  ) : null;
+
+  const arrowBackButton = displayArrowBackButton ? (
+    <Button onPress={handleOnPress}>
+      <ArrowBackButton
+        style={{ width: 12, height: 24 }}
+        strokeWidth={12}
+        stroke={template.colors.text}
+      />
+    </Button>
+  ) : null;
 
   return (
     <View
       style={{
         height: template.height.header,
-        paddingHorizontal: template.paddings.screen,
+        paddingHorizontal: template.paddings.md,
       }}
     >
       <View
@@ -26,7 +61,14 @@ export const Header: FC<{
           flexDirection: "row",
         }}
       >
-        <View style={{ flex: 1 }} />
+        <View
+          style={{
+            flex: 1,
+          }}
+        >
+          {closeButton}
+          {arrowBackButton}
+        </View>
         <Text
           style={{
             color: template.colors.text,
@@ -39,25 +81,23 @@ export const Header: FC<{
         >
           {text}
         </Text>
-        <View style={{ flex: 1, alignItems: "flex-end" }}>
-          {displayCloseButton ? (
-            <Pressable
-              onPress={() => {
-                if (onClose) {
-                  onClose();
-                }
-
-                navigation.goBack();
-              }}
-              hitSlop={15}
-            >
-              {({ pressed }) => {
-                return <CloseIcon fill={pressed ? "#aaa" : "#ddd"} />;
-              }}
-            </Pressable>
-          ) : null}
-        </View>
+        <View style={{ flex: 1, alignItems: "flex-end" }}></View>
       </View>
     </View>
+  );
+};
+
+const Button: FC<{ children: ReactNode; onPress: () => void }> = ({
+  children,
+  onPress,
+}) => {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={{ alignSelf: "flex-start" }}
+      hitSlop={20}
+    >
+      {children}
+    </Pressable>
   );
 };
