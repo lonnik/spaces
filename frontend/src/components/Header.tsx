@@ -7,15 +7,19 @@ import { ArrowDownIcon } from "./icons/ArrowDownIcon";
 import { ArrowBackButton } from "./icons/ArrowBackButton";
 
 export const Header: FC<{
-  text: string;
+  text?: string;
   onClose?: () => void;
   displayArrowDownButton?: boolean;
   displayArrowBackButton?: boolean;
+  centerElement?: ReactNode;
+  rightElement?: ReactNode;
 }> = ({
   text,
   onClose,
   displayArrowDownButton = false,
   displayArrowBackButton = false,
+  centerElement,
+  rightElement,
 }) => {
   const navigation = useCustomNavigation();
 
@@ -26,6 +30,23 @@ export const Header: FC<{
 
     navigation.goBack();
   };
+
+  const centerElementView = centerElement || (
+    <Text
+      style={{
+        color: template.colors.text,
+        textAlign: "center",
+        fontSize: 16,
+        fontStyle: "normal",
+        fontWeight: "600",
+        letterSpacing: 0.32,
+      }}
+    >
+      {text || ""}
+    </Text>
+  );
+
+  const rightElementView = rightElement || null;
 
   const closeButton = displayArrowDownButton ? (
     <Button onPress={handleOnPress}>
@@ -69,19 +90,10 @@ export const Header: FC<{
           {closeButton}
           {arrowBackButton}
         </View>
-        <Text
-          style={{
-            color: template.colors.text,
-            textAlign: "center",
-            fontSize: 16,
-            fontStyle: "normal",
-            fontWeight: "600",
-            letterSpacing: 0.32,
-          }}
-        >
-          {text}
-        </Text>
-        <View style={{ flex: 1, alignItems: "flex-end" }}></View>
+        {centerElementView}
+        <View style={{ flex: 1, alignItems: "flex-end" }}>
+          {rightElementView}
+        </View>
       </View>
     </View>
   );
