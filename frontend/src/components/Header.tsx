@@ -36,10 +36,11 @@ export const Header: FC<{
       style={{
         color: template.colors.text,
         textAlign: "center",
-        fontSize: 16,
+        fontSize: 20,
         fontStyle: "normal",
         fontWeight: "600",
-        letterSpacing: 0.32,
+        letterSpacing: -0.4,
+        maxWidth: "75%",
       }}
     >
       {text || ""}

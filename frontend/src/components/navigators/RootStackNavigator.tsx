@@ -12,6 +12,7 @@ import { useUserState } from "../context/UserContext";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SpaceRootScreen } from "../../screens/spaces/Root";
+import { LastVisitedSpacesScreen } from "../../screens/LastVisitedSpaces";
 
 const Stack = createCustomStackNavigator<RootStackParamList>();
 
@@ -63,6 +64,13 @@ export const RootStackNavigator: FC = () => {
               component={SpaceRootScreen}
               options={{
                 animation: "slideInFromBottom",
+              }}
+            />
+            <Stack.Screen
+              name="LastVisitedSpaces"
+              component={LastVisitedSpacesScreen}
+              options={{
+                animation: "slideInFromRight",
               }}
             />
           </>

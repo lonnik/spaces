@@ -9,6 +9,7 @@ export type RootStackParamList = {
     spaceId: Uuid;
   };
   NewSpace: undefined;
+  LastVisitedSpaces: undefined;
 };
 
 export type SpaceStackParamList = {
@@ -49,6 +50,7 @@ export type Space = {
   adminId: UserUid;
   createdAt: Date;
   distance: number;
+  icon?: string;
 };
 
 export type Address = {
