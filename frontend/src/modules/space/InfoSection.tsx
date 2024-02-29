@@ -60,10 +60,7 @@ export const InfoSection: FC<{
   };
 
   return (
-    <PressableTransformation
-      onPress={onPress}
-      style={[{ position: "relative" }, style]}
-    >
+    <>
       <View
         style={{
           position: "absolute",
@@ -117,8 +114,35 @@ export const InfoSection: FC<{
             {activeSpaceSubscribers?.length} others online
           </Text>
         </View>
+        <View style={{ flexDirection: "row", marginTop: 15 }}>
+          {["join", "invite", "info"].map((buttonText) => {
+            return (
+              <PressableTransformation key={buttonText} onPress={() => {}}>
+                <View
+                  style={{
+                    paddingHorizontal: 20,
+                    paddingVertical: 6,
+                    backgroundColor: template.colors.purple,
+                    borderRadius: 999,
+                    marginRight: 10,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontWeight: "600",
+                      fontSize: 16,
+                      color: template.colors.white,
+                    }}
+                  >
+                    {buttonText}
+                  </Text>
+                </View>
+              </PressableTransformation>
+            );
+          })}
+        </View>
       </View>
-    </PressableTransformation>
+    </>
   );
 };
 

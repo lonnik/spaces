@@ -1,7 +1,7 @@
 export const template = {
   colors: {
     gray: "#d5d5d5",
-    purpleLightBackground: "#F6ECFF",
+    purpleLightBackground: "#C081FF33",
     purpleLight: "#C081FF",
     purple: "#A347FF",
     grayLightBackground: "#F5F5F5",

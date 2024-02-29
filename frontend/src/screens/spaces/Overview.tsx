@@ -110,12 +110,14 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
   const renderItem: ListRenderItem<ListItem> = ({ index, item }) => {
     if (item.type === "info") {
       return (
-        <InfoSection
-          key={index}
-          spaceId={spaceId}
-          onPress={() => navigation.navigate("Info")}
-          style={{ marginBottom: 20 }}
-        />
+        <View style={{ backgroundColor: "white", marginBottom: 15 }}>
+          <InfoSection
+            key={index}
+            spaceId={spaceId}
+            onPress={() => navigation.navigate("Info")}
+            style={{ marginBottom: 5 }}
+          />
+        </View>
       );
     }
 
@@ -164,7 +166,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
         <FlatList
           data={data}
           onRefresh={onRefresh}
-          stickyHeaderIndices={[0]}
+          stickyHeaderIndices={[]}
           refreshing={refreshing}
           style={{
             flex: 1,
