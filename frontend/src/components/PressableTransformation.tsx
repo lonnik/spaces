@@ -13,7 +13,7 @@ export const PressableTransformation: FC<
     children: ReactNode;
     onPress: () => void;
   } & PressableProps
-> = ({ children, onPress, ...props }) => {
+> = ({ children, onPress, hitSlop = 10, ...props }) => {
   const [dimensions, setDimensions] = useState<{
     width: number;
     height: number;
@@ -60,6 +60,7 @@ export const PressableTransformation: FC<
       onPress={onPress}
       {...props}
       onLayout={(event) => setDimensions(event.nativeEvent.layout)}
+      hitSlop={hitSlop}
     >
       <Animated.View style={[animatedOpacity]}>{children}</Animated.View>
     </Pressable>

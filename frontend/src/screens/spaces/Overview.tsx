@@ -1,5 +1,5 @@
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Message, SpaceStackParamList } from "../../types";
+import { Message, SpaceStackParamList, Uuid } from "../../types";
 import { FC, useEffect, useRef, useState } from "react";
 import { FlatList, ListRenderItem, View } from "react-native";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
@@ -32,7 +32,7 @@ type ListItem = MessageListItem | SpaceInfoListItem;
 
 // TODO: animation from bottom on first render for share something button
 
-export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
+export const SpaceOverviewScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const insets = useSafeAreaInsets();
 
   const [
@@ -121,18 +121,13 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
       );
     }
 
-    const isLast = index === topLevelThreads?.length;
-
     return (
-      <>
-        <ThreadItem
-          key={index}
-          spaceId={spaceId}
-          message={item.message}
-          style={{ marginBottom: 26 }}
-        />
-        {isLast && <View style={{ height: insets.bottom + 50 }} />}
-      </>
+      <ThreadItem
+        key={index}
+        spaceId={spaceId}
+        message={item.message}
+        style={{ marginBottom: 26 }}
+      />
     );
   };
 
@@ -168,6 +163,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: string }> = ({ spaceId }) => {
           onRefresh={onRefresh}
           stickyHeaderIndices={[]}
           refreshing={refreshing}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 50 }}
           style={{
             flex: 1,
             paddingHorizontal: template.paddings.md,

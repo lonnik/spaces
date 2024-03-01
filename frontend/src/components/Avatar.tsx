@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
 
-export const Avatar: FC<{ size: number; style?: StyleProp<ViewStyle> }> = ({
-  size,
+export const Avatar: FC<{ size?: number; style?: StyleProp<ViewStyle> }> = ({
+  size = 32,
   style,
 }) => {
   return (

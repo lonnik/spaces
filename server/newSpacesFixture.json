@@ -1,7 +1,7 @@
 [
   {
     "name": "Thulestr 32",
-    "themeColorHexaCode": "4E943B",
+    "themeColorHexaCode": "#4E943B",
     "radius": 10,
     "location": {
       "longitude": 13.404954,
@@ -10,7 +10,7 @@
   },
   {
     "name": "Lunderstr 2",
-    "themeColorHexaCode": "9AE174",
+    "themeColorHexaCode": "#9AE174",
     "radius": 100,
     "location": {
       "longitude": 13.419568,
@@ -19,7 +19,7 @@
   },
   {
     "name": "Baumbachstraße 6A",
-    "themeColorHexaCode": "0B4ABC",
+    "themeColorHexaCode": "#0B4ABC",
     "radius": 145,
     "location": {
       "longitude": 13.420864,
@@ -28,7 +28,7 @@
   },
   {
     "name": "Trelleborger Str. 6",
-    "themeColorHexaCode": "230EE7",
+    "themeColorHexaCode": "#230EE7",
     "radius": 50,
     "location": {
       "longitude": 13.418482,
@@ -37,7 +37,7 @@
   },
   {
     "name": "Thulestraße 31",
-    "themeColorHexaCode": "A1BA6D",
+    "themeColorHexaCode": "#A1BA6D",
     "radius": 68,
     "location": {
       "longitude": 13.420215,
@@ -46,7 +46,7 @@
   },
   {
     "name": "Spreewaffel Hinterhof",
-    "themeColorHexaCode": "137BCA",
+    "themeColorHexaCode": "#137BCA",
     "radius": 140,
     "location": {
       "longitude": 13.419560,
@@ -55,7 +55,7 @@
   },
   {
     "name": "Thulestr 41",
-    "themeColorHexaCode": "422DC5",
+    "themeColorHexaCode": "#422DC5",
     "radius": 65,
     "location": {
       "longitude": 13.421014,
@@ -64,7 +64,7 @@
   },
   {
     "name": "Gegenueber von Haus am Park",
-    "themeColorHexaCode": "66BDAA",
+    "themeColorHexaCode": "#66BDAA",
     "radius": 157,
     "location": {
       "longitude": 13.420552,
@@ -73,7 +73,7 @@
   },
   {
     "name": "Haus am Park",
-    "themeColorHexaCode": "86EB4F",
+    "themeColorHexaCode": "#86EB4F",
     "radius": 240,
     "location": {
       "longitude": 13.420848,

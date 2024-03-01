@@ -45,7 +45,7 @@ export const SpaceItem: FC<{
             height: "100%",
             padding: 10,
             borderRadius: 7,
-            backgroundColor: hexToRgb(data.themeColorHexaCode, 0.7),
+            backgroundColor: hexToRgb(data.themeColorHexaCode, 0.8),
             flexDirection: "row",
             justifyContent: "space-between",
             gap: 5,
@@ -69,7 +69,7 @@ export const SpaceItem: FC<{
               justifyContent: "space-between",
             }}
           >
-            <Text style={{ lineHeight: 32, fontSize: 28, textAlign: "right" }}>
+            <Text style={{ lineHeight: 30, fontSize: 26, textAlign: "right" }}>
               🏠
             </Text>
             <Distance distance={data.distance} />

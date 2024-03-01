@@ -3,11 +3,13 @@ import { Pressable, StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
 import { useNotification } from "../../utils/notifications";
-import { Uuid } from "../../types";
+import { SpaceStackParamList, Uuid } from "../../types";
 import { useQueries } from "@tanstack/react-query";
 import { getSpaceSubscribers } from "../../utils/queries";
-import { Avatar } from "../../components/Avatar";
 import { PressableTransformation } from "../../components/PressableTransformation";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useNavigation } from "@react-navigation/native";
+import { AvatarRow } from "./AvatarRow";
 
 export const InfoSection: FC<{
   onPress: () => void;
@@ -15,6 +17,8 @@ export const InfoSection: FC<{
   style?: StyleProp<ViewStyle>;
 }> = ({ onPress, style, spaceId }) => {
   const [joined, setJoined] = useState(false);
+
+  const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
   let [{ data: activeSpaceSubscribers }, { data: inactiveSpaceSubscribers }] =
     useQueries({
@@ -62,13 +66,16 @@ export const InfoSection: FC<{
   return (
     <>
       <View
-        style={{
-          position: "absolute",
-          top: 0,
-          width: "100%",
-          height: 10,
-          backgroundColor: "white",
-        }}
+        style={[
+          {
+            position: "absolute",
+            top: 0,
+            width: "100%",
+            height: 10,
+            backgroundColor: "white",
+          },
+          style,
+        ]}
       />
       <View
         style={{
@@ -86,38 +93,35 @@ export const InfoSection: FC<{
             alignItems: "center",
           }}
         >
-          <View
-            style={{
-              flexDirection: "row",
-            }}
-          >
-            {[
-              { id: 1 },
-              { id: 2 },
-              { id: 3 },
-              { id: 4 },
-              { id: 5 },
-              { id: 6 },
-              { id: 7 },
-              { id: 8 },
-            ].map((spaceSubscriber, index) => {
-              return (
-                <Avatar
-                  key={spaceSubscriber.id}
-                  size={32}
-                  style={{ marginLeft: index === 0 ? 0 : -15 }}
-                />
-              );
-            })}
-          </View>
+          <AvatarRow
+            data={[
+              { id: "1" },
+              { id: "2" },
+              { id: "3" },
+              { id: "4" },
+              { id: "5" },
+              { id: "6" },
+              { id: "7" },
+              { id: "8" },
+            ]}
+          />
           <Text style={{ color: template.colors.textLight }}>
             {activeSpaceSubscribers?.length} others online
           </Text>
         </View>
         <View style={{ flexDirection: "row", marginTop: 15 }}>
-          {["join", "invite", "info"].map((buttonText) => {
+          {[
+            { text: "join", onPress: () => {} },
+            { text: "invite", onPress: () => {} },
+            {
+              text: "info",
+              onPress: () => {
+                navigation.navigate("Info");
+              },
+            },
+          ].map((data) => {
             return (
-              <PressableTransformation key={buttonText} onPress={() => {}}>
+              <PressableTransformation key={data.text} onPress={data.onPress}>
                 <View
                   style={{
                     paddingHorizontal: 20,
@@ -134,7 +138,7 @@ export const InfoSection: FC<{
                       color: template.colors.white,
                     }}
                   >
-                    {buttonText}
+                    {data.text}
                   </Text>
                 </View>
               </PressableTransformation>

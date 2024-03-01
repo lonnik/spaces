@@ -15,6 +15,7 @@ export type RootStackParamList = {
 export type SpaceStackParamList = {
   Overview: undefined;
   Info: undefined;
+  Subscribers: undefined;
   Share: undefined;
   Thread: {
     spaceId: Uuid;

@@ -82,6 +82,7 @@ export const List: FC<{ data: ListItem[]; style?: StyleProp<ViewStyle> }> = ({
   return (
     <FlatList
       style={[{ flex: 1 }, style]}
+      alwaysBounceVertical={false}
       data={data}
       renderItem={renderItem}
     />

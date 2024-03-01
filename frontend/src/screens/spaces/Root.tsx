@@ -7,6 +7,7 @@ import { SpaceShareScreen } from "./Share";
 import { View } from "react-native";
 import { SpaceInfoScreen } from "./Info";
 import { MessageScreen } from "./Message";
+import { SpaceSubscribersScreen } from "./Subscribers";
 
 const Stack = createCustomStackNavigator<SpaceStackParamList>();
 
@@ -22,11 +23,15 @@ export const SpaceRootScreen: FC<
         <Stack.Screen name="Overview">
           {() => <SpaceOverviewScreen spaceId={spaceId} />}
         </Stack.Screen>
+        <Stack.Screen name="Info" options={{ animation: "slideInFromRight" }}>
+          {() => <SpaceInfoScreen spaceId={spaceId} />}
+        </Stack.Screen>
         <Stack.Screen
-          name="Info"
+          name="Subscribers"
           options={{ animation: "slideInFromRight" }}
-          component={SpaceInfoScreen}
-        />
+        >
+          {() => <SpaceSubscribersScreen spaceId={spaceId} />}
+        </Stack.Screen>
         <Stack.Screen
           name="Share"
           options={{ animation: "slideInFromBottom", snapPoint: "96%" }}

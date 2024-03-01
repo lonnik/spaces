@@ -95,7 +95,7 @@ export const MessageScreen: FC<
               marginBottom: 8,
             }}
           >
-            <Avatar size={32} style={{ marginRight: 7 }} />
+            <Avatar style={{ marginRight: 7 }} />
             <MessageInfo
               userId={item.message.senderId}
               style={{ marginBottom: 5 }}
@@ -128,7 +128,7 @@ export const MessageScreen: FC<
 
     return (
       <View style={{ flexDirection: "row", gap: 7 }}>
-        <Avatar size={32} />
+        <Avatar />
         <View style={{ flex: 1 }}>
           <MessageInfo
             userId={item.message.senderId}
