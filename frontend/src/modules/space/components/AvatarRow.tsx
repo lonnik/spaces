@@ -1,7 +1,7 @@
 import { FC } from "react";
-import { User } from "../../types";
+import { User } from "../../../types";
 import { View } from "react-native";
-import { Avatar } from "../../components/Avatar";
+import { Avatar } from "../../../components/Avatar";
 
 export const AvatarRow: FC<{ data: Pick<User, "id">[] }> = ({ data }) => {
   return (
@@ -14,7 +14,7 @@ export const AvatarRow: FC<{ data: Pick<User, "id">[] }> = ({ data }) => {
         return (
           <Avatar
             key={spaceSubscriber.id}
-            style={{ marginLeft: index === 0 ? 0 : -15 }}
+            style={{ marginLeft: index === 0 ? 0 : -12 }}
           />
         );
       })}

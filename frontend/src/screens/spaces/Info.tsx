@@ -11,12 +11,12 @@ import { FillLayer, LineLayer, ShapeSource } from "@rnmapbox/maps";
 import { hexToRgb } from "../../utils/hex_to_rgb";
 import { createGeoJSONCircle } from "../../utils/map";
 import { Avatar } from "../../components/Avatar";
-import { AvatarRow } from "../../modules/space/AvatarRow";
+import { AvatarRow } from "../../modules/space/components/AvatarRow";
 import { ArrowForward } from "../../components/icons/ArrowForward";
 import { PressableTransformation } from "../../components/PressableTransformation";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import { Section } from "../../modules/space/Section";
+import { Section } from "../../modules/space/components/Section";
 
 const color = "#69701e";
 

@@ -4,15 +4,15 @@ import {
   type Message as TMessage,
   Uuid,
   SpaceStackParamList,
-} from "../../types";
+} from "../../../types";
 import { useQuery } from "@tanstack/react-query";
-import { getThreadWithMessages } from "../../utils/queries";
-import { Avatar } from "../../components/Avatar";
+import { getThreadWithMessages } from "../../../utils/queries";
+import { Avatar } from "../../../components/Avatar";
 import { Message } from "./Message";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MessageInfo } from "./MessageInfo";
-import { PressableTransformation } from "../../components/PressableTransformation";
+import { PressableTransformation } from "../../../components/PressableTransformation";
 
 // TODO:
 // display date function

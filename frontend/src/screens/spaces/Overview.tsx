@@ -11,24 +11,38 @@ import {
 import { LoadingScreen } from "../Loading";
 import { Header } from "../../components/Header";
 import { template } from "../../styles/template";
-import { InfoSection } from "../../modules/space/InfoSection";
+import { SubscribersSection } from "../../modules/space/components/SubscribersSection";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ThreadItem } from "../../modules/space/ThreadItem";
+import { ThreadItem } from "../../modules/space/components/ThreadItem";
 import { useNavigation } from "@react-navigation/native";
 import { getApiUrl } from "../../utils/get_api_url";
+import { ButtonsSection } from "../../modules/space/components/ButtonsSection";
 
 type MessageListItem = {
   type: "message";
   message: Message;
 };
 
-type SpaceInfoListItem = {
-  type: "info";
+type SubscribersListItem = {
+  type: "subscribers";
 };
 
-type ListItem = MessageListItem | SpaceInfoListItem;
+type ButtonsListItem = {
+  type: "buttons";
+};
+
+type HeadingListItem = {
+  type: "heading";
+  text: string;
+};
+
+type ListItem =
+  | MessageListItem
+  | SubscribersListItem
+  | ButtonsListItem
+  | HeadingListItem;
 
 // TODO: animation from bottom on first render for share something button
 
@@ -108,27 +122,48 @@ export const SpaceOverviewScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const renderItem: ListRenderItem<ListItem> = ({ index, item }) => {
-    if (item.type === "info") {
-      return (
-        <View style={{ backgroundColor: "white", marginBottom: 15 }}>
-          <InfoSection
+    switch (item.type) {
+      case "subscribers": {
+        return (
+          <SubscribersSection
+            key={index}
+            onPress={() => navigation.navigate("Subscribers")}
+            spaceId={spaceId}
+          />
+        );
+      }
+
+      case "buttons": {
+        return <ButtonsSection />;
+      }
+
+      case "heading": {
+        return (
+          <View style={{ marginTop: 10 }}>
+            <Text
+              key={index}
+              style={{
+                fontSize: 28,
+                fontWeight: "600",
+              }}
+            >
+              {item.text}
+            </Text>
+          </View>
+        );
+      }
+
+      default: {
+        return (
+          <ThreadItem
             key={index}
             spaceId={spaceId}
-            onPress={() => navigation.navigate("Info")}
-            style={{ marginBottom: 5 }}
+            message={item.message}
+            style={{ marginBottom: 10 }}
           />
-        </View>
-      );
+        );
+      }
     }
-
-    return (
-      <ThreadItem
-        key={index}
-        spaceId={spaceId}
-        message={item.message}
-        style={{ marginBottom: 26 }}
-      />
-    );
   };
 
   if (isLoadingSpace || isLoadingThreads) {
@@ -136,7 +171,9 @@ export const SpaceOverviewScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   }
 
   const data = [
-    { type: "info" } as SpaceInfoListItem,
+    { type: "subscribers" } as SubscribersListItem,
+    { type: "buttons" } as ButtonsListItem,
+    { type: "heading", text: "Threads" } as HeadingListItem,
     ...topLevelThreads!.map<MessageListItem>((thread) => ({
       type: "message",
       message: thread.firstMessage!,
@@ -160,17 +197,16 @@ export const SpaceOverviewScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
         </PrimaryButton>
         <FlatList
           data={data}
+          renderItem={renderItem}
           onRefresh={onRefresh}
-          stickyHeaderIndices={[]}
+          stickyHeaderIndices={[1]}
           refreshing={refreshing}
-          contentContainerStyle={{ paddingBottom: insets.bottom + 50 }}
+          alwaysBounceVertical={false}
+          contentContainerStyle={{ paddingBottom: insets.bottom + 60, gap: 10 }}
           style={{
             flex: 1,
             paddingHorizontal: template.paddings.md,
-            flexDirection: "column",
-            paddingBottom: insets.bottom + 50,
           }}
-          renderItem={renderItem}
         />
       </View>
     </View>

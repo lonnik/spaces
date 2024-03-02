@@ -1,10 +1,10 @@
 import { FC, useState } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
-import { template } from "../../styles/template";
-import { Text } from "../../components/Text";
-import { Uuid, type Message as TMessage } from "../../types";
+import { template } from "../../../styles/template";
+import { Text } from "../../../components/Text";
+import { Uuid, type Message as TMessage } from "../../../types";
 import { useMutation } from "@tanstack/react-query";
-import { createMessageLike } from "../../utils/queries";
+import { createMessageLike } from "../../../utils/queries";
 import { LikeButton2 } from "./LikeButton2";
 
 // TODO:

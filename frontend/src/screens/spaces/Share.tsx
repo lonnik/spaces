@@ -128,7 +128,7 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <Header text="Share something" onClose={onClose} />
+      <Header text="Share something" onClose={onClose} displayArrowDownButton />
       <View
         style={{
           flex: 1,

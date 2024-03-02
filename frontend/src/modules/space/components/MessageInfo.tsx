@@ -1,12 +1,12 @@
-import { PointIcon } from "../../components/icons/PointIcon";
-import { template } from "../../styles/template";
-import { Avatar } from "../../components/Avatar";
-import { Text } from "../../components/Text";
+import { PointIcon } from "../../../components/icons/PointIcon";
+import { template } from "../../../styles/template";
+import { Avatar } from "../../../components/Avatar";
+import { Text } from "../../../components/Text";
 import { FC } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
 import { useQuery } from "@tanstack/react-query";
-import { Uuid } from "../../types";
-import { getUser } from "../../utils/queries";
+import { Uuid } from "../../../types";
+import { getUser } from "../../../utils/queries";
 
 export const MessageInfo: FC<{
   userId: Uuid;

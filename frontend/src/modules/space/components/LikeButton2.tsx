@@ -1,16 +1,16 @@
 import { FC, useEffect, useState } from "react";
 import { Pressable } from "react-native";
-import { template } from "../../styles/template";
-import { HeartIcon } from "../../components/icons/HeartIcon";
+import { template } from "../../../styles/template";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { Heart2Icon } from "../../../components/icons/Heart2Icon";
 
-const AnimatedHeartIcon = Animated.createAnimatedComponent(HeartIcon);
+const AnimatedHeartIcon = Animated.createAnimatedComponent(Heart2Icon);
 
-export const LikeButton: FC<{
+export const LikeButton2: FC<{
   likes: number;
   onPress: () => void;
   isLikedByUser: boolean;
@@ -29,19 +29,16 @@ export const LikeButton: FC<{
       transform: [
         {
           scale: isScaledDownSv.value
-            ? withTiming(0.9, { duration: 50 })
+            ? withTiming(0.8, { duration: 50 })
             : withTiming(1, { duration: 50 }),
         },
       ],
-      backgroundColor: isSelected.value
-        ? template.colors.purple
-        : "transparent",
     };
   });
 
   const animatedColorStyles = useAnimatedStyle(() => {
     return {
-      color: isSelected.value ? template.colors.white : template.colors.purple,
+      color: isSelected.value ? template.colors.purple : template.colors.text,
     };
   });
 
@@ -69,32 +66,33 @@ export const LikeButton: FC<{
             flexDirection: "row",
             gap: 4,
             alignItems: "center",
-            borderWidth: 1,
             borderRadius: 7,
-            paddingVertical: 3,
-            paddingHorizontal: 8,
-            borderColor: template.colors.purple,
           },
           animatedContainerStyles,
         ]}
       >
         <AnimatedHeartIcon
-          style={[{ width: 14, height: 14 }, animatedColorStyles as any]}
+          style={[{ width: 18, height: 17 }, animatedColorStyles as any]}
+          fill={isSelected.value ? template.colors.purple : "none"}
+          stroke={
+            isSelected.value
+              ? template.colors.purple
+              : template.colors.textLight
+          }
         />
-        <Animated.Text
-          style={[
-            {
-              color: isLikedByUser
-                ? template.colors.white
-                : template.colors.purple,
-              fontWeight: "400",
-              fontSize: 13,
-            },
-            animatedColorStyles,
-          ]}
-        >
-          {internalLikes.toString()}
-        </Animated.Text>
+        {internalLikes ? (
+          <Animated.Text
+            style={[
+              {
+                fontWeight: "400",
+                fontSize: 13,
+              },
+              animatedColorStyles,
+            ]}
+          >
+            {internalLikes.toString()}
+          </Animated.Text>
+        ) : null}
       </Animated.View>
     </Pressable>
   );
