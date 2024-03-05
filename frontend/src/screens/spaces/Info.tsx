@@ -169,7 +169,6 @@ const ForwardButton: FC<{ text: string; onPress: () => void }> = ({
         <Text
           style={{
             fontWeight: "600",
-            fontSize: 12,
           }}
         >
           {text}

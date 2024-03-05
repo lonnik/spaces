@@ -64,15 +64,20 @@ export type Address = {
   streetNumber: string;
 };
 
+export type TopLevelThread = Pick<
+  Thread,
+  "id" | "firstMessage" | "likes" | "messagesCount" | "createdAt" | "spaceId"
+>;
+
 export type Thread = {
   id: Uuid;
-  firstMessage?: Message; // only toplevel thread
+  firstMessage: Message; // only toplevel thread
   likes: number;
   messagesCount: number;
   createdAt: Date;
   spaceId: Uuid;
-  messages?: Message[]; // only child thread
-  parentMessageId?: Uuid; // only child thread
+  messages: Message[]; // only child thread
+  parentMessageId: Uuid; // only child thread
 };
 
 export type Message = {

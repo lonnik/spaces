@@ -8,6 +8,7 @@ import {
   Sorting,
   Thread,
   Message,
+  TopLevelThread,
 } from "../types";
 import { fetchApi } from "./fetch_api";
 import { parseQuery } from "./parse_query";
@@ -47,13 +48,17 @@ export const getAddress = async (loc: Location) => {
   return fetchApi<Address>(url);
 };
 
-export const getToplevelThreads = async (spaceId: Uuid) => {
-  const queryStr = parseQuery({ sort: "recent", offset: 0, count: 10 });
+export const getToplevelThreads = async (
+  spaceId: Uuid,
+  offset: number | undefined = 0,
+  count: number | undefined = 10
+) => {
+  const queryStr = parseQuery({ sort: "recent", offset, count });
   const url = `/spaces/${encodeURIComponent(
     spaceId
   )}/toplevel-threads${queryStr}`;
 
-  return fetchApi<Thread[]>(url);
+  return fetchApi<TopLevelThread[]>(url);
 };
 
 export const getThreadWithMessages = async (
