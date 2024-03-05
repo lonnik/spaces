@@ -159,6 +159,7 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
                 style={{
                   fontSize: 28,
                   fontWeight: "600",
+                  marginBottom: 5,
                 }}
               >
                 {item.text}

@@ -181,7 +181,7 @@ const ContentInput = forwardRef<
     setValue: (newValue: string) => void;
     placeholder?: string;
   } & TextInputProps
->(({ value, setValue, placeholder = "", ...props }, ref) => {
+>(({ value, setValue, placeholder = "", style, ...props }, ref) => {
   return (
     <View style={{ marginBottom: 30 }}>
       <TextInput
@@ -190,12 +190,15 @@ const ContentInput = forwardRef<
         placeholder={placeholder}
         onChangeText={setValue}
         multiline={true}
-        style={{
-          fontSize: 16,
-          marginBottom: 15,
-          color: template.colors.text,
-          lineHeight: 22,
-        }}
+        style={[
+          {
+            fontSize: 16,
+            marginBottom: 15,
+            color: template.colors.text,
+            lineHeight: 22,
+          },
+          style,
+        ]}
         {...props}
       />
       <View style={{ flexDirection: "row", gap: 10 }}>

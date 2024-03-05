@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useMemo, useState } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../../styles/template";
 import { Text } from "../../../components/Text";
@@ -24,7 +24,7 @@ export const Message: FC<{
   message,
   spaceId,
   style,
-  fontSize = 26,
+  fontSize,
   displayLikeButton = false,
   displayAnswersCount = false,
 }) => {
@@ -44,8 +44,28 @@ export const Message: FC<{
     createNewMessageLike();
   };
 
+  fontSize = useMemo(() => {
+    return fontSize || calculateFontSize(message.content);
+  }, [message.content, fontSize]);
+
   displayAnswersCount =
     displayAnswersCount && !!message.childThreadMessagesCount;
+
+  const likeButton = displayLikeButton ? (
+    <View style={{ minWidth: 55 }}>
+      <LikeButton2
+        likes={message.likesCount}
+        onPress={onLikeButtonPress}
+        isLikedByUser={isLiked}
+      />
+    </View>
+  ) : null;
+
+  const answersCount = displayAnswersCount ? (
+    <Text
+      style={{ color: template.colors.textLight }}
+    >{`${message.childThreadMessagesCount} answers`}</Text>
+  ) : null;
 
   return (
     <View
@@ -58,7 +78,7 @@ export const Message: FC<{
       ]}
     >
       <Text style={{ fontSize }}>{message.content}</Text>
-      {displayLikeButton || displayAnswersCount ? (
+      {likeButton || answersCount ? (
         <View
           style={{
             flexDirection: "row",
@@ -66,22 +86,24 @@ export const Message: FC<{
             gap: 5,
           }}
         >
-          {displayLikeButton ? (
-            <View style={{ minWidth: 55 }}>
-              <LikeButton2
-                likes={message.likesCount}
-                onPress={onLikeButtonPress}
-                isLikedByUser={isLiked}
-              />
-            </View>
-          ) : null}
-          {displayAnswersCount ? (
-            <Text
-              style={{ color: template.colors.textLight }}
-            >{`${message.childThreadMessagesCount} answers`}</Text>
-          ) : null}
+          {likeButton}
+          {answersCount}
         </View>
       ) : null}
     </View>
   );
+};
+
+const calculateFontSize = (text: string, min = 14, max = 26) => {
+  const lines = calculateLineCount(text);
+
+  const fontSize = max - ((max - min) / 3) * (lines - 1);
+
+  return Math.max(fontSize, min);
+};
+
+const calculateLineCount = (text: string) => {
+  return text.split("\n").reduce((acc, line) => {
+    return acc + Math.max(Math.ceil(line.length / 30), 1);
+  }, 0);
 };

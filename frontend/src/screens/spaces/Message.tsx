@@ -108,6 +108,7 @@ export const MessageScreen: FC<
             displayLikeButton={true}
             displayAnswersCount={true}
             spaceId={spaceId}
+            fontSize={14}
           />
         </View>
       );
