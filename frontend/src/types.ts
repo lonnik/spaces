@@ -74,7 +74,7 @@ export type Thread = {
   firstMessage: Message; // only toplevel thread
   likes: number;
   messagesCount: number;
-  createdAt: Date;
+  createdAt: string;
   spaceId: Uuid;
   messages: Message[]; // only child thread
   parentMessageId: Uuid; // only child thread
@@ -85,7 +85,7 @@ export type Message = {
   content: string;
   likesCount: number;
   type: MessageType;
-  createdAt: Date;
+  createdAt: string;
   senderId: Uuid;
   childThreadId: Uuid;
   threadId: Uuid;

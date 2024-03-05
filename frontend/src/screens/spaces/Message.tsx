@@ -97,6 +97,7 @@ export const MessageScreen: FC<
           >
             <Avatar style={{ marginRight: 7 }} />
             <MessageInfo
+              createdAt={item.message.createdAt}
               userId={item.message.senderId}
               style={{ marginBottom: 5 }}
             />
@@ -131,6 +132,7 @@ export const MessageScreen: FC<
         <Avatar />
         <View style={{ flex: 1 }}>
           <MessageInfo
+            createdAt={item.message.createdAt}
             userId={item.message.senderId}
             style={{ marginBottom: 5 }}
           />

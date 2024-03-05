@@ -68,7 +68,7 @@ export const ThreadItem: FC<{
         }}
       >
         <Avatar size={28} />
-        <MessageInfo userId={message.senderId} />
+        <MessageInfo userId={message.senderId} createdAt={message.createdAt} />
       </View>
       <View>
         <PressableTransformation
