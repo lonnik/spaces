@@ -84,8 +84,8 @@ export const ThreadItem: FC<{
           <Message
             message={message}
             style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-            displayLikeButton={true}
-            displayAnswersCount={true}
+            displayLikeButton
+            displayAnswerButton
             spaceId={spaceId}
           />
         </PressableTransformation>

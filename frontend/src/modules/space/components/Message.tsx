@@ -5,7 +5,9 @@ import { Text } from "../../../components/Text";
 import { Uuid, type Message as TMessage } from "../../../types";
 import { useMutation } from "@tanstack/react-query";
 import { createMessageLike } from "../../../utils/queries";
-import { LikeButton2 } from "./LikeButton2";
+import { LikeButton } from "./LikeButton";
+import { CommentIcon } from "../../../components/icons/CommentIcon";
+import { PressableTransformation } from "../../../components/PressableTransformation";
 
 // TODO:
 // prop should exist that says if the message is liked by the user
@@ -17,7 +19,7 @@ export const Message: FC<{
   message: TMessage;
   spaceId: Uuid;
   displayLikeButton?: boolean;
-  displayAnswersCount?: boolean;
+  displayAnswerButton?: boolean;
   style?: StyleProp<ViewStyle>;
   fontSize?: number;
 }> = ({
@@ -26,7 +28,7 @@ export const Message: FC<{
   style,
   fontSize,
   displayLikeButton = false,
-  displayAnswersCount = false,
+  displayAnswerButton = false,
 }) => {
   // TODO: this state variable temporarily replaces the server state and will not be needed when the server state is implemented
   const [isLiked, setIsLiked] = useState(false);
@@ -48,12 +50,9 @@ export const Message: FC<{
     return fontSize || calculateFontSize(message.content);
   }, [message.content, fontSize]);
 
-  displayAnswersCount =
-    displayAnswersCount && !!message.childThreadMessagesCount;
-
   const likeButton = displayLikeButton ? (
-    <View style={{ minWidth: 55 }}>
-      <LikeButton2
+    <View>
+      <LikeButton
         likes={message.likesCount}
         onPress={onLikeButtonPress}
         isLikedByUser={isLiked}
@@ -61,10 +60,21 @@ export const Message: FC<{
     </View>
   ) : null;
 
-  const answersCount = displayAnswersCount ? (
-    <Text
-      style={{ color: template.colors.textLight }}
-    >{`${message.childThreadMessagesCount} answers`}</Text>
+  const answerButton = displayAnswerButton ? (
+    <PressableTransformation onPress={() => {}}>
+      <View style={{ flexDirection: "row", gap: 3 }}>
+        <CommentIcon
+          style={{ width: 17, height: 17 }}
+          stroke={template.colors.textLight}
+          strokeWidth={70}
+        />
+        {message.childThreadMessagesCount ? (
+          <Text style={{ color: template.colors.text }}>
+            {message.childThreadMessagesCount}
+          </Text>
+        ) : null}
+      </View>
+    </PressableTransformation>
   ) : null;
 
   return (
@@ -78,16 +88,16 @@ export const Message: FC<{
       ]}
     >
       <Text style={{ fontSize }}>{message.content}</Text>
-      {likeButton || answersCount ? (
+      {likeButton || answerButton ? (
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            gap: 5,
+            gap: 10,
           }}
         >
           {likeButton}
-          {answersCount}
+          {answerButton}
         </View>
       ) : null}
     </View>

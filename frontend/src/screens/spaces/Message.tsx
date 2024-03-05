@@ -105,8 +105,8 @@ export const MessageScreen: FC<
           <Message
             message={item.message}
             style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-            displayLikeButton={true}
-            displayAnswersCount={true}
+            displayLikeButton
+            displayAnswerButton
             spaceId={spaceId}
             fontSize={14}
           />
@@ -124,7 +124,7 @@ export const MessageScreen: FC<
       },
       fontSize: 14,
       spaceId,
-      displayAnswersCount: true,
+      displayAnswerButton: true,
       displayLikeButton: true,
     };
 
