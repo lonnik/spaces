@@ -1,12 +1,5 @@
 import { User } from "firebase/auth";
-import {
-  FC,
-  createContext,
-  useReducer,
-  Dispatch,
-  useContext,
-  ReactNode,
-} from "react";
+import { FC, createContext, useReducer, Dispatch, ReactNode } from "react";
 import { Location } from "../../types";
 
 const initialState: {
@@ -40,8 +33,8 @@ const userReducer = (prevState: UserState, action: Action) => {
   }
 };
 
-const UserStateContext = createContext<null | UserState>(null);
-const UserDispatchContext = createContext<null | Dispatch<Action>>(null);
+export const UserStateContext = createContext<null | UserState>(null);
+export const UserDispatchContext = createContext<null | Dispatch<Action>>(null);
 
 export const UserStateProvider: FC<{ children: ReactNode }> = ({
   children,
@@ -55,15 +48,4 @@ export const UserStateProvider: FC<{ children: ReactNode }> = ({
       </UserDispatchContext.Provider>
     </UserStateContext.Provider>
   );
-};
-
-export const useUserState = () => {
-  const context = useContext(UserStateContext);
-  const dispatch = useContext(UserDispatchContext);
-
-  if (context === null || dispatch === null) {
-    throw new Error("useUserState must be used within a UserStateProvider");
-  }
-
-  return [context, dispatch] as const;
 };

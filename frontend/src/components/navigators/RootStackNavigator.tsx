@@ -8,11 +8,11 @@ import { auth } from "../../../firebase";
 import { LoadingScreen } from "../../screens/Loading";
 import { createCustomStackNavigator } from "../../navigators/stack_navigator";
 import { NewSpaceScreen } from "../../screens/NewSpace";
-import { useUserState } from "../context/UserContext";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SpaceRootScreen } from "../../screens/spaces/Root";
 import { LastVisitedSpacesScreen } from "../../screens/LastVisitedSpaces";
+import { useUserState } from "../../hooks/use_current_user";
 
 const Stack = createCustomStackNavigator<RootStackParamList>();
 

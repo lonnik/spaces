@@ -3,7 +3,7 @@ import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
 } from "expo-location";
-import { useUserState } from "../components/context/UserContext";
+import { useUserState } from "./use_current_user";
 
 export const useLocation = () => {
   const [userState, dispatch] = useUserState();

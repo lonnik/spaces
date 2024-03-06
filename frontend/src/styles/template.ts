@@ -9,6 +9,7 @@ export const template = {
     textLight: "#888",
     white: "#fff",
     error: "#FD7979",
+    red: "#AB0303",
     success: "#4CAF50",
   },
   paddings: {

@@ -8,8 +8,9 @@ import { ArrowForward } from "./icons/ArrowForward";
 export const ForwardButton: FC<{
   onPress: () => void;
   text: string;
+  color?: string;
   style?: StyleProp<ViewStyle>;
-}> = ({ onPress, text, style }) => {
+}> = ({ onPress, text, color = template.colors.text, style }) => {
   return (
     <PressableTransformation onPress={onPress} style={style}>
       <View
@@ -26,15 +27,12 @@ export const ForwardButton: FC<{
           style={{
             fontSize: 16,
             fontWeight: "600",
-            color: template.colors.text,
+            color: color,
           }}
         >
           {text}
         </Text>
-        <ArrowForward
-          style={{ width: 20, height: 16 }}
-          fill={template.colors.text}
-        />
+        <ArrowForward style={{ width: 20, height: 16 }} fill={color} />
       </View>
     </PressableTransformation>
   );
