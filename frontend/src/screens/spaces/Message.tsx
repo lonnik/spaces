@@ -1,35 +1,20 @@
-import { ComponentProps, FC } from "react";
-import { FlatList, ListRenderItem, View } from "react-native";
-import { Message as TMessage, SpaceStackParamList } from "../../types";
+import { FC, useEffect } from "react";
+import { View } from "react-native";
+import { SpaceStackParamList } from "../../types";
 import { Header } from "../../components/Header";
 import { useQueries } from "@tanstack/react-query";
 import { getMessage, getThreadWithMessages } from "../../utils/queries";
 import { StackScreenProps } from "@react-navigation/stack";
 import { template } from "../../styles/template";
-import { Avatar } from "../../components/Avatar";
 import { Text } from "../../components/Text";
-import { Message } from "../../modules/space/components/Message";
-import { MessageInfo } from "../../modules/space/components/MessageInfo";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
-import { PressableTransformation } from "../../components/PressableTransformation";
-
-type ParentMessage = {
-  type: "parent";
-  message: TMessage;
-};
-
-type AnswerMessage = {
-  type: "answer";
-  message: TMessage;
-};
-
-type ListItem = ParentMessage | AnswerMessage;
-type Level = "thread" | "answer";
+import { MessageLevel } from "../../modules/space/types";
+import { MessageList } from "../../modules/space/components/MessageList";
 
 export const MessageScreen: FC<
   StackScreenProps<SpaceStackParamList, "Thread" | "Answer"> & {
-    level: Level;
+    level: MessageLevel;
   }
 > = ({ route, level, navigation }) => {
   const { threadId, parentMessageId, parentThreadId, spaceId } = route.params;
@@ -82,94 +67,20 @@ export const MessageScreen: FC<
     ],
   });
 
-  const insets = useSafeAreaInsets();
-
-  const renderItem: ListRenderItem<ListItem> = ({ index, item }) => {
-    if (item.type === "parent") {
-      return (
-        <View style={{ marginBottom: 32 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Avatar style={{ marginRight: 7 }} />
-            <MessageInfo
-              createdAt={item.message.createdAt}
-              userId={item.message.senderId}
-              style={{ marginBottom: 5 }}
-            />
-          </View>
-          <Message
-            message={item.message}
-            style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-            displayLikeButton
-            displayAnswerButton
-            spaceId={spaceId}
-            fontSize={14}
-          />
-        </View>
-      );
+  useEffect(() => {
+    if (parentMessageData?.childThreadId && !threadId) {
+      navigation.setParams({
+        ...route.params,
+        threadId: parentMessageData.childThreadId,
+      });
     }
+  }, [parentMessageData?.childThreadId]);
 
-    const messageProps: ComponentProps<typeof Message> = {
-      message: item.message,
-      style: {
-        paddingVertical: 8,
-        paddingHorizontal: 12,
-        gap: 8,
-        marginTop: 5,
-      },
-      fontSize: 14,
-      spaceId,
-      displayAnswerButton: true,
-      displayLikeButton: true,
-    };
-
-    return (
-      <View style={{ flexDirection: "row", gap: 7 }}>
-        <Avatar />
-        <View style={{ flex: 1 }}>
-          <MessageInfo
-            createdAt={item.message.createdAt}
-            userId={item.message.senderId}
-            style={{ marginBottom: 5 }}
-          />
-          {level === "thread" ? (
-            <PressableTransformation
-              onPress={() =>
-                navigation.navigate("Answer", {
-                  threadId: item.message.childThreadId,
-                  parentMessageId: item.message.id,
-                  parentThreadId: item.message.threadId,
-                  spaceId,
-                })
-              }
-            >
-              <Message {...messageProps} />
-            </PressableTransformation>
-          ) : (
-            <Message {...messageProps} />
-          )}
-        </View>
-      </View>
-    );
-  };
+  const insets = useSafeAreaInsets();
 
   if (!parentMessageData) {
     return null;
   }
-
-  const answerMessages = (threadData?.messages || []).map((message) => {
-    return { type: "answer", message } as AnswerMessage;
-  });
-
-  const data: ListItem[] = [
-    { type: "parent", message: parentMessageData } as ParentMessage,
-    ...answerMessages,
-  ];
 
   const onRefresh = () => {
     refetchParentMessage();
@@ -183,7 +94,13 @@ export const MessageScreen: FC<
         displayArrowBackButton
       />
       <PrimaryButton
-        onPress={() => navigation.navigate("Share")}
+        onPress={() =>
+          navigation.navigate("Share", {
+            parentThreadId: parentThreadId,
+            parentMessageId: parentMessageId,
+            threadId: threadId,
+          })
+        }
         style={{
           alignSelf: "center",
           position: "absolute",
@@ -203,12 +120,13 @@ export const MessageScreen: FC<
           paddingBottom: insets.bottom + 50,
         }}
       >
-        <FlatList
-          style={{ flex: 1 }}
-          data={data}
-          renderItem={renderItem}
+        <MessageList
+          level={level}
           onRefresh={onRefresh}
-          refreshing={isLoadingParentMessage || isLoadingParentMessage}
+          isRefreshing={isLoadingParentMessage || isLoadingThread}
+          spaceId={spaceId}
+          parentMessageData={parentMessageData}
+          threadData={threadData}
         />
       </View>
     </View>

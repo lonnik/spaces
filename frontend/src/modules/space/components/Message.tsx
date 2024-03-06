@@ -2,12 +2,18 @@ import { FC, useMemo, useState } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
 import { template } from "../../../styles/template";
 import { Text } from "../../../components/Text";
-import { Uuid, type Message as TMessage } from "../../../types";
+import {
+  Uuid,
+  type Message as TMessage,
+  SpaceStackParamList,
+} from "../../../types";
 import { useMutation } from "@tanstack/react-query";
 import { createMessageLike } from "../../../utils/queries";
 import { LikeButton } from "./LikeButton";
 import { CommentIcon } from "../../../components/icons/CommentIcon";
 import { PressableTransformation } from "../../../components/PressableTransformation";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
 
 // TODO:
 // prop should exist that says if the message is liked by the user
@@ -32,6 +38,8 @@ export const Message: FC<{
 }) => {
   // TODO: this state variable temporarily replaces the server state and will not be needed when the server state is implemented
   const [isLiked, setIsLiked] = useState(false);
+
+  const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
   const { mutate: createNewMessageLike } = useMutation({
     mutationKey: ["likeMessage", message.id],
@@ -61,7 +69,15 @@ export const Message: FC<{
   ) : null;
 
   const answerButton = displayAnswerButton ? (
-    <PressableTransformation onPress={() => {}}>
+    <PressableTransformation
+      onPress={() => {
+        navigation.navigate("Share", {
+          parentThreadId: message.threadId,
+          parentMessageId: message.id,
+          threadId: message.childThreadId,
+        });
+      }}
+    >
       <View style={{ flexDirection: "row", gap: 3 }}>
         <CommentIcon
           style={{ width: 17, height: 17 }}

@@ -16,7 +16,11 @@ export type SpaceStackParamList = {
   Overview: undefined;
   Info: undefined;
   Subscribers: undefined;
-  Share: undefined;
+  Share?: {
+    parentThreadId: Uuid;
+    parentMessageId: Uuid;
+    threadId?: Uuid;
+  };
   Thread: {
     spaceId: Uuid;
     threadId?: Uuid;
@@ -87,7 +91,7 @@ export type Message = {
   type: MessageType;
   createdAt: string;
   senderId: Uuid;
-  childThreadId: Uuid;
+  childThreadId: Uuid; // TODO: at the moment can be empty string instead of null
   threadId: Uuid;
   childThreadMessagesCount?: number; // only child thread
 };

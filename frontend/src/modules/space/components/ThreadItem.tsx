@@ -1,4 +1,4 @@
-import { FC } from "react";
+import { FC, memo } from "react";
 import { StyleProp, View, ViewStyle } from "react-native";
 import {
   type Message as TMessage,
@@ -14,10 +14,6 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { MessageInfo } from "./MessageInfo";
 import { PressableTransformation } from "../../../components/PressableTransformation";
 
-// TODO:
-// display date function
-// text size function
-
 const count = 1;
 const offset = 0;
 
@@ -25,93 +21,104 @@ export const ThreadItem: FC<{
   spaceId: Uuid;
   message: TMessage;
   style?: StyleProp<ViewStyle>;
-}> = ({ spaceId, message, style }) => {
-  const { data: answerThread, isLoading: isLoadingAnswerThread } = useQuery({
-    enabled: message.childThreadId.length > 0,
-    queryKey: [
-      "spaces",
-      spaceId,
-      "threads",
-      message.childThreadId,
-      "popularity",
-      count,
-      offset,
-    ],
-    queryFn: async () => {
-      return getThreadWithMessages(
+}> = memo(
+  ({ spaceId, message, style }) => {
+    const { data: answerThread, isLoading: isLoadingAnswerThread } = useQuery({
+      enabled: message.childThreadId.length > 0,
+      queryKey: [
+        "spaces",
         spaceId,
+        "threads",
         message.childThreadId,
         "popularity",
         count,
-        offset
-      );
-    },
-  });
+        offset,
+      ],
+      queryFn: async () => {
+        return getThreadWithMessages(
+          spaceId,
+          message.childThreadId,
+          "popularity",
+          count,
+          offset
+        );
+      },
+    });
 
-  if (answerThread) {
-    message.childThreadMessagesCount = answerThread.messagesCount;
-  }
+    if (answerThread) {
+      message.childThreadMessagesCount = answerThread.messagesCount;
+    }
 
-  const firstAnswer = answerThread?.messages?.[0];
+    const firstAnswer = answerThread?.messages?.[0];
 
-  const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
+    const navigation =
+      useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
-  return (
-    <View style={[{ flex: 1 }, style]}>
-      <View
-        style={{
-          flex: 1,
-          flexDirection: "row",
-          alignItems: "center",
-          gap: 5,
-          marginBottom: 5,
-        }}
-      >
-        <Avatar size={28} />
-        <MessageInfo userId={message.senderId} createdAt={message.createdAt} />
-      </View>
-      <View>
-        <PressableTransformation
-          onPress={() => {
-            navigation.navigate("Thread", {
-              threadId: message.childThreadId,
-              spaceId,
-              parentMessageId: message.id,
-              parentThreadId: message.threadId,
-            });
+    return (
+      <View style={[{ flex: 1 }, style]}>
+        <View
+          style={{
+            flex: 1,
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 5,
+            marginBottom: 5,
           }}
         >
-          <Message
-            message={message}
-            style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-            displayLikeButton
-            displayAnswerButton
-            spaceId={spaceId}
+          <Avatar size={28} />
+          <MessageInfo
+            userId={message.senderId}
+            createdAt={message.createdAt}
           />
-        </PressableTransformation>
-      </View>
-      {firstAnswer ? (
-        <View style={{ flex: 1, flexDirection: "row", gap: 5, marginTop: 10 }}>
-          <Avatar size={22} />
+        </View>
+        <View>
           <PressableTransformation
             onPress={() => {
-              navigation.navigate("Answer", {
-                parentMessageId: firstAnswer.id,
-                parentThreadId: firstAnswer.threadId,
-                threadId: firstAnswer.childThreadId,
+              navigation.navigate("Thread", {
+                threadId: message.childThreadId,
                 spaceId,
+                parentMessageId: message.id,
+                parentThreadId: message.threadId,
               });
             }}
           >
             <Message
-              message={firstAnswer}
-              style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
-              fontSize={14}
+              message={message}
+              style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
+              displayLikeButton
+              displayAnswerButton
               spaceId={spaceId}
             />
           </PressableTransformation>
         </View>
-      ) : null}
-    </View>
-  );
-};
+        {firstAnswer ? (
+          <View
+            style={{ flex: 1, flexDirection: "row", gap: 5, marginTop: 10 }}
+          >
+            <Avatar size={22} />
+            <PressableTransformation
+              onPress={() => {
+                navigation.navigate("Answer", {
+                  parentMessageId: firstAnswer.id,
+                  parentThreadId: firstAnswer.threadId,
+                  threadId: firstAnswer.childThreadId,
+                  spaceId,
+                });
+              }}
+            >
+              <Message
+                message={firstAnswer}
+                style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
+                fontSize={14}
+                spaceId={spaceId}
+              />
+            </PressableTransformation>
+          </View>
+        ) : null}
+      </View>
+    );
+  },
+  (prevProps, nextProps) => {
+    return prevProps.message.id === nextProps.message.id;
+  }
+);

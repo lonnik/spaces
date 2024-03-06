@@ -14,26 +14,28 @@ import {
   createThread,
   createToplevelThread,
 } from "../../utils/queries";
-import { Uuid } from "../../types";
+import { SpaceStackParamList, Uuid } from "../../types";
 import { useKeyboardHeight } from "../../modules/space/hooks/use_keyboard_height";
 import { useOnClose } from "../../modules/space/hooks/use_on_close";
 import { cleanString } from "../../utils/strings";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StackScreenProps } from "@react-navigation/stack";
 
 const createThreadAndMessage = async ({
-  topLevelThreadId,
-  firstMessageId,
+  parentThreadId,
+  parentMessageId,
   spaceId,
   messageContent,
 }: {
-  topLevelThreadId: Uuid;
-  firstMessageId: Uuid;
+  parentThreadId: Uuid;
+  parentMessageId: Uuid;
   spaceId: Uuid;
   messageContent: string;
 }) => {
   const { threadId } = await createThread(
     spaceId,
-    topLevelThreadId,
-    firstMessageId
+    parentThreadId,
+    parentMessageId
   );
 
   return createMessage(spaceId, threadId, messageContent);
@@ -41,7 +43,10 @@ const createThreadAndMessage = async ({
 
 // TODO: loading notification and success or error notification
 
-export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
+export const SpaceShareScreen: FC<
+  StackScreenProps<SpaceStackParamList, "Share"> & { spaceId: Uuid }
+> = ({ spaceId, route }) => {
+  const isNewThreadShare = !route.params;
   const [firstMessageText, setFirstMessageText] = useState("");
   const [secondMessageText, setSecondMessageText] = useState("");
   const keyboardHeight = useKeyboardHeight();
@@ -50,6 +55,7 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const secondMessageRef = useRef<TextInput>(null);
   const notification = useNotification();
   const queryClient = useQueryClient();
+  const insets = useSafeAreaInsets();
 
   const onSuccess = useCallback(() => {
     queryClient.invalidateQueries({
@@ -70,15 +76,19 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     });
   }, []);
 
-  const { mutate: createNewMessage } = useMutation({
+  const { mutate: createNewMessageInThread } = useMutation({
     mutationKey: ["createMessage"],
+    mutationFn: ({ threadId, content }: { threadId: Uuid; content: string }) =>
+      createMessage(spaceId, threadId, content),
+    onError,
+    onSuccess,
+  });
+
+  const { mutate: createNewThreadAndMessage } = useMutation({
+    mutationKey: ["createThreadAndMessage"],
     mutationFn: createThreadAndMessage,
-    onError(error) {
-      onError(error);
-    },
-    onSuccess() {
-      onSuccess();
-    },
+    onError,
+    onSuccess,
   });
 
   const { mutate: createNewTopLevelThread } = useMutation({
@@ -86,16 +96,14 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     mutationFn: async (content: string) => {
       return createToplevelThread(spaceId, content);
     },
-    onError(error) {
-      onError(error);
-    },
+    onError,
     onSuccess(data) {
       if (secondMessageText) {
         const secondMessageTextClean = cleanString(secondMessageText);
 
-        createNewMessage({
-          topLevelThreadId: data.threadId,
-          firstMessageId: data.firstMessageId,
+        createNewThreadAndMessage({
+          parentThreadId: data.threadId,
+          parentMessageId: data.firstMessageId,
           spaceId,
           messageContent: secondMessageTextClean,
         });
@@ -117,6 +125,31 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const onSend = async () => {
     const firstMessageTextClean = cleanString(firstMessageText);
 
+    if (!isNewThreadShare) {
+      const { parentThreadId, parentMessageId, threadId } = route.params;
+
+      notification.showNotification({
+        title: "Creating New Answer ...",
+        type: "loading",
+        duration: 999999,
+      });
+
+      if (threadId) {
+        createNewMessageInThread({ threadId, content: firstMessageTextClean });
+
+        return;
+      }
+
+      createNewThreadAndMessage({
+        parentThreadId,
+        parentMessageId,
+        spaceId,
+        messageContent: firstMessageTextClean,
+      });
+
+      return;
+    }
+
     notification.showNotification({
       title: "Creating New Thread ...",
       type: "loading",
@@ -127,7 +160,12 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingBottom: keyboardHeight === 0 ? insets.bottom : 0,
+      }}
+    >
       <Header text="Share something" onClose={onClose} displayArrowDownButton />
       <View
         style={{
@@ -143,12 +181,14 @@ export const SpaceShareScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
           placeholder="Start a thread ..."
           autoFocus={true}
         />
-        <ContentInput
-          ref={secondMessageRef}
-          setValue={setSecondMessageText}
-          value={secondMessageText}
-          placeholder="Add something to the thread"
-        />
+        {isNewThreadShare ? (
+          <ContentInput
+            ref={secondMessageRef}
+            setValue={setSecondMessageText}
+            value={secondMessageText}
+            placeholder="Add something to the thread"
+          />
+        ) : null}
         <View style={{ flex: 1 }} />
         <View
           style={{

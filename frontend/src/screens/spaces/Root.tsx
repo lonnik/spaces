@@ -36,7 +36,13 @@ export const SpaceRootScreen: FC<
           name="Share"
           options={{ animation: "slideInFromBottom", snapPoint: "96%" }}
         >
-          {() => <SpaceShareScreen spaceId={spaceId} />}
+          {({ route, navigation }) => (
+            <SpaceShareScreen
+              spaceId={spaceId}
+              navigation={navigation}
+              route={route}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Thread" options={{ animation: "slideInFromRight" }}>
           {({ route, navigation }) => (

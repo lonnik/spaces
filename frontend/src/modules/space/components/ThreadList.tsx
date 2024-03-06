@@ -42,11 +42,6 @@ type HeadingListItem = {
   text: string;
 };
 
-type FetchingNextPageIndicatorListItem = {
-  type: "fetchingNextPage";
-  isLoading: boolean;
-};
-
 type LoadingIndicatorListItem = {
   type: "loading";
 };
@@ -56,7 +51,6 @@ type ListItem =
   | SubscribersListItem
   | ButtonsListItem
   | HeadingListItem
-  | FetchingNextPageIndicatorListItem
   | LoadingIndicatorListItem;
 
 const pageSize = 6;
@@ -135,12 +129,11 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const [refreshing, setRefreshing] = useState(false);
 
   const renderItem: ListRenderItem<ListItem> = useCallback(
-    ({ index, item }) => {
+    ({ item }) => {
       switch (item.type) {
         case "subscribers": {
           return (
             <SubscribersSection
-              key={index}
               onPress={() => navigation.navigate("Subscribers")}
               spaceId={spaceId}
             />
@@ -155,7 +148,6 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
           return (
             <View style={{ marginTop: 10 }}>
               <Text
-                key={index}
                 style={{
                   fontSize: 28,
                   fontWeight: "600",
@@ -168,34 +160,18 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
           );
         }
 
-        case "fetchingNextPage": {
-          return (
-            <View
-              style={{
-                height: 60,
-                justifyContent: "center",
-                alignContent: "center",
-              }}
-            >
-              {item.isLoading ? <ActivityIndicator key={index} /> : null}
-            </View>
-          );
-        }
-
-        case "loading": {
-          return <LoadingScreen />;
-        }
-
-        default: {
+        case "message": {
           return (
             <ThreadItem
-              key={index}
               spaceId={spaceId}
               message={item.message}
               style={{ marginBottom: 10 }}
             />
           );
         }
+
+        default:
+          return <LoadingScreen />;
       }
     },
     [spaceId, navigation]
@@ -216,16 +192,8 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
       ...(isLoading
         ? [{ type: "loading" } as LoadingIndicatorListItem]
         : topLevelThreadsData),
-      ...(hasNextPage
-        ? [
-            {
-              type: "fetchingNextPage",
-              isLoading: isFetchingNextPage,
-            } as FetchingNextPageIndicatorListItem,
-          ]
-        : []),
     ];
-  }, [topLevelThreads, isFetchingNextPage, isLoading, hasNextPage]);
+  }, [topLevelThreads, isFetchingNextPage, isLoading]);
 
   return (
     <FlatList
@@ -233,6 +201,19 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
       renderItem={renderItem}
       onRefresh={onRefresh}
       stickyHeaderIndices={[1]}
+      keyExtractor={(item) => {
+        if (item.type === "message") {
+          return item.message.id;
+        }
+
+        return item.type;
+      }}
+      ListFooterComponent={
+        <NextPageLoadingIndicator
+          isLoading={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+        />
+      }
       refreshing={refreshing}
       onEndReached={() => {
         if (hasNextPage) {
@@ -246,5 +227,26 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
         paddingHorizontal: template.paddings.md,
       }}
     />
+  );
+};
+
+const NextPageLoadingIndicator: FC<{
+  isLoading: boolean;
+  hasNextPage: boolean;
+}> = ({ isLoading, hasNextPage }) => {
+  if (!hasNextPage) {
+    return null;
+  }
+
+  return (
+    <View
+      style={{
+        height: 60,
+        justifyContent: "center",
+        alignContent: "center",
+      }}
+    >
+      {isLoading ? <ActivityIndicator /> : null}
+    </View>
   );
 };
