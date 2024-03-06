@@ -1,4 +1,4 @@
 import { useContext } from "react";
-import { LastUpdatedContxtContext } from "../components/context/LastUpdatedContext";
+import { LastUpdatedContext } from "../components/context/LastUpdatedContext";
 
-export const useLastUpdated = () => useContext(LastUpdatedContxtContext);
+export const useLastUpdated = () => useContext(LastUpdatedContext);

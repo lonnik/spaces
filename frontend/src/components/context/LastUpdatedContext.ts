@@ -1,3 +1,3 @@
 import { createContext } from "react";
 
-export const LastUpdatedContxtContext = createContext<null | Date>(null);
+export const LastUpdatedContext = createContext<null | Date>(null);

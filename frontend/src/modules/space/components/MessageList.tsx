@@ -17,7 +17,7 @@ import { getMessage, getThreadWithMessages } from "../../../utils/queries";
 import { NextPageLoadingIndicator } from "./NextPageLoadingIndicator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LoadingScreen } from "../../../screens/Loading";
-import { LastUpdatedContxtContext } from "../../../components/context/LastUpdatedContext";
+import { LastUpdatedContext } from "../../../components/context/LastUpdatedContext";
 
 type ParentMessageListItem = {
   type: "parent";
@@ -180,7 +180,7 @@ export const MessageList: FC<{
   }, [refreshing]);
 
   return (
-    <LastUpdatedContxtContext.Provider value={lastUpdated}>
+    <LastUpdatedContext.Provider value={lastUpdated}>
       <FlatList
         style={{ flex: 1 }}
         data={data}
@@ -204,7 +204,7 @@ export const MessageList: FC<{
         }}
         alwaysBounceVertical={false}
       />
-    </LastUpdatedContxtContext.Provider>
+    </LastUpdatedContext.Provider>
   );
 };
 

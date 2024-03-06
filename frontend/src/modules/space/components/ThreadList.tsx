@@ -19,7 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import { getApiUrl } from "../../../utils/get_api_url";
 import { ButtonsSection } from "../../../modules/space/components/ButtonsSection";
 import { NextPageLoadingIndicator } from "./NextPageLoadingIndicator";
-import { LastUpdatedContxtContext } from "../../../components/context/LastUpdatedContext";
+import { LastUpdatedContext } from "../../../components/context/LastUpdatedContext";
 
 type MessageListItem = {
   type: "message";
@@ -186,7 +186,7 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   }, [refreshing]);
 
   return (
-    <LastUpdatedContxtContext.Provider value={lastUpdated}>
+    <LastUpdatedContext.Provider value={lastUpdated}>
       <FlatList
         data={data}
         renderItem={renderItem}
@@ -218,7 +218,7 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
           paddingHorizontal: template.paddings.md,
         }}
       />
-    </LastUpdatedContxtContext.Provider>
+    </LastUpdatedContext.Provider>
   );
 };
 
