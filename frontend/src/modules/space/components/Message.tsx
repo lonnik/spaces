@@ -85,7 +85,13 @@ export const Message: FC<{
           strokeWidth={70}
         />
         {message.childThreadMessagesCount ? (
-          <Text style={{ color: template.colors.text }}>
+          <Text
+            style={{
+              color: template.colors.text,
+              fontWeight: "400",
+              fontSize: 13,
+            }}
+          >
             {message.childThreadMessagesCount}
           </Text>
         ) : null}
