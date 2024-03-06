@@ -87,7 +87,9 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const onRefresh = async () => {
     setRefreshing(true);
     // TODO: only refetch first page
-    await queryClient.refetchQueries({ queryKey: ["spaces", spaceId] });
+    await queryClient.invalidateQueries({
+      queryKey: ["spaces", spaceId],
+    });
     setRefreshing(false);
   };
 

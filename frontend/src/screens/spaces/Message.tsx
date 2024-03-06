@@ -1,8 +1,8 @@
-import { FC, useEffect } from "react";
+import { FC, useEffect, useState } from "react";
 import { View } from "react-native";
 import { SpaceStackParamList } from "../../types";
 import { Header } from "../../components/Header";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { getMessage, getThreadWithMessages } from "../../utils/queries";
 import { StackScreenProps } from "@react-navigation/stack";
 import { template } from "../../styles/template";
@@ -12,6 +12,9 @@ import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { MessageLevel } from "../../modules/space/types";
 import { MessageList } from "../../modules/space/components/MessageList";
 
+const count = 10;
+const offset = 0;
+
 export const MessageScreen: FC<
   StackScreenProps<SpaceStackParamList, "Thread" | "Answer"> & {
     level: MessageLevel;
@@ -19,23 +22,29 @@ export const MessageScreen: FC<
 > = ({ route, level, navigation }) => {
   const { threadId, parentMessageId, parentThreadId, spaceId } = route.params;
 
-  const count = 10;
-  const offset = 0;
-
-  const [
-    { data: threadData, refetch: refetchThread, isLoading: isLoadingThread },
-    {
-      data: parentMessageData,
-      refetch: refetchParentMessage,
-      isLoading: isLoadingParentMessage,
-    },
-  ] = useQueries({
+  const [{ data: parentMessageData }, { data: threadData }] = useQueries({
     queries: [
+      {
+        queryKey: [
+          "spaces",
+          spaceId,
+          "threads",
+          parentThreadId,
+          "messages",
+          parentMessageId,
+        ],
+        queryFn: async () =>
+          getMessage(spaceId, parentThreadId, parentMessageId),
+      },
       {
         enabled: !!threadId,
         queryKey: [
           "spaces",
           spaceId,
+          "threads",
+          parentThreadId,
+          "messages",
+          parentMessageId,
           "threads",
           threadId,
           "recent",
@@ -52,18 +61,6 @@ export const MessageScreen: FC<
           );
         },
       },
-      {
-        queryKey: [
-          "spaces",
-          spaceId,
-          "threads",
-          parentThreadId,
-          "messages",
-          parentMessageId,
-        ],
-        queryFn: async () =>
-          getMessage(spaceId, parentThreadId, parentMessageId),
-      },
     ],
   });
 
@@ -78,13 +75,27 @@ export const MessageScreen: FC<
 
   const insets = useSafeAreaInsets();
 
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
+
   if (!parentMessageData) {
     return null;
   }
 
-  const onRefresh = () => {
-    refetchParentMessage();
-    refetchThread();
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({
+      queryKey: [
+        "spaces",
+        spaceId,
+        "threads",
+        parentThreadId,
+        "messages",
+        parentMessageId,
+      ],
+    });
+    setRefreshing(false);
   };
 
   return (
@@ -123,7 +134,7 @@ export const MessageScreen: FC<
         <MessageList
           level={level}
           onRefresh={onRefresh}
-          isRefreshing={isLoadingParentMessage || isLoadingThread}
+          isRefreshing={refreshing}
           spaceId={spaceId}
           parentMessageData={parentMessageData}
           threadData={threadData}

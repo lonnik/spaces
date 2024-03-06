@@ -23,8 +23,8 @@ export const ThreadItem: FC<{
   style?: StyleProp<ViewStyle>;
 }> = memo(
   ({ spaceId, message, style }) => {
-    const { data: answerThread, isLoading: isLoadingAnswerThread } = useQuery({
-      enabled: message.childThreadId.length > 0,
+    const { data: answerThread } = useQuery({
+      enabled: !!message.childThreadId,
       queryKey: [
         "spaces",
         spaceId,
@@ -49,7 +49,30 @@ export const ThreadItem: FC<{
       message.childThreadMessagesCount = answerThread.messagesCount;
     }
 
-    const firstAnswer = answerThread?.messages?.[0];
+    const firstAnswerData = answerThread?.messages?.[0];
+
+    const firstAnswer = firstAnswerData ? (
+      <View style={{ flex: 1, flexDirection: "row", gap: 5, marginTop: 10 }}>
+        <Avatar size={22} />
+        <PressableTransformation
+          onPress={() => {
+            navigation.navigate("Answer", {
+              parentMessageId: firstAnswerData.id,
+              parentThreadId: firstAnswerData.threadId,
+              threadId: firstAnswerData.childThreadId,
+              spaceId,
+            });
+          }}
+        >
+          <Message
+            message={firstAnswerData}
+            style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
+            fontSize={14}
+            spaceId={spaceId}
+          />
+        </PressableTransformation>
+      </View>
+    ) : null;
 
     const navigation =
       useNavigation<StackNavigationProp<SpaceStackParamList>>();
@@ -91,34 +114,14 @@ export const ThreadItem: FC<{
             />
           </PressableTransformation>
         </View>
-        {firstAnswer ? (
-          <View
-            style={{ flex: 1, flexDirection: "row", gap: 5, marginTop: 10 }}
-          >
-            <Avatar size={22} />
-            <PressableTransformation
-              onPress={() => {
-                navigation.navigate("Answer", {
-                  parentMessageId: firstAnswer.id,
-                  parentThreadId: firstAnswer.threadId,
-                  threadId: firstAnswer.childThreadId,
-                  spaceId,
-                });
-              }}
-            >
-              <Message
-                message={firstAnswer}
-                style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
-                fontSize={14}
-                spaceId={spaceId}
-              />
-            </PressableTransformation>
-          </View>
-        ) : null}
+        {firstAnswer}
       </View>
     );
   },
   (prevProps, nextProps) => {
-    return prevProps.message.id === nextProps.message.id;
+    return (
+      prevProps.message.id === nextProps.message.id &&
+      prevProps.message.childThreadId === nextProps.message.childThreadId
+    );
   }
 );
