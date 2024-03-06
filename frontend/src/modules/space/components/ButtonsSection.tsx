@@ -8,6 +8,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import { hexToRgb } from "../../../utils/hex_to_rgb";
 import { useNotification } from "../../../utils/notifications";
+import { useSpaceColor } from "../../../hooks/use_space_color";
 
 export const ButtonsSection: FC = () => {
   const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
@@ -83,6 +84,8 @@ const Button: FC<{ text: string; onPress: () => void; isActive?: boolean }> = ({
   onPress,
   isActive = false,
 }) => {
+  const spaceColor = useSpaceColor();
+
   return (
     <PressableTransformation onPress={onPress} hitSlop={10}>
       <View
@@ -91,7 +94,7 @@ const Button: FC<{ text: string; onPress: () => void; isActive?: boolean }> = ({
           paddingVertical: 7,
           backgroundColor: isActive
             ? template.colors.grayLightBackground
-            : hexToRgb(template.colors.purple, 0.15),
+            : hexToRgb(spaceColor, 0.15),
           borderRadius: 999,
         }}
       >
@@ -99,9 +102,7 @@ const Button: FC<{ text: string; onPress: () => void; isActive?: boolean }> = ({
           style={{
             fontWeight: "600",
             fontSize: 16,
-            color: isActive
-              ? template.colors.textLight
-              : template.colors.purple,
+            color: isActive ? template.colors.textLight : spaceColor,
           }}
         >
           {text}

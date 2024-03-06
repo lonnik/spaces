@@ -67,7 +67,7 @@ export const ThreadItem: FC<{
           <Message
             message={firstAnswerData}
             style={{ paddingVertical: 6, paddingHorizontal: 8, gap: 8 }}
-            fontSize={14}
+            fontSize={15}
             spaceId={spaceId}
           />
         </PressableTransformation>

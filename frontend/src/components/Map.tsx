@@ -36,6 +36,8 @@ export const Map: FC<{
         {
           width: "100%",
           aspectRatio,
+          borderColor: "#e5e5e5",
+          borderWidth: 1,
         },
         style,
       ]}

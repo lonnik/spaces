@@ -9,6 +9,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "../../components/form/PrimaryButton";
 import { MessageLevel } from "../../modules/space/types";
 import { MessageList } from "../../modules/space/components/MessageList";
+import { useSpaceColor } from "../../hooks/use_space_color";
 
 export const MessageScreen: FC<
   StackScreenProps<SpaceStackParamList, "Thread" | "Answer"> & {
@@ -18,6 +19,8 @@ export const MessageScreen: FC<
   const { threadId, parentMessageId, parentThreadId, spaceId } = route.params;
 
   const insets = useSafeAreaInsets();
+
+  const spaceColor = useSpaceColor();
 
   return (
     <View style={{ flex: 1 }}>
@@ -33,6 +36,7 @@ export const MessageScreen: FC<
             threadId: threadId,
           })
         }
+        color={spaceColor}
         style={{
           alignSelf: "center",
           position: "absolute",

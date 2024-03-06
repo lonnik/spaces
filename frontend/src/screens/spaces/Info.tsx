@@ -17,8 +17,7 @@ import { PressableTransformation } from "../../components/PressableTransformatio
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Section } from "../../modules/space/components/Section";
-
-const color = "#69701e";
+import { useSpaceColor } from "../../hooks/use_space_color";
 
 export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   const { data } = useQuery({
@@ -26,17 +25,17 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     queryFn: () => getSpaceById(spaceId),
   });
 
+  const spaceColor = useSpaceColor();
+
   const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
   if (!data) {
     return null;
   }
 
-  const location: Location = { longitude: 13.420864, latitude: 52.55485 };
-
   const geoJSONCircle = useMemo(
-    () => createGeoJSONCircle(location, data.radius, 60),
-    [location, data.radius]
+    () => createGeoJSONCircle(data.location, data.radius, 60),
+    [data.radius, data.location]
   );
 
   return (
@@ -66,10 +65,9 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
                 borderRadius: template.borderRadius.md,
                 overflow: "hidden",
                 borderWidth: 1,
-                borderColor: "#eee",
               }}
               aspectRatio={2.1}
-              centerCoordinate={location}
+              centerCoordinate={data.location}
               radius={data.radius}
             >
               <ShapeSource
@@ -80,14 +78,14 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
                 <FillLayer
                   id="circleFill"
                   style={{
-                    fillColor: color,
+                    fillColor: spaceColor,
                     fillOpacity: 0.18,
                   }}
                 />
                 <LineLayer
                   id="circleLine"
                   style={{
-                    lineColor: hexToRgb(color, 0.22),
+                    lineColor: hexToRgb(spaceColor, 0.22),
                     lineWidth: 1,
                   }}
                 />
@@ -144,7 +142,7 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
               flexDirection: "row",
               alignItems: "center",
               gap: 3,
-              backgroundColor: hexToRgb(color, 0.4),
+              backgroundColor: hexToRgb(spaceColor, 0.4),
               borderRadius: template.borderRadius.md,
             }}
           >

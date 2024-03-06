@@ -11,6 +11,7 @@ import { Text } from "../../components/Text";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { ThreadList } from "../../modules/space/components/ThreadList";
+import { useSpaceColor } from "../../hooks/use_space_color";
 
 // TODO: animation from bottom on first render for share something button
 
@@ -22,6 +23,8 @@ export const SpaceOverviewScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     queryKey: ["spaces", spaceId],
     queryFn: () => getSpaceById(spaceId),
   });
+
+  const spaceColor = useSpaceColor();
 
   const { mutate: createNewSpaceSubscriber } = useMutation({
     mutationKey: ["createSpaceSubscriber"],
@@ -41,6 +44,7 @@ export const SpaceOverviewScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
       <Header text={headerText} displayArrowDownButton />
       <View style={{ flex: 1 }}>
         <PrimaryButton
+          color={spaceColor}
           onPress={() => navigation.navigate("Share")}
           style={{
             alignSelf: "center",

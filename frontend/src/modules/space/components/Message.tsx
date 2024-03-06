@@ -10,10 +10,9 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { createMessageLike } from "../../../utils/queries";
 import { LikeButton } from "./LikeButton";
-import { CommentIcon } from "../../../components/icons/CommentIcon";
-import { PressableTransformation } from "../../../components/PressableTransformation";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import { CommentButton } from "./CommentButton";
 
 // TODO:
 // prop should exist that says if the message is liked by the user
@@ -69,34 +68,7 @@ export const Message: FC<{
   ) : null;
 
   const answerButton = displayAnswerButton ? (
-    <PressableTransformation
-      onPress={() => {
-        navigation.navigate("Share", {
-          parentThreadId: message.threadId,
-          parentMessageId: message.id,
-          threadId: message.childThreadId,
-        });
-      }}
-    >
-      <View style={{ flexDirection: "row", gap: 3 }}>
-        <CommentIcon
-          style={{ width: 17, height: 17 }}
-          stroke={template.colors.textLight}
-          strokeWidth={70}
-        />
-        {message.childThreadMessagesCount ? (
-          <Text
-            style={{
-              color: template.colors.text,
-              fontWeight: "400",
-              fontSize: 13,
-            }}
-          >
-            {message.childThreadMessagesCount}
-          </Text>
-        ) : null}
-      </View>
-    </PressableTransformation>
+    <CommentButton messageData={message} />
   ) : null;
 
   return (
@@ -126,7 +98,7 @@ export const Message: FC<{
   );
 };
 
-const calculateFontSize = (text: string, min = 14, max = 26) => {
+const calculateFontSize = (text: string, min = 15, max = 26) => {
   const lines = calculateLineCount(text);
 
   const fontSize = max - ((max - min) / 3) * (lines - 1);

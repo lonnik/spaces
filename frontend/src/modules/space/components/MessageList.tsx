@@ -238,7 +238,7 @@ const ParentMessageListItem: FC<{ messageData?: TMessage; spaceId: Uuid }> = ({
         displayLikeButton
         displayAnswerButton
         spaceId={spaceId}
-        fontSize={14}
+        fontSize={15}
       />
     </View>
   );

@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Heart2Icon } from "../../../components/icons/Heart2Icon";
+import { useSpaceColor } from "../../../hooks/use_space_color";
 
 const AnimatedHeartIcon = Animated.createAnimatedComponent(Heart2Icon);
 
@@ -19,6 +20,8 @@ export const LikeButton: FC<{
 
   const isScaledDownSv = useSharedValue(false);
   const isSelected = useSharedValue(isLikedByUser);
+
+  const spaceColor = useSpaceColor();
 
   useEffect(() => {
     setInternalLikes(likes);
@@ -38,7 +41,7 @@ export const LikeButton: FC<{
 
   const animatedColorStyles = useAnimatedStyle(() => {
     return {
-      color: isSelected.value ? template.colors.purple : template.colors.text,
+      color: isSelected.value ? spaceColor : template.colors.text,
     };
   });
 
@@ -73,12 +76,8 @@ export const LikeButton: FC<{
       >
         <AnimatedHeartIcon
           style={[{ width: 18, height: 17 }, animatedColorStyles as any]}
-          fill={isSelected.value ? template.colors.purple : "none"}
-          stroke={
-            isSelected.value
-              ? template.colors.purple
-              : template.colors.textLight
-          }
+          fill={isSelected.value ? spaceColor : "none"}
+          stroke={isSelected.value ? spaceColor : template.colors.textLight}
         />
         {internalLikes ? (
           <Animated.Text

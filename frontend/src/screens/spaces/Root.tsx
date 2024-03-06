@@ -8,6 +8,10 @@ import { View } from "react-native";
 import { SpaceInfoScreen } from "./Info";
 import { MessageScreen } from "./Message";
 import { SpaceSubscribersScreen } from "./Subscribers";
+import { SpaceColorContext } from "../../components/context/SpaceColorContext";
+import { useQuery } from "@tanstack/react-query";
+import { getSpaceById } from "../../utils/queries";
+import { template } from "../../styles/template";
 
 const Stack = createCustomStackNavigator<SpaceStackParamList>();
 
@@ -17,52 +21,67 @@ export const SpaceRootScreen: FC<
 > = ({ route }) => {
   const { spaceId } = route.params;
 
+  const { data: space } = useQuery({
+    queryKey: ["spaces", spaceId],
+    queryFn: () => getSpaceById(spaceId),
+  });
+
   return (
-    <View style={{ flex: 1 }}>
-      <Stack.Navigator screenOptions={{}}>
-        <Stack.Screen name="Overview">
-          {() => <SpaceOverviewScreen spaceId={spaceId} />}
-        </Stack.Screen>
-        <Stack.Screen name="Info" options={{ animation: "slideInFromRight" }}>
-          {() => <SpaceInfoScreen spaceId={spaceId} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="Subscribers"
-          options={{ animation: "slideInFromRight" }}
-        >
-          {() => <SpaceSubscribersScreen spaceId={spaceId} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="Share"
-          options={{ animation: "slideInFromBottom", snapPoint: "96%" }}
-        >
-          {({ route, navigation }) => (
-            <SpaceShareScreen
-              spaceId={spaceId}
-              navigation={navigation}
-              route={route}
-            />
-          )}
-        </Stack.Screen>
-        <Stack.Screen name="Thread" options={{ animation: "slideInFromRight" }}>
-          {({ route, navigation }) => (
-            <MessageScreen
-              level="thread"
-              navigation={navigation}
-              route={route}
-            />
-          )}
-        </Stack.Screen>
-        <Stack.Screen name="Answer" options={{ animation: "slideInFromRight" }}>
-          {({ route, navigation }) => (
-            <MessageScreen
-              level="answer"
-              navigation={navigation}
-              route={route}
-            />
-          )}
-        </Stack.Screen>
-      </Stack.Navigator>
-    </View>
+    <SpaceColorContext.Provider
+      value={space?.themeColorHexaCode || template.colors.purple}
+    >
+      <View style={{ flex: 1 }}>
+        <Stack.Navigator screenOptions={{}}>
+          <Stack.Screen name="Overview">
+            {() => <SpaceOverviewScreen spaceId={spaceId} />}
+          </Stack.Screen>
+          <Stack.Screen name="Info" options={{ animation: "slideInFromRight" }}>
+            {() => <SpaceInfoScreen spaceId={spaceId} />}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Subscribers"
+            options={{ animation: "slideInFromRight" }}
+          >
+            {() => <SpaceSubscribersScreen spaceId={spaceId} />}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Share"
+            options={{ animation: "slideInFromBottom", snapPoint: "96%" }}
+          >
+            {({ route, navigation }) => (
+              <SpaceShareScreen
+                spaceId={spaceId}
+                navigation={navigation}
+                route={route}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Thread"
+            options={{ animation: "slideInFromRight" }}
+          >
+            {({ route, navigation }) => (
+              <MessageScreen
+                level="thread"
+                navigation={navigation}
+                route={route}
+              />
+            )}
+          </Stack.Screen>
+          <Stack.Screen
+            name="Answer"
+            options={{ animation: "slideInFromRight" }}
+          >
+            {({ route, navigation }) => (
+              <MessageScreen
+                level="answer"
+                navigation={navigation}
+                route={route}
+              />
+            )}
+          </Stack.Screen>
+        </Stack.Navigator>
+      </View>
+    </SpaceColorContext.Provider>
   );
 };
