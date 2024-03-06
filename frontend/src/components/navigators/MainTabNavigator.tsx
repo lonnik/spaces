@@ -82,11 +82,17 @@ const TabBarItem: FC<{
 
   return (
     <Pressable
+      hitSlop={20}
       accessibilityRole="button"
       accessibilityState={isFocused ? { selected: true } : {}}
       onPress={onPress}
       onLongPress={onLongPress}
-      style={{ flex: 1, alignItems: "center" }}
+      style={{
+        flex: 1,
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
       key={routeName}
     >
       {tabBarIcon}
