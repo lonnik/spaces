@@ -204,6 +204,10 @@ func (uc *SpaceController) GetThreadWithMessages(c *gin.Context) {
 		MessagesCount  int64  `form:"messages_count" binding:"min=0"`
 		MessagesSort   string `form:"messages_sort" binding:"oneof='recent' 'popularity' ''"`
 	}
+	if err := c.ShouldBindQuery(&query); err != nil {
+		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
+		return
+	}
 	if query.MessagesCount == 0 {
 		query.MessagesCount = 10
 	}

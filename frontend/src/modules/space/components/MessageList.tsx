@@ -1,18 +1,22 @@
-import { ComponentProps, FC, memo } from "react";
+import { ComponentProps, FC, memo, useEffect, useState } from "react";
 import { FlatList, ListRenderItem, View } from "react-native";
-import {
-  Message as TMessage,
-  SpaceStackParamList,
-  Uuid,
-  Thread,
-} from "../../../types";
+import { Message as TMessage, SpaceStackParamList, Uuid } from "../../../types";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { Avatar } from "../../../components/Avatar";
 import { Message } from "../../../modules/space/components/Message";
 import { MessageInfo } from "../../../modules/space/components/MessageInfo";
 import { PressableTransformation } from "../../../components/PressableTransformation";
 import { MessageLevel } from "../types";
-import { useNavigation } from "@react-navigation/native";
+import { RouteProp, useNavigation } from "@react-navigation/native";
+import {
+  useInfiniteQuery,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { getMessage, getThreadWithMessages } from "../../../utils/queries";
+import { NextPageLoadingIndicator } from "./NextPageLoadingIndicator";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { LoadingScreen } from "../../../screens/Loading";
 
 type ParentMessageListItem = {
   type: "parent";
@@ -24,47 +28,147 @@ type AnswerMessageListItem = {
   message: TMessage;
 };
 
-type ListItem = ParentMessageListItem | AnswerMessageListItem;
+type LoadingIndicatorListItem = {
+  type: "loading";
+};
+
+type ListItem =
+  | ParentMessageListItem
+  | AnswerMessageListItem
+  | LoadingIndicatorListItem;
+
+const pageSize = 6;
 
 export const MessageList: FC<{
   spaceId: Uuid;
   level: MessageLevel;
-  onRefresh: () => void;
-  isRefreshing: boolean;
-  threadData?: Thread;
-  parentMessageData?: TMessage;
-}> = ({
-  spaceId,
-  level,
-  onRefresh,
-  isRefreshing,
-  threadData,
-  parentMessageData,
-}) => {
-  const renderItem: ListRenderItem<ListItem> = ({ item }) => {
-    if (item.type === "parent") {
-      return (
-        <ParentMessageListItem messageData={item.message} spaceId={spaceId} />
+  parentThreadId: Uuid;
+  parentMessageId: Uuid;
+  route: RouteProp<SpaceStackParamList, "Thread" | "Answer">;
+  threadId?: Uuid;
+}> = ({ spaceId, level, parentThreadId, parentMessageId, threadId, route }) => {
+  const {
+    data: threadData,
+    isLoading: threadDataIsLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    enabled: !!threadId,
+    queryKey: [
+      "spaces",
+      spaceId,
+      "threads",
+      parentThreadId,
+      "messages",
+      parentMessageId,
+      "threads",
+      threadId,
+      "recent",
+    ],
+    queryFn: ({ pageParam }) => {
+      const offset = pageParam * pageSize;
+
+      return getThreadWithMessages(
+        spaceId,
+        threadId!,
+        "recent",
+        pageSize,
+        offset
       );
-    }
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage, _, lastPageParam) => {
+      if (lastPage.messages.length < pageSize) {
+        return undefined;
+      }
 
-    return (
-      <AnswerMessageListItem
-        messageData={item.message}
-        spaceId={spaceId}
-        level={level}
-      />
-    );
-  };
-
-  const answerMessages = (threadData?.messages || []).map((message) => {
-    return { type: "answer", message } as AnswerMessageListItem;
+      return lastPageParam + 1;
+    },
   });
 
-  const data = [
-    { type: "parent", message: parentMessageData } as ParentMessageListItem,
-    ...answerMessages,
-  ];
+  const { data: parentMessageData, isLoading: parentMessageDataIsLoading } =
+    useQuery({
+      queryKey: [
+        "spaces",
+        spaceId,
+        "threads",
+        parentThreadId,
+        "messages",
+        parentMessageId,
+      ],
+      queryFn: async () => getMessage(spaceId, parentThreadId, parentMessageId),
+    });
+
+  const queryClient = useQueryClient();
+
+  const [refreshing, setRefreshing] = useState(false);
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await queryClient.invalidateQueries({
+      queryKey: [
+        "spaces",
+        spaceId,
+        "threads",
+        parentThreadId,
+        "messages",
+        parentMessageId,
+      ],
+    });
+    setRefreshing(false);
+  };
+
+  const navigation = useNavigation<StackNavigationProp<SpaceStackParamList>>();
+
+  useEffect(() => {
+    if (parentMessageData?.childThreadId && !threadId) {
+      navigation.setParams({
+        ...route.params,
+        threadId: parentMessageData.childThreadId,
+      });
+    }
+  }, [parentMessageData?.childThreadId]);
+
+  const insets = useSafeAreaInsets();
+
+  const renderItem: ListRenderItem<ListItem> = ({ item }) => {
+    switch (item.type) {
+      case "parent":
+        return (
+          <ParentMessageListItem messageData={item.message} spaceId={spaceId} />
+        );
+
+      case "answer":
+        return (
+          <AnswerMessageListItem
+            messageData={item.message}
+            spaceId={spaceId}
+            level={level}
+          />
+        );
+      default:
+        return <LoadingScreen />;
+    }
+  };
+
+  const isLoading = parentMessageDataIsLoading || threadDataIsLoading;
+
+  const answerMessages =
+    threadData?.pages
+      .map((page) => {
+        return page.messages.map((message) => {
+          return { type: "answer", message } as AnswerMessageListItem;
+        });
+      })
+      .flat() || [];
+
+  const data = isLoading
+    ? [{ type: "loading" } as LoadingIndicatorListItem]
+    : [
+        { type: "parent", message: parentMessageData } as ParentMessageListItem,
+        ...answerMessages,
+      ];
 
   return (
     <FlatList
@@ -72,15 +176,23 @@ export const MessageList: FC<{
       data={data}
       renderItem={renderItem}
       onRefresh={onRefresh}
-      refreshing={isRefreshing}
-      contentContainerStyle={{ gap: 20 }}
+      refreshing={refreshing}
+      contentContainerStyle={{ paddingBottom: insets.bottom + 60, gap: 20 }}
       keyExtractor={(item) => {
-        if (item.type === "parent") {
-          return "parent";
-        }
-
-        return item.message.id;
+        return item.type !== "answer" ? item.type : item.message.id;
       }}
+      ListFooterComponent={
+        <NextPageLoadingIndicator
+          isLoading={isFetchingNextPage}
+          hasNextPage={hasNextPage}
+        />
+      }
+      onEndReached={() => {
+        if (hasNextPage) {
+          fetchNextPage();
+        }
+      }}
+      alwaysBounceVertical={false}
     />
   );
 };

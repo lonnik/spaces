@@ -136,15 +136,12 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
             />
           );
         }
-
         case "buttons": {
           return <ButtonsSection />;
         }
-
         case "heading": {
           return <HeadingListItem text="Threads" />;
         }
-
         case "message": {
           return (
             <ThreadItem
@@ -154,7 +151,6 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
             />
           );
         }
-
         default:
           return <LoadingScreen />;
       }

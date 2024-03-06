@@ -69,7 +69,7 @@ export const getThreadWithMessages = async (
   offset: number
 ) => {
   const queryStr = parseQuery({
-    sort: sorting,
+    messages_sort: sorting,
     messages_offset: offset,
     messages_count: count,
   });
