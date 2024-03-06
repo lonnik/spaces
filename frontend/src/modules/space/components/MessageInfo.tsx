@@ -7,12 +7,15 @@ import { useQuery } from "@tanstack/react-query";
 import { Uuid } from "../../../types";
 import { getUser } from "../../../utils/queries";
 import { getTimeAgoText } from "../../../utils/time";
+import { useLastUpdated } from "../../../hooks/use_last_updated";
 
 export const MessageInfo: FC<{
   createdAt: string;
   userId: Uuid;
   style?: StyleProp<ViewStyle>;
 }> = ({ userId, style, createdAt }) => {
+  const lastUpdated = useLastUpdated();
+
   const { data } = useQuery({
     queryKey: ["users", userId],
     queryFn: async () => {
@@ -20,11 +23,11 @@ export const MessageInfo: FC<{
     },
   });
 
-  const currentDate = new Date();
-
   const timeAgo = useMemo(() => {
-    return getTimeAgoText(new Date(createdAt), currentDate);
-  }, [createdAt, currentDate.getTime()]);
+    const nowDate = lastUpdated || new Date();
+
+    return getTimeAgoText(new Date(createdAt), nowDate);
+  }, [createdAt, lastUpdated]);
 
   return (
     <View

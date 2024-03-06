@@ -17,6 +17,7 @@ import { getMessage, getThreadWithMessages } from "../../../utils/queries";
 import { NextPageLoadingIndicator } from "./NextPageLoadingIndicator";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LoadingScreen } from "../../../screens/Loading";
+import { LastUpdatedContxtContext } from "../../../components/context/LastUpdatedContext";
 
 type ParentMessageListItem = {
   type: "parent";
@@ -170,30 +171,40 @@ export const MessageList: FC<{
         ...answerMessages,
       ];
 
+  const [lastUpdated, setLastUpdated] = useState(new Date());
+
+  useEffect(() => {
+    if (refreshing) {
+      setLastUpdated(new Date());
+    }
+  }, [refreshing]);
+
   return (
-    <FlatList
-      style={{ flex: 1 }}
-      data={data}
-      renderItem={renderItem}
-      onRefresh={onRefresh}
-      refreshing={refreshing}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 60, gap: 20 }}
-      keyExtractor={(item) => {
-        return item.type !== "answer" ? item.type : item.message.id;
-      }}
-      ListFooterComponent={
-        <NextPageLoadingIndicator
-          isLoading={isFetchingNextPage}
-          hasNextPage={hasNextPage}
-        />
-      }
-      onEndReached={() => {
-        if (hasNextPage) {
-          fetchNextPage();
+    <LastUpdatedContxtContext.Provider value={lastUpdated}>
+      <FlatList
+        style={{ flex: 1 }}
+        data={data}
+        renderItem={renderItem}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 60, gap: 20 }}
+        keyExtractor={(item) => {
+          return item.type !== "answer" ? item.type : item.message.id;
+        }}
+        ListFooterComponent={
+          <NextPageLoadingIndicator
+            isLoading={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+          />
         }
-      }}
-      alwaysBounceVertical={false}
-    />
+        onEndReached={() => {
+          if (hasNextPage) {
+            fetchNextPage();
+          }
+        }}
+        alwaysBounceVertical={false}
+      />
+    </LastUpdatedContxtContext.Provider>
   );
 };
 

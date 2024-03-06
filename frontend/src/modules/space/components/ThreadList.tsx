@@ -19,6 +19,7 @@ import { useNavigation } from "@react-navigation/native";
 import { getApiUrl } from "../../../utils/get_api_url";
 import { ButtonsSection } from "../../../modules/space/components/ButtonsSection";
 import { NextPageLoadingIndicator } from "./NextPageLoadingIndicator";
+import { LastUpdatedContxtContext } from "../../../components/context/LastUpdatedContext";
 
 type MessageListItem = {
   type: "message";
@@ -176,38 +177,48 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
     ];
   }, [topLevelThreads, isFetchingNextPage, isLoading]);
 
-  return (
-    <FlatList
-      data={data}
-      renderItem={renderItem}
-      onRefresh={onRefresh}
-      stickyHeaderIndices={[1]}
-      keyExtractor={(item) => {
-        if (item.type === "message") {
-          return item.message.id;
-        }
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
-        return item.type;
-      }}
-      ListFooterComponent={
-        <NextPageLoadingIndicator
-          isLoading={isFetchingNextPage}
-          hasNextPage={hasNextPage}
-        />
-      }
-      refreshing={refreshing}
-      onEndReached={() => {
-        if (hasNextPage) {
-          fetchNextPage();
+  useEffect(() => {
+    if (refreshing) {
+      setLastUpdated(new Date());
+    }
+  }, [refreshing]);
+
+  return (
+    <LastUpdatedContxtContext.Provider value={lastUpdated}>
+      <FlatList
+        data={data}
+        renderItem={renderItem}
+        onRefresh={onRefresh}
+        stickyHeaderIndices={[1]}
+        keyExtractor={(item) => {
+          if (item.type === "message") {
+            return item.message.id;
+          }
+
+          return item.type;
+        }}
+        ListFooterComponent={
+          <NextPageLoadingIndicator
+            isLoading={isFetchingNextPage}
+            hasNextPage={hasNextPage}
+          />
         }
-      }}
-      alwaysBounceVertical={false}
-      contentContainerStyle={{ paddingBottom: insets.bottom + 60, gap: 10 }}
-      style={{
-        flex: 1,
-        paddingHorizontal: template.paddings.md,
-      }}
-    />
+        refreshing={refreshing}
+        onEndReached={() => {
+          if (hasNextPage) {
+            fetchNextPage();
+          }
+        }}
+        alwaysBounceVertical={false}
+        contentContainerStyle={{ paddingBottom: insets.bottom + 60, gap: 10 }}
+        style={{
+          flex: 1,
+          paddingHorizontal: template.paddings.md,
+        }}
+      />
+    </LastUpdatedContxtContext.Provider>
   );
 };
 

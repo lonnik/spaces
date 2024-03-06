@@ -7,7 +7,6 @@ export const getTimeAgoText = (date: Date, now: Date) => {
   const months = Math.round(days / 30);
   const years = Math.round(days / 365);
 
-  return seconds;
   if (seconds < 60) {
     return "a few seconds ago";
   }
