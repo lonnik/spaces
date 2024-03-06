@@ -1,5 +1,4 @@
-export const getTimeAgoText = (date: Date) => {
-  const now = new Date();
+export const getTimeAgoText = (date: Date, now: Date) => {
   const seconds = Math.round((now.getTime() - date.getTime()) / 1000);
   const minutes = Math.round(seconds / 60);
   const hours = Math.round(minutes / 60);
@@ -8,6 +7,7 @@ export const getTimeAgoText = (date: Date) => {
   const months = Math.round(days / 30);
   const years = Math.round(days / 365);
 
+  return seconds;
   if (seconds < 60) {
     return "a few seconds ago";
   }

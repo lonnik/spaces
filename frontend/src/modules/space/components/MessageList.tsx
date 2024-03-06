@@ -1,4 +1,4 @@
-import { ComponentProps, FC } from "react";
+import { ComponentProps, FC, memo } from "react";
 import { FlatList, ListRenderItem, View } from "react-native";
 import {
   Message as TMessage,
@@ -14,17 +14,17 @@ import { PressableTransformation } from "../../../components/PressableTransforma
 import { MessageLevel } from "../types";
 import { useNavigation } from "@react-navigation/native";
 
-type ParentMessage = {
+type ParentMessageListItem = {
   type: "parent";
   message?: TMessage;
 };
 
-type AnswerMessage = {
+type AnswerMessageListItem = {
   type: "answer";
   message: TMessage;
 };
 
-type ListItem = ParentMessage | AnswerMessage;
+type ListItem = ParentMessageListItem | AnswerMessageListItem;
 
 export const MessageList: FC<{
   spaceId: Uuid;
@@ -41,47 +41,99 @@ export const MessageList: FC<{
   threadData,
   parentMessageData,
 }) => {
-  const navigation =
-    useNavigation<
-      StackNavigationProp<SpaceStackParamList, "Thread" | "Answer">
-    >();
-
   const renderItem: ListRenderItem<ListItem> = ({ item }) => {
     if (item.type === "parent") {
-      if (!item.message) {
-        return null;
-      }
-
       return (
-        <View style={{ marginBottom: 12 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 8,
-            }}
-          >
-            <Avatar style={{ marginRight: 7 }} />
-            <MessageInfo
-              createdAt={item.message.createdAt}
-              userId={item.message.senderId}
-              style={{ marginBottom: 5 }}
-            />
-          </View>
-          <Message
-            message={item.message}
-            style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-            displayLikeButton
-            displayAnswerButton
-            spaceId={spaceId}
-            fontSize={14}
-          />
-        </View>
+        <ParentMessageListItem messageData={item.message} spaceId={spaceId} />
       );
     }
 
+    return (
+      <AnswerMessageListItem
+        messageData={item.message}
+        spaceId={spaceId}
+        level={level}
+      />
+    );
+  };
+
+  const answerMessages = (threadData?.messages || []).map((message) => {
+    return { type: "answer", message } as AnswerMessageListItem;
+  });
+
+  const data = [
+    { type: "parent", message: parentMessageData } as ParentMessageListItem,
+    ...answerMessages,
+  ];
+
+  return (
+    <FlatList
+      style={{ flex: 1 }}
+      data={data}
+      renderItem={renderItem}
+      onRefresh={onRefresh}
+      refreshing={isRefreshing}
+      contentContainerStyle={{ gap: 20 }}
+      keyExtractor={(item) => {
+        if (item.type === "parent") {
+          return "parent";
+        }
+
+        return item.message.id;
+      }}
+    />
+  );
+};
+
+const ParentMessageListItem: FC<{ messageData?: TMessage; spaceId: Uuid }> = ({
+  messageData,
+  spaceId,
+}) => {
+  if (!messageData) {
+    return null;
+  }
+
+  return (
+    <View style={{ marginBottom: 12 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 8,
+        }}
+      >
+        <Avatar style={{ marginRight: 7 }} />
+        <MessageInfo
+          createdAt={messageData.createdAt}
+          userId={messageData.senderId}
+          style={{ marginBottom: 5 }}
+        />
+      </View>
+      <Message
+        message={messageData}
+        style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
+        displayLikeButton
+        displayAnswerButton
+        spaceId={spaceId}
+        fontSize={14}
+      />
+    </View>
+  );
+};
+
+const AnswerMessageListItem: FC<{
+  messageData: TMessage;
+  spaceId: Uuid;
+  level: MessageLevel;
+}> = memo(
+  ({ messageData, spaceId, level }) => {
+    const navigation =
+      useNavigation<
+        StackNavigationProp<SpaceStackParamList, "Thread" | "Answer">
+      >();
+
     const messageProps: ComponentProps<typeof Message> = {
-      message: item.message,
+      message: messageData,
       style: {
         paddingVertical: 8,
         paddingHorizontal: 12,
@@ -99,17 +151,17 @@ export const MessageList: FC<{
         <Avatar />
         <View style={{ flex: 1 }}>
           <MessageInfo
-            createdAt={item.message.createdAt}
-            userId={item.message.senderId}
+            createdAt={messageData.createdAt}
+            userId={messageData.senderId}
             style={{ marginBottom: 5 }}
           />
           {level === "thread" ? (
             <PressableTransformation
               onPress={() =>
                 navigation.navigate("Answer", {
-                  threadId: item.message.childThreadId,
-                  parentMessageId: item.message.id,
-                  parentThreadId: item.message.threadId,
+                  threadId: messageData.childThreadId,
+                  parentMessageId: messageData.id,
+                  parentThreadId: messageData.threadId,
                   spaceId,
                 })
               }
@@ -122,25 +174,17 @@ export const MessageList: FC<{
         </View>
       </View>
     );
-  };
-
-  const answerMessages = (threadData?.messages || []).map((message) => {
-    return { type: "answer", message } as AnswerMessage;
-  });
-
-  const data: ListItem[] = [
-    { type: "parent", message: parentMessageData } as ParentMessage,
-    ...answerMessages,
-  ];
-
-  return (
-    <FlatList
-      style={{ flex: 1 }}
-      data={data}
-      renderItem={renderItem}
-      onRefresh={onRefresh}
-      refreshing={isRefreshing}
-      contentContainerStyle={{ gap: 20 }}
-    />
-  );
-};
+  },
+  (prevProps, nextProps) => {
+    return (
+      prevProps.level === nextProps.level &&
+      prevProps.spaceId === nextProps.spaceId &&
+      prevProps.messageData.id === nextProps.messageData.id &&
+      prevProps.messageData.childThreadId ===
+        nextProps.messageData.childThreadId &&
+      prevProps.messageData.likesCount === nextProps.messageData.likesCount &&
+      prevProps.messageData.childThreadMessagesCount ===
+        nextProps.messageData.childThreadMessagesCount
+    );
+  }
+);

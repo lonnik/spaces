@@ -20,9 +20,11 @@ export const MessageInfo: FC<{
     },
   });
 
+  const currentDate = new Date();
+
   const timeAgo = useMemo(() => {
-    return getTimeAgoText(new Date(createdAt));
-  }, [createdAt]);
+    return getTimeAgoText(new Date(createdAt), currentDate);
+  }, [createdAt, currentDate.getTime()]);
 
   return (
     <View

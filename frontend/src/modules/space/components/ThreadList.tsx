@@ -6,12 +6,7 @@ import {
   Uuid,
 } from "../../../types";
 import { FC, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  FlatList,
-  ListRenderItem,
-  View,
-} from "react-native";
+import { FlatList, ListRenderItem, View } from "react-native";
 import { useQueryClient, useInfiniteQuery } from "@tanstack/react-query";
 import { getToplevelThreads } from "../../../utils/queries";
 import { LoadingScreen } from "../../../screens/Loading";
@@ -23,6 +18,7 @@ import { ThreadItem } from "../../../modules/space/components/ThreadItem";
 import { useNavigation } from "@react-navigation/native";
 import { getApiUrl } from "../../../utils/get_api_url";
 import { ButtonsSection } from "../../../modules/space/components/ButtonsSection";
+import { NextPageLoadingIndicator } from "./NextPageLoadingIndicator";
 
 type MessageListItem = {
   type: "message";
@@ -39,7 +35,6 @@ type ButtonsListItem = {
 
 type HeadingListItem = {
   type: "heading";
-  text: string;
 };
 
 type LoadingIndicatorListItem = {
@@ -147,19 +142,7 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
         }
 
         case "heading": {
-          return (
-            <View style={{ marginTop: 10 }}>
-              <Text
-                style={{
-                  fontSize: 28,
-                  fontWeight: "600",
-                  marginBottom: 5,
-                }}
-              >
-                {item.text}
-              </Text>
-            </View>
-          );
+          return <HeadingListItem text="Threads" />;
         }
 
         case "message": {
@@ -232,23 +215,18 @@ export const ThreadList: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
   );
 };
 
-const NextPageLoadingIndicator: FC<{
-  isLoading: boolean;
-  hasNextPage: boolean;
-}> = ({ isLoading, hasNextPage }) => {
-  if (!hasNextPage) {
-    return null;
-  }
-
+const HeadingListItem = ({ text }: { text: string }) => {
   return (
-    <View
-      style={{
-        height: 60,
-        justifyContent: "center",
-        alignContent: "center",
-      }}
-    >
-      {isLoading ? <ActivityIndicator /> : null}
+    <View style={{ marginTop: 10 }}>
+      <Text
+        style={{
+          fontSize: 28,
+          fontWeight: "600",
+          marginBottom: 5,
+        }}
+      >
+        {text}
+      </Text>
     </View>
   );
 };
