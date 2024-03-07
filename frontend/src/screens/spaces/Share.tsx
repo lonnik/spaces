@@ -20,6 +20,7 @@ import { useOnClose } from "../../modules/space/hooks/use_on_close";
 import { cleanString } from "../../utils/strings";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StackScreenProps } from "@react-navigation/stack";
+import { useSpaceColor } from "../../hooks/use_space_color";
 
 const createThreadAndMessage = async ({
   parentThreadId,
@@ -56,6 +57,7 @@ export const SpaceShareScreen: FC<
   const notification = useNotification();
   const queryClient = useQueryClient();
   const insets = useSafeAreaInsets();
+  const spaceColor = useSpaceColor();
 
   const onSuccess = useCallback(() => {
     queryClient.invalidateQueries({
@@ -198,7 +200,11 @@ export const SpaceShareScreen: FC<
             paddingVertical: template.paddings.screen - 5,
           }}
         >
-          <PrimaryButton onPress={onSend} isDisabled={!firstMessageText}>
+          <PrimaryButton
+            onPress={onSend}
+            isDisabled={!firstMessageText}
+            color={spaceColor}
+          >
             <Text
               style={{
                 color: template.colors.white,
