@@ -13,6 +13,7 @@ import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { MessageInfo } from "./MessageInfo";
 import { PressableTransformation } from "../../../components/PressableTransformation";
+import { OpacityAnimation } from "../../../components/OpacityAnimation";
 
 const count = 1;
 const offset = 0;
@@ -78,44 +79,46 @@ export const ThreadItem: FC<{
       useNavigation<StackNavigationProp<SpaceStackParamList>>();
 
     return (
-      <View style={[{ flex: 1 }, style]}>
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            alignItems: "center",
-            gap: 5,
-            marginBottom: 5,
-          }}
-        >
-          <Avatar size={28} />
-          <MessageInfo
-            userId={message.senderId}
-            createdAt={message.createdAt}
-          />
-        </View>
-        <View>
-          <PressableTransformation
-            onPress={() => {
-              navigation.navigate("Thread", {
-                threadId: message.childThreadId,
-                spaceId,
-                parentMessageId: message.id,
-                parentThreadId: message.threadId,
-              });
+      <OpacityAnimation isDisplayed={true}>
+        <View style={[{ flex: 1 }, style]}>
+          <View
+            style={{
+              flex: 1,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 5,
+              marginBottom: 5,
             }}
           >
-            <Message
-              message={message}
-              style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
-              displayLikeButton
-              displayAnswerButton
-              spaceId={spaceId}
+            <Avatar size={28} />
+            <MessageInfo
+              userId={message.senderId}
+              createdAt={message.createdAt}
             />
-          </PressableTransformation>
+          </View>
+          <View>
+            <PressableTransformation
+              onPress={() => {
+                navigation.navigate("Thread", {
+                  threadId: message.childThreadId,
+                  spaceId,
+                  parentMessageId: message.id,
+                  parentThreadId: message.threadId,
+                });
+              }}
+            >
+              <Message
+                message={message}
+                style={{ paddingHorizontal: 12, paddingVertical: 8, gap: 12 }}
+                displayLikeButton
+                displayAnswerButton
+                spaceId={spaceId}
+              />
+            </PressableTransformation>
+          </View>
+          {firstAnswer}
         </View>
-        {firstAnswer}
-      </View>
+      </OpacityAnimation>
     );
   },
   (prevProps, nextProps) => {

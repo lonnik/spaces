@@ -1,5 +1,5 @@
 import "react-native-gesture-handler";
-import { View } from "react-native";
+import { FlatList, View } from "react-native";
 import { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import { FC, useCallback, useEffect, useState } from "react";
 import { Location, TabsParamList } from "../types";
@@ -7,11 +7,6 @@ import { useQueries } from "@tanstack/react-query";
 import { getAddress, getSpacesByLocation } from "../utils/queries";
 import { LoadingScreen } from "./Loading";
 import { SpaceItem } from "../modules/here/SpaceItem";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
 import { useLocation } from "../hooks/use_location";
 import { template } from "../styles/template";
 import { Header } from "../components/Header";
@@ -20,6 +15,7 @@ import { PressableOverlay } from "../components/PressableOverlay";
 import { useNavigation } from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { ProfileIcon } from "../components/icons/ProfileIcon";
+import { OpacityAnimation } from "../components/OpacityAnimation";
 
 const maxNumberItems = 11;
 
@@ -27,8 +23,6 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   navigation,
 }) => {
   const [refreshing, setRefreshing] = useState(false);
-
-  const opacity = useSharedValue(0);
 
   const { location } = useLocation();
 
@@ -51,23 +45,11 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
     ],
   });
 
-  useEffect(() => {
-    if (spaces) {
-      opacity.value = 1;
-    }
-  }, [spaces]);
-
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     await Promise.allSettled([refetchAddress(), refetchSpaces()]);
     setRefreshing(false);
   }, [refetchAddress, refetchSpaces]);
-
-  const animatedOpacityStyles = useAnimatedStyle(() => {
-    return {
-      opacity: withTiming(opacity.value, { duration: 200 }),
-    };
-  });
 
   if (isLoading) {
     return <LoadingScreen />;
@@ -90,20 +72,22 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
           flex: 1,
         }}
       >
-        <Animated.FlatList
-          data={spaces}
-          numColumns={2}
-          onRefresh={onRefresh}
-          refreshing={refreshing}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => {
-            return <SpaceItem data={item} navigation={navigation} />;
-          }}
-          contentContainerStyle={{
-            paddingHorizontal: (template.paddings.md * 2) / 3,
-          }}
-          style={[{ flex: 1 }, animatedOpacityStyles]}
-        />
+        <OpacityAnimation isDisplayed={!!spaces}>
+          <FlatList
+            data={spaces}
+            numColumns={2}
+            onRefresh={onRefresh}
+            refreshing={refreshing}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => {
+              return <SpaceItem data={item} navigation={navigation} />;
+            }}
+            contentContainerStyle={{
+              paddingHorizontal: (template.paddings.md * 2) / 3,
+            }}
+            style={[{ flex: 1 }]}
+          />
+        </OpacityAnimation>
       </View>
     </View>
   );
