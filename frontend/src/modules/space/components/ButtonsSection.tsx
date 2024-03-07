@@ -1,5 +1,5 @@
 import React, { FC, useState } from "react";
-import { ScrollView, View } from "react-native";
+import { ScrollView, Share, View } from "react-native";
 import { template } from "../../../styles/template";
 import { Text } from "../../../components/Text";
 import { SpaceStackParamList, Uuid } from "../../../types";
@@ -33,6 +33,16 @@ export const ButtonsSection: FC = () => {
     setJoined((oldJoined) => !oldJoined);
   };
 
+  const handleShare = async () => {
+    try {
+      await Share.share({
+        message: "Check out this space",
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <ScrollView
       contentContainerStyle={{
@@ -50,15 +60,10 @@ export const ButtonsSection: FC = () => {
           onPress: handleJoin,
           isActive: joined,
         },
-        { text: "invite", onPress: () => {} },
         {
-          text: "info",
-          onPress: () => {
-            navigation.navigate("Info");
-          },
+          text: "share",
+          onPress: handleShare,
         },
-        { text: "join", onPress: () => {} },
-        { text: "invite", onPress: () => {} },
         {
           text: "info",
           onPress: () => {
