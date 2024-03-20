@@ -4,4 +4,10 @@
 **/tmp/
 .env
 
-serviceAccountKey.json
+*_key.json
+
+# Terraform
+.terraform
+*.tfstate
+*.tfstate.backup
+*.tfvars

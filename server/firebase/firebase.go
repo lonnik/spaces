@@ -15,7 +15,7 @@ func InitAuthClient() error {
 	const op errors.Op = "firebase.InitAuthClient"
 
 	ctx := context.Background()
-	opt := option.WithCredentialsFile("./serviceAccountKey.json")
+	opt := option.WithCredentialsFile("./firebase/firebase_service_account_key.json")
 
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
