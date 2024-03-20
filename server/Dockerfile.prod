@@ -1,0 +1,24 @@
+FROM golang:1.22.1-alpine as dependencies
+
+WORKDIR /app
+
+RUN apk add --no-cache make 
+
+COPY go.mod ./
+COPY go.sum* ./
+
+RUN go mod download 
+
+COPY . .
+
+RUN make build
+
+FROM alpine:latest
+
+WORKDIR /app
+
+COPY --from=dependencies /app/tmp/main /app/main
+COPY --from=dependencies /app/firebase/firebase_service_account_key.json /app/firebase/firebase_service_account_key.json
+
+CMD ["/app/main"]
+

@@ -21,9 +21,11 @@ import (
 )
 
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		panic("Error loading .env file")
+	if os.Getenv("ENVIRONMENT") != "production" {
+		err := godotenv.Load(".env")
+		if err != nil {
+			panic("Error loading .env file")
+		}
 	}
 
 	// Zerolog configuration
@@ -55,7 +57,7 @@ func main() {
 	})
 
 	// initialize redis client
-	redis.ConnectRedis(logger)
+	redis.ConnectRedis()
 
 	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)

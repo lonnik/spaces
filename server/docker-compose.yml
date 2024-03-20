@@ -13,7 +13,7 @@ services:
     depends_on:
       - redis
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./
       target: dependencies
     volumes:
@@ -31,10 +31,10 @@ services:
   server_build:
     profiles:
       - build
-    # depends_on:
-    #   - redis
+    depends_on:
+      - redis
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
       context: ./
     environment:
       - PORT=8080
