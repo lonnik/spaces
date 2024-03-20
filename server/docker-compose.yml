@@ -31,8 +31,8 @@ services:
   server_build:
     profiles:
       - build
-    depends_on:
-      - redis
+    # depends_on:
+    #   - redis
     build:
       dockerfile: Dockerfile
       context: ./

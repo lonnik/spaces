@@ -55,7 +55,7 @@ func main() {
 	})
 
 	// initialize redis client
-	redis.ConnectRedis()
+	redis.ConnectRedis(logger)
 
 	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
@@ -74,6 +74,7 @@ func main() {
 	userController := controllers.NewUserController(logger, userService)
 	spaceController := controllers.NewSpaceController(logger, spaceService, spaceNotificationService, threadService, messageService)
 	addressController := controllers.NewAddressController(logger, addressService)
+	healthController := controllers.NewHealthController()
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
@@ -152,6 +153,9 @@ func main() {
 
 	// ADDRESSES
 	api.GET("/address", addressController.GetAddress)
+
+	// HEALTH
+	api.GET("/health", healthController.HealthCheck)
 
 	router.Run()
 }

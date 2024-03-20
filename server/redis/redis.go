@@ -1,6 +1,7 @@
 package redis
 
 import (
+	"spaces-p/common"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -15,7 +16,9 @@ const (
 
 var RedisClient *redis.Client
 
-func ConnectRedis() {
+func ConnectRedis(logger common.Logger) {
+	logger.Info("Connecting to Redis ...")
+
 	RedisClient = redis.NewClient(&redis.Options{
 		Addr:         redisHost + ":" + redisPort,
 		Password:     redisPassword,
