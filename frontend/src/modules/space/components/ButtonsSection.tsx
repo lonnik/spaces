@@ -105,7 +105,7 @@ const Button: FC<{ text: string; onPress: () => void; isActive?: boolean }> = ({
       >
         <Text
           style={{
-            fontWeight: "600",
+            fontWeight: template.fontWeight.bold,
             fontSize: 16,
             color: isActive ? template.colors.textLight : spaceColor,
           }}

@@ -48,7 +48,9 @@ export const SpaceSubscribersScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
       >
         <Avatar />
         <View>
-          <Text style={{ fontWeight: "600" }}>{item.name}</Text>
+          <Text style={{ fontWeight: template.fontWeight.bold }}>
+            {item.name}
+          </Text>
           <Text style={{ color: template.colors.textLight }}>
             {item.createdAt}
           </Text>

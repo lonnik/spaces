@@ -38,7 +38,7 @@ export const Header: FC<{
         textAlign: "center",
         fontSize: 20,
         fontStyle: "normal",
-        fontWeight: "600",
+        fontWeight: template.fontWeight.bold,
         letterSpacing: -0.4,
         maxWidth: "75%",
       }}

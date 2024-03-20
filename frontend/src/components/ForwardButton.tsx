@@ -26,7 +26,7 @@ export const ForwardButton: FC<{
         <Text
           style={{
             fontSize: 16,
-            fontWeight: "600",
+            fontWeight: template.fontWeight.bold,
             color: color,
           }}
         >

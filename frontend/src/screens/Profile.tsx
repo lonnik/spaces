@@ -56,7 +56,9 @@ export const ProfileScreen: FC = () => {
           }}
         >
           <Avatar size={100} />
-          <Text style={{ fontSize: 18, fontWeight: "600" }}>{fullName}</Text>
+          <Text style={{ fontSize: 18, fontWeight: template.fontWeight.bold }}>
+            {fullName}
+          </Text>
         </View>
         <ForwardButton
           onPress={handleSignOut}

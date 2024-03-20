@@ -228,7 +228,7 @@ const HeadingListItem = ({ text }: { text: string }) => {
       <Text
         style={{
           fontSize: 28,
-          fontWeight: "600",
+          fontWeight: template.fontWeight.bold,
           marginBottom: 5,
         }}
       >

@@ -91,7 +91,7 @@ export const PrimaryButton: FC<{
                 {
                   textAlign: "center",
                   fontSize: 16,
-                  fontWeight: "700",
+                  fontWeight: template.fontWeight.bold,
                   letterSpacing: 0.36,
                   textTransform: "uppercase",
                 },

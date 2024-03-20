@@ -8,6 +8,7 @@ import { Text } from "../../components/Text";
 import { Map } from "../../components/Map";
 import { createGeoJSONCircle } from "../../utils/map";
 import { hexToRgb } from "../../utils/hex_to_rgb";
+import { template } from "../../styles/template";
 
 MapboxGL.setAccessToken(process.env.EXPO_PUBLIC_MAPBOX_ACCESS_TOKEN!);
 
@@ -59,7 +60,7 @@ export const MapboxMap: FC<{
             style={{
               fontSize: spaceNameTextFontsize,
               color,
-              fontWeight: "600",
+              fontWeight: template.fontWeight.bold,
               maxWidth: spaceNameTextMaxWidth,
               textAlign: "center",
             }}

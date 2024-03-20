@@ -1,3 +1,5 @@
+import { TextStyle } from "react-native";
+
 export const template = {
   colors: {
     gray: "#d5d5d5",
@@ -11,6 +13,9 @@ export const template = {
     error: "#FD7979",
     red: "#AB0303",
     success: "#4CAF50",
+  },
+  fontWeight: {
+    bold: "700" as TextStyle["fontWeight"],
   },
   paddings: {
     md: 15,

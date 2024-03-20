@@ -54,7 +54,7 @@ export const SpaceItem: FC<{
           <Text
             style={{
               fontSize: 15,
-              fontWeight: "600",
+              fontWeight: template.fontWeight.bold,
               color: "#fff",
               flex: 1,
               height: "auto",
@@ -110,7 +110,7 @@ const Distance: FC<{ distance: number; style?: StyleProp<ViewStyle> }> = ({
         style={{
           color: "#fff",
           fontSize: 11,
-          fontWeight: "600",
+          fontWeight: template.fontWeight.bold,
         }}
       >
         {`${distance.toFixed(1)}`}
@@ -119,7 +119,7 @@ const Distance: FC<{ distance: number; style?: StyleProp<ViewStyle> }> = ({
         style={{
           color: "#fff",
           fontSize: 11,
-          fontWeight: "600",
+          fontWeight: template.fontWeight.bold,
         }}
       >
         m

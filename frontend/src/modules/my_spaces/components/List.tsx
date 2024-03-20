@@ -26,7 +26,7 @@ export const List: FC<{ data: ListItem[]; style?: StyleProp<ViewStyle> }> = ({
           <Text
             style={{
               fontSize: 15,
-              fontWeight: "600",
+              fontWeight: template.fontWeight.bold,
               marginBottom: 15,
             }}
           >
@@ -119,7 +119,9 @@ const SpaceListItem: FC<{
           <Text style={{ fontSize: 32 }}>{data.icon}</Text>
         </View>
         <View style={{ flex: 1, gap: 5 }}>
-          <Text style={{ fontWeight: "600" }}>{data.name}</Text>
+          <Text style={{ fontWeight: template.fontWeight.bold }}>
+            {data.name}
+          </Text>
           <Text
             style={{ color: template.colors.textLight }}
           >{`${data.lastActivity.sender} shared: ${data.lastActivity.message}`}</Text>
@@ -147,7 +149,9 @@ const JoinButton: FC<{ onPress: () => void }> = ({ onPress }) => {
           backgroundColor: template.colors.white,
         }}
       >
-        <Text style={{ fontSize: 14, fontWeight: "600" }}>join</Text>
+        <Text style={{ fontSize: 14, fontWeight: template.fontWeight.bold }}>
+          join
+        </Text>
       </View>
     </PressableOverlay>
   );

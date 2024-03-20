@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   title: {
     color: template.colors.white,
     textAlign: "center",
-    fontWeight: "700",
+    fontWeight: template.fontWeight.bold,
     fontSize: 16,
   },
   description: {

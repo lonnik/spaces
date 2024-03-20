@@ -2,7 +2,7 @@ import { FC, useMemo } from "react";
 import { ScrollView, View } from "react-native";
 import { Header } from "../../components/Header";
 import { useQuery } from "@tanstack/react-query";
-import { Location, SpaceStackParamList, Uuid } from "../../types";
+import { SpaceStackParamList, Uuid } from "../../types";
 import { getSpaceById } from "../../utils/queries";
 import { template } from "../../styles/template";
 import { Text } from "../../components/Text";
@@ -130,7 +130,7 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
         <Section headingText="Admin">
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Avatar />
-            <Text style={{ fontWeight: "600" }}>nikoko</Text>
+            <Text style={{ fontWeight: template.fontWeight.bold }}>nikoko</Text>
           </View>
         </Section>
         <Section headingText="Category">
@@ -146,7 +146,9 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
               borderRadius: template.borderRadius.md,
             }}
           >
-            <Text style={{ fontSize: 12, fontWeight: "600" }}>
+            <Text
+              style={{ fontSize: 12, fontWeight: template.fontWeight.bold }}
+            >
               Neighbourhood
             </Text>
             <Text style={{ fontSize: 13 }}>🍺</Text>
@@ -166,7 +168,7 @@ const ForwardButton: FC<{ text: string; onPress: () => void }> = ({
       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
         <Text
           style={{
-            fontWeight: "600",
+            fontWeight: template.fontWeight.bold,
           }}
         >
           {text}
