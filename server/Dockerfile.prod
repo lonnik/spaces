@@ -2,6 +2,8 @@ FROM golang:1.22.1-alpine as dependencies
 
 WORKDIR /app
 
+ARG FIREBASE_SERVICE_ACCOUNT_KEY_BASE64
+
 RUN apk add --no-cache make 
 
 COPY go.mod ./
@@ -10,6 +12,8 @@ COPY go.sum* ./
 RUN go mod download 
 
 COPY . .
+
+RUN echo $FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 | base64 -d > firebase/firebase_service_account_key.json
 
 RUN make build
 
