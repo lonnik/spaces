@@ -24,12 +24,11 @@ jobs:
       
       - name: Decode kubeconfig
         run: |
-          echo "${{ secrets.LINODE_KUBECONFIG_BASE64 }}" | base64 -d > $HOME/kubeconfig.yaml
-          echo "KUBECONFIG_PATH=$HOME/kubeconfig.yaml" >> $GITHUB_ENV
+          echo "KUBECONFIG=$(echo ${{ secrets.LINODE_KUBECONFIG_BASE64 }} | base64 -d)" >> $GITHUB_ENV
         
       - uses: azure/k8s-set-context@v4
         with:
-          kubeconfig: ${{ env.KUBECONFIG_PATH }}
+          kubeconfig: ${{ env.KUBECONFIG }}
 
       - name: Build the Docker Image
         run: docker build -f Dockerfile.prod -t spaces-server:${{ github.sha }} --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64="${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64}}" .
