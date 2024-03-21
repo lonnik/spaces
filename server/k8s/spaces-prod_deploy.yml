@@ -24,7 +24,7 @@ spec:
     spec:
       containers:
       - name: spaces-server
-        image: DOCKERHUB_USERNAME/DOCKERHUB_REPOSITORY:DOCKERHUB_TAG
+        image: DOCKERHUB_IMAGE
         env: 
         - name: ENVIRONMENT
           value: production
