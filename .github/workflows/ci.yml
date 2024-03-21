@@ -24,7 +24,7 @@ jobs:
       
       - name: Decode kubeconfig
         run: |
-          echo "KUBECONFIG=$(echo ${{ secrets.LINODE_KUBECONFIG_BASE64 }} | base64 -d)" >> $GITHUB_ENV
+          echo "KUBECONFIG=$(echo ${{ secrets.LINODE_KUBECONFIG_BASE64 }} | base64 -d)" >> "$GITHUB_ENV"
         
       - uses: azure/k8s-set-context@v4
         with:
