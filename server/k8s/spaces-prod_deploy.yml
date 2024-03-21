@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Deployment
+metadata:
+  name: spaces
+  labels:
+    env: prod
+    project: spaces
+spec:
+  minReadySeconds: 5
+  replicas: 2
+  selector:
+    matchLabels:
+      project: spaces
+      env: prod
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        project: spaces
+        env: prod
+    spec:
+      containers:
+      - name: spaces-server
+        image: DOCKERHUB_USERNAME/DOCKERHUB_REPOSITORY:DOCKERHUB_TAG
+        env: 
+        - name: ENVIRONMENT
+          value: production
+        ports:
+        - containerPort: 8080
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: docker-hub-secret
+
