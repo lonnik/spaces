@@ -23,10 +23,8 @@ jobs:
             server
 
       - name: Decode LINODE_KUBECONFIG
-        env:
-          LINODE_KUBECONFIG: ${{ secrets.LINODE_KUBECONFIG_BASE64 }}
         run: |
-          echo "${LINODE_KUBECONFIG}" | base64 --decode > decoded_kubeconfig
+          echo ${{ secrets.LINODE_KUBECONFIG_BASE64 }} | base64 --decode > decoded_kubeconfig
           echo "KUBECONFIG_CONTENTS=$(cat decoded_kubeconfig)" >> $GITHUB_ENV
         
       - uses: azure/k8s-set-context@v4
