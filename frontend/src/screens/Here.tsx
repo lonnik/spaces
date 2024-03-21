@@ -24,17 +24,21 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
 }) => {
   const [refreshing, setRefreshing] = useState(false);
 
-  const { location } = useLocation();
+  // const { location } = useLocation();
+  const location = { latitude: 52.554357, longitude: 13.420848 };
 
+  console.log("location :>> ", location);
   const [
-    { data: spaces, isLoading, refetch: refetchSpaces },
+    { data: spaces, isLoading, refetch: refetchSpaces, status, error },
     { data: address, refetch: refetchAddress },
   ] = useQueries({
     queries: [
       {
         queryKey: ["spaces by location", location],
-        queryFn: () =>
-          getSpacesByLocation(location as Location, maxNumberItems),
+        queryFn: () => {
+          console.log("hello world");
+          return getSpacesByLocation(location as Location, maxNumberItems);
+        },
         enabled: !!location,
       },
       {
@@ -44,6 +48,9 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
       },
     ],
   });
+
+  console.log("status :>> ", status);
+  console.log("error :>> ", error);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -111,7 +118,7 @@ const HeaderCenterElement: FC<{ addressSmall?: string }> = ({
           textAlign: "center",
           fontSize: 16,
           fontStyle: "normal",
-          fontWeight: "600",
+          fontWeight: template.fontWeight.bold,
           letterSpacing: 0.32,
         }}
       >
