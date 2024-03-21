@@ -27,6 +27,7 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   // const { location } = useLocation();
   const location = { latitude: 52.554357, longitude: 13.420848 };
 
+  console.log("hello world");
   console.log("location :>> ", location);
   const [
     { data: spaces, isLoading, refetch: refetchSpaces, status, error },
