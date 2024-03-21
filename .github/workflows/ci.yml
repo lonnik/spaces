@@ -62,7 +62,7 @@ jobs:
       - name: Apply Deployment
         run: |
           sed -i'' \
-          -e "s/DOCKERHUB_IMAGE/${{ env.IMAGE }}/g" \
+          -e "s|DOCKERHUB_IMAGE|${{ env.IMAGE }}|g" \
           k8s/spaces-prod_deploy.yml
           kubectl apply -f k8s/spaces-prod_deploy.yml
 
