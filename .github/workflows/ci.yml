@@ -61,7 +61,7 @@ jobs:
           sed -i'' \
           -e "s/DOCKERHUB_USERNAME/${{ secrets.DOCKERHUB_USERNAME }}/g" \
           -e "s/DOCKERHUB_REPOSITORY/${{ secrets.DOCKERHUB_REPO }}/g" \
-          -e "s/DOCKERHUB_TAG/${{ github.sha }}/g" \
+          -e "s/DOCKERHUB_TAG/${{ github.sha }}/g" 
           k8s/spaces-prod_deploy.yml
 
       - name: Apply Service
