@@ -3,7 +3,11 @@ variable "google_project_id" {
   description = "description"
 }
 
-variable "credentials_file" { 
+variable "credentials_file" {
   type        = string
   description = "description"
+}
+
+variable "linode_token" {
+  type = string
 }
