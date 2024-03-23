@@ -18,7 +18,7 @@ on:
 jobs:
   build-and-push:
     env:
-      IMAGE: "${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:${{ github.sha }}"
+      IMAGE: "${{ secrets.DOCKERHUB_USERNAME }}/${{ secrets.DOCKERHUB_REPO }}:${{ github.ref_name }}-${{ github.sha }}"
     defaults:
       run:
         working-directory: server
@@ -68,3 +68,11 @@ jobs:
 
       - name: Apply Service
         run: kubectl apply -f k8s/spaces-prod_svc.yml
+
+      - name: Delete old Images on Docker Hub
+        run: /bin/bash bash_scripts/delete_old_images.sh
+        env:
+          REGEX: "${{ github.ref_name }}-"
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+          DOCKERHUB_REPO: ${{ secrets.DOCKERHUB_REPO }}

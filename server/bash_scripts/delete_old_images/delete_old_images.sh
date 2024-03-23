@@ -1,12 +1,15 @@
 #!/bin/bash
 
-branch=${BRANCH:-'prod'}
+set -e
+set -o pipefail
+
+regex=${REGEX:-'prod'}
 days_ago=${DAYS_AGO:-50}
 nth_newest=${NTH_NEWEST:-5}
 
-# $1 branch
-if [[ -z "$branch" ]]; then
-  echo "Please provide a branch name as the "BRANCH" environment variable"
+# $1 regex
+if [[ -z "$regex" ]]; then
+  echo "Please provide a regex name as the "REGEX" environment variable"
   exit 1
 fi
 
@@ -28,7 +31,7 @@ if [[ $nth_newest -lt 1 ]]; then
   exit 1
 fi
 
-echo "Branch: $branch"
+echo "Regex: $regex"
 echo "Older than: $days_ago days"
 echo "N-th newest: $nth_newest"
 
@@ -47,35 +50,41 @@ if [[ -z "$DOCKERHUB_REPO" ]]; then
   exit 1
 fi
 
-token=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${DOCKERHUB_USERNAME}'", "password": "'${DOCKERHUB_PASSWORD}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
-tag_delimiter='-' 
+token=$(curl -s -f -H "Content-Type: application/json" -X POST -d '{"username": "'${DOCKERHUB_USERNAME}'", "password": "'${DOCKERHUB_PASSWORD}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+# don't use process substitution for curl so the error is caught by set -e
+images_output=$(curl -s -f -H "Authorization: JWT ${token}" "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}/tags/?page_size=10000" | jq -r '.results|.[]|.name + " " + .last_updated')
 
 while read name last_updated; do
-  if [[ $name =~ ${branch}${tag_delimiter} ]]; then 
-    branch_image_names+=("$name")
-    branch_image_last_updated_dates+=("$last_updated")
+  if [[ $name =~ $regex ]]; then 
+    image_names+=("$name")
+    image_last_updated_dates+=("$last_updated")
   fi
-done < <(curl -s -H "Authorization: JWT ${token}" "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}/tags/?page_size=10000" | jq -r '.results|.[]|.name + " " + .last_updated')
+# use < <() process substitution to avoid subshell so the above image_names and image_last_updated_dates variables are available outside the while loop  
+done < <(echo "$images_output")
+
 
 delete_from_unix_sec=$(date -d "$days_ago days ago" +%s)
 i=0
-for branch_image_name in ${branch_image_names[@]}; do
-  last_updated_unix_sec=$(date -d "${branch_image_last_updated_dates[$i]}" +'%s')
+for image_name in ${image_names[@]}; do
+  last_updated_unix_sec=$(date -d "${image_last_updated_dates[$i]}" +'%s')
   image_count=$(( i+1 ))
 
   if [[ $last_updated_unix_sec -lt $delete_from_unix_sec ]] && [[ $image_count -gt $nth_newest ]]; then 
-    images_to_delete+=("$branch_image_name")
+    images_to_delete+=("$image_name")
   fi
 
-  ((i++))
+  i=$(( i + 1 ))
 done
+
+if [[ ${#images_to_delete[@]} -eq 0 ]]; then
+  echo "No images to delete"
+  exit 0
+fi
 
 echo "Images to delete: ${images_to_delete[@]}"
 
 for image_to_delete in ${images_to_delete[@]}; do
   echo "Deleting image: ${image_to_delete}"
-  curl -s -X DELETE -H "Authorization: JWT ${token}" "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}/tags/${image_to_delete}"
+  curl -s -f -X DELETE -H "Authorization: JWT ${token}" "https://hub.docker.com/v2/repositories/${DOCKERHUB_USERNAME}/${DOCKERHUB_REPO}/tags/${image_to_delete}"
 done
-
-exit 0
-
