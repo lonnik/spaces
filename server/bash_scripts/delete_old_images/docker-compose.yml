@@ -1,0 +1,12 @@
+version: "3.9"
+
+services:
+  delete_old_docker_hub_images:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./delete_old_images.sh:/delete_old_images.sh
+    env_file:
+      - ./.env
+    command: /bin/bash /delete_old_images.sh 
