@@ -73,8 +73,6 @@ jobs:
         run: /bin/bash bash_scripts/delete_old_images/delete_old_images.sh
         env:
           REGEX: "${{ github.ref_name }}-"
-          DAYS_AGO: 0
-          NTH_NEWEST: 1
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
           DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
