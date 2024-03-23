@@ -70,7 +70,7 @@ jobs:
         run: kubectl apply -f k8s/spaces-prod_svc.yml
 
       - name: Delete old Images on Docker Hub
-        run: /bin/bash bash_scripts/delete_old_images.sh
+        run: /bin/bash bash_scripts/delete_old_images/delete_old_images.sh
         env:
           REGEX: "${{ github.ref_name }}-"
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
