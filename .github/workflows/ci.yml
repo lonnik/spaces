@@ -4,13 +4,13 @@ name: CI
 on: 
   push:
     branches:
-      - prod
+      - main
     paths: 
       - 'server/**'
       - '.github/**'
   pull_request:
     branches:
-      - prod
+      - main
     paths: 
       - 'server/**'
       - '.github/**'
@@ -52,24 +52,24 @@ jobs:
       # - name: Set new current namespace # same (different namespace)
       #   run: kubectl config set-context --current --namespace=spaces
 
-      - name: Create Dockerhub secret # same
+      - name: Create Dockerhub secret # maybe same (secret must be accessible in all namespaces)
         run: |
           sed -i'' \
           -e "s/DOCKERHUB_SECRET/$(cat ~/.docker/config.json | base64 -w 0)/g" \
           k8s/spaces-dockerhub_secret.yml
           kubectl apply -f k8s/spaces-dockerhub_secret.yml --namespace=spaces
 
-      - name: Apply Deployment # 
+      - name: Apply Deployment # different namespace, deployment file
         run: |
           sed -i'' \
           -e "s|DOCKERHUB_IMAGE|${{ env.IMAGE }}|g" \
           k8s/spaces-prod_deploy.yml
           kubectl apply -f k8s/spaces-prod_deploy.yml --namespace=spaces
 
-      - name: Apply Service
+      - name: Apply Service # different namespace, service file
         run: kubectl apply -f k8s/spaces-prod_svc.yml --namespace=spaces
 
-      - name: Delete old Images on Docker Hub
+      - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: /bin/bash bash_scripts/delete_old_images/delete_old_images.sh
         env:
           REGEX: "${{ github.ref_name }}-"
