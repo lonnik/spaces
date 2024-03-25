@@ -26,3 +26,7 @@ variable "node_type" {
   type    = string
   default = "g6-standard-1"
 }
+
+variable "kubeconfig_path" {
+  type    = string
+}

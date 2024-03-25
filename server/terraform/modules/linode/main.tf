@@ -4,12 +4,20 @@ terraform {
       source  = "linode/linode"
       version = "2.16.0"
     }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "2.27.0"
+    }
   }
   required_version = ">= 0.13"
 }
 
 provider "linode" {
   token = var.linode_token
+}
+
+provider "kubernetes" {
+  config_path = var.kubeconfig_path
 }
 
 resource "linode_lke_cluster" "default" {
@@ -24,5 +32,17 @@ resource "linode_lke_cluster" "default" {
       min = var.min_nodes
       max = var.max_nodes
     }
+  }
+}
+
+resource "kubernetes_namespace" "prod" {
+  metadata {
+    name = "prod"
+  }
+}
+
+resource "kubernetes_namespace" "staging" {
+  metadata {
+    name = "staging"
   }
 }

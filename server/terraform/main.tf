@@ -4,6 +4,7 @@ module "linode" {
   linode_token = var.linode_token
   min_nodes    = 1
   max_nodes    = 3
+  kubeconfig_path = var.kubeconfig_path
 }
 
 module "firebase" {

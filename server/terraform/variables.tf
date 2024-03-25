@@ -11,3 +11,7 @@ variable "credentials_file" {
 variable "linode_token" {
   type = string
 }
+
+variable "kubeconfig_path" {
+  type = string
+}
