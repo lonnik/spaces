@@ -26,9 +26,9 @@ jobs:
         id: select-environment
         run: |
           if [[ ${{ github.ref_name }} == 'prod' ]]; then 
-            echo "environment=prod" >> "$GITHUG_OUTPUT"
+            echo "environment=prod" >> "$GITHUB_OUTPUT"
           else
-            echo "environment=staging" >> "$GITHUG_OUTPUT"
+            echo "environment=staging" >> "$GITHUB_OUTPUT"
           fi
           
   build-and-push:
