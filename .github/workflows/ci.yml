@@ -4,70 +4,70 @@ name: CI
 on: 
   push:
     branches:
-      - main
+      - prod
     paths: 
       - 'server/**'
       - '.github/**'
   pull_request:
     branches:
-      - main
+      - prod
     paths: 
       - 'server/**'
       - '.github/**'
 
 jobs:
   build-and-push:
-    env:
+    env: # same for prod and staging
       IMAGE: "${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{ github.ref_name }}-${{ github.sha }}"
     defaults:
       run:
         working-directory: server
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4 # same
         with:
           sparse-checkout: |
             .github
             server
         
-      - uses: azure/k8s-set-context@v4
+      - uses: azure/k8s-set-context@v4 # same (maybe with different namespace)
         with:
           kubeconfig: ${{ secrets.LINODE_KUBECONFIG }} # must be the kubeconfig itself, not the path to it
 
-      - name: Build the Docker Image
+      - name: Build the Docker Image # same (different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret)
         run: docker build -f Dockerfile.prod -t ${{ env.IMAGE }} --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64="${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64}}" .
 
-      - name: Login to Docker Hub
+      - name: Login to Docker Hub #same
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Push the Docker Image
+      - name: Push the Docker Image # same
         run: docker push ${{ env.IMAGE }}
 
-      - name: Create namespace
-        run: kubectl apply -f k8s/spaces_ns.yml
+      # - name: Create namespace  # same (different namespace)
+      #   run: kubectl apply -f k8s/spaces_ns.yml
 
-      - name: Set new current namespace
-        run: kubectl config set-context --current --namespace=spaces
+      # - name: Set new current namespace # same (different namespace)
+      #   run: kubectl config set-context --current --namespace=spaces
 
-      - name: Create Dockerhub secret
+      - name: Create Dockerhub secret # same
         run: |
           sed -i'' \
           -e "s/DOCKERHUB_SECRET/$(cat ~/.docker/config.json | base64 -w 0)/g" \
           k8s/spaces-dockerhub_secret.yml
-          kubectl apply -f k8s/spaces-dockerhub_secret.yml
+          kubectl apply -f k8s/spaces-dockerhub_secret.yml --namespace=spaces
 
-      - name: Apply Deployment
+      - name: Apply Deployment # 
         run: |
           sed -i'' \
           -e "s|DOCKERHUB_IMAGE|${{ env.IMAGE }}|g" \
           k8s/spaces-prod_deploy.yml
-          kubectl apply -f k8s/spaces-prod_deploy.yml
+          kubectl apply -f k8s/spaces-prod_deploy.yml --namespace=spaces
 
       - name: Apply Service
-        run: kubectl apply -f k8s/spaces-prod_svc.yml
+        run: kubectl apply -f k8s/spaces-prod_svc.yml --namespace=spaces
 
       - name: Delete old Images on Docker Hub
         run: /bin/bash bash_scripts/delete_old_images/delete_old_images.sh
