@@ -21,7 +21,7 @@ import (
 )
 
 func main() {
-	if os.Getenv("ENVIRONMENT") != "production" {
+	if os.Getenv("ENVIRONMENT") == "development" {
 		err := godotenv.Load(".env")
 		if err != nil {
 			panic("Error loading .env file")

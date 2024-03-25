@@ -3,31 +3,31 @@
 set -e
 set -o pipefail
 
-regex=${REGEX:-'prod'}
-days_ago=${DAYS_AGO:-50}
-nth_newest=${NTH_NEWEST:-5}
+regex=${1:-'prod'}
+days_ago=${2:-50}
+nth_newest=${3:-5}
 
 # $1 regex
 if [[ -z "$regex" ]]; then
-  echo "Please provide a regex name as the "REGEX" environment variable"
+  echo "Please provide a regex name as the 1. argument"
   exit 1
 fi
 
 # $2 older than days condition
 # f.e.: $(echo $(( $(date +%s) - 86400 * 50)))
 if ! [[ "$days_ago" =~ ^[0-9]+$ ]]; then 
-  echo "Please provide a number as the "DAYS_AGO" environment variable"
+  echo "Please provide a number as the 2. argument"
   exit 1
 fi
 
 # $3 more than n-th newest image condition
 if ! [[ "$nth_newest" =~ ^[0-9]+$ ]]; then 
-  echo "Please provide a number as the "NTH_NEWEST" environment variable"
+  echo "Please provide a number as the 3. argument"
   exit 1
 fi
 
 if [[ $nth_newest -lt 1 ]]; then 
-  echo "Please provide a number greater than 0 the "NTH_NEWEST" environment variable"
+  echo "Please provide a number greater than 0 the 3. argument"
   exit 1
 fi
 
