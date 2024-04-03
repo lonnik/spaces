@@ -37,3 +37,19 @@ yarn-error.*
 # custom
 android
 ios
+
+
+# custom 
+
+**/*.log
+**/tmp/
+.env
+
+*_key.json
+
+# Terraform
+**/.terraform
+**/*.tfstate*
+**/*.tfvars
+**/kubeconfig.yaml
+

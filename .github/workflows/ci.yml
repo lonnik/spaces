@@ -6,14 +6,14 @@ on:
       - main
       - prod
     paths: 
-      - 'server/**'
+      - 'services/**'
       - '.github/**'
   pull_request:
     branches:
       - main
       - prod
     paths: 
-      - 'server/**'
+      - 'services/**'
       - '.github/**'
 
 jobs:
@@ -39,14 +39,14 @@ jobs:
       IMAGE: "${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{ needs.select-environment.outputs.environment }}-${{ github.sha }}"
     defaults:
       run:
-        working-directory: server
+        working-directory: services/server
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4 
         with:
           sparse-checkout: |
             .github
-            server
+            services
         
       - uses: azure/k8s-set-context@v4  
         with:
