@@ -8,7 +8,11 @@ One of the many use cases would be to create a space for your neighbors. Another
 
 From a technical viewpoint, the application consists of a Golang backend with a Redis DB connected to it and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and will be split into microservices. I am aware that this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end. I will soon move most of the DB functionality from Redis to Postgres to take advantage of the benefits a relational database brings to me (foreign keys, schemas, complex queries etc.).
 
-Take into consideration that I worked on this project by myself. So even though things such as maintainability were an important aspect to me, I f.e. didnt see the benefit of using feature branches, but instead pushed everything directly to main. Don't hold it against me :) As you can see below, I'm 3/4 through on my way to launch the app.
+Take into consideration that I worked on this project by myself. So even though things such as maintainability were an important aspect to me, I f.e. didnt see the benefit of using feature branches, but instead pushed everything directly to main.
+
+Also more importantly, I didnt add any tests so far. Although I structured the functions (especially on the backend) in a way to make them easily testable through unit tests, I decided against to write some so far in order to move faster. When splitting up the app into microservices, I will think from the start about integration and E2E tests and add some later, if there will be still time.
+
+As you can see below, I'm about 3/4 through on my way to launch the app.
 
 You are welcome to go through the code as you please. I'm happy about every bit of feedback!
 
@@ -24,6 +28,7 @@ You are welcome to go through the code as you please. I'm happy about every bit 
 * Add missing functionality for endpoints
 * Refine CI/CD pipeline
 * Refine custom navigator
+* Integrate Sentry
 * Submit app to Appstore and Playstore
 
 ## Useful Commands
