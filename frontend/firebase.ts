@@ -2,10 +2,8 @@
 import { initializeApp } from "firebase/app";
 import { initializeAuth, getReactNativePersistence } from "firebase/auth";
 import ReactNativeAsyncStorage from "@react-native-async-storage/async-storage";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
+// doesn't point to valid Firebase project anymore
 const firebaseConfig = {
   apiKey: "AIzaSyAQnaSfi9aYTDM03Qbs5cEDAPnDznM_RDk",
   authDomain: "spaces-prototype-408615.firebaseapp.com",
@@ -15,7 +13,6 @@ const firebaseConfig = {
   appId: "1:717063629448:web:be287e333c134a787a0d3d",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 export const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage),
