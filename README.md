@@ -1,6 +1,44 @@
-# README (in progress)
+# Spaces (under development)
 
-## Start a new project
+## About
+
+"Spaces" is supposed to bring people together that are in physical proximity to each other but have never really interacted. You can create a "space" bound to a physical location and set a specific radius to it. Then, other people who open the app and find themselves within the radius of the space's location can access the space and communicate with other members of the space. Once you have accessed a space "on site", you can access it from anywhere anytime.
+
+One of the many use cases would be to create a space for your neighbors. Another one, to create a space for a Pingpong table in the local park so people who play there Pingpong regularly can meet up without having to know each others Whatsapp numbers. You only must have been there once and have accessed the Pingpong table space. People who regularly go play Pingpong in parks know what I am talking about :)
+
+From a technical viewpoint, the application consists of a Golang backend with a Redis DB connected to it and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and will be split into microservices. I am aware that this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end. I will soon move most of the DB functionality from Redis to Postgres to take advantage of the benefits a relational database brings to me (foreign keys, schemas, complex queries etc.).
+
+Take into consideration that I worked on this project by myself. So even though things such as maintainability were an important aspect to me, I f.e. didnt see the benefit of using feature branches, but instead pushed everything directly to main. Don't hold it against me :) As you can see below, I'm 3/4 through on my way to launch the app.
+
+You are welcome to go through the code as you please. I'm happy about every bit of feedback!
+
+### Main Tasks before launch
+
+* <s>Create backend with Redis as the main DB</s>
+* <s>Create designs in Figma</s>
+* <s>Implement designs for screen and hook them up to backend</s>
+* <s>Create custom navigator for React Navigation to take advantage of gestures</s>
+* <s>Create basic CI/CD pipeline</s>
+* Split backend into microservices with single API Gateway
+* Move to Postgresql
+* Add missing functionality for endpoints
+* Refine CI/CD pipeline
+* Refine custom navigator
+* Submit app to Appstore and Playstore
+
+## Useful Commands
+
+`docker compose --profile dev up --build` to start the developer environment (Firebase service account key must be set)
+
+`docker exec -it server-redis-1 redis-cli` to access the Redis CLI from the Redis server started with the above command
+
+`ngrok http http://localhost:8080` to start a ngrok HTTP tunnel exposing the development server
+
+## Useful Links
+
+`http://localhost:8001/redis-stack/browser`
+
+## Deploy a new instance
 
 ### What is needed to get started
 
@@ -36,15 +74,3 @@ linode_token      = <Linode API token>
 * `DOCKERHUB_TOKEN`
 * `FIREBASE_SERVICE_ACCOUNT_KEY_BASE64`
 * `LINODE_KUBECONFIG`
-
-## Useful Commands
-
-`docker compose --profile dev up --build` to start the developer environment (Firebase service account key must be set)
-
-`docker exec -it server-redis-1 redis-cli` to access the Redis CLI from the Redis server started with the above command
-
-`ngrok http http://localhost:8080` to start a ngrok HTTP tunnel exposing the development server
-
-## Useful Links
-
-`http://localhost:8001/redis-stack/browser`
