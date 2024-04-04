@@ -8,9 +8,9 @@ One of the many use cases would be to create a space for your neighbors. Another
 
 From a technical viewpoint, the application consists of a Golang backend with a Redis DB connected to it and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and will be split into microservices. I am aware that this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end. I will soon move most of the DB functionality from Redis to Postgres to take advantage of the benefits a relational database brings to me (foreign keys, schemas, complex queries etc.).
 
-Take into consideration that I worked on this project by myself. So even though things such as maintainability were an important aspect to me, I f.e. didnt see the benefit of using feature branches, but instead pushed everything directly to main.
+Take into consideration that I worked on this project by myself. So even though things such as maintainability were an important aspect to me, I f.e. didn't see the benefit of using feature branches, but instead pushed everything directly to main.
 
-Also more importantly, I didnt add any tests so far. Although I structured the functions (especially on the backend) in a way to make them easily testable through unit tests, I decided against to write some so far in order to move faster. When splitting up the app into microservices, I will think from the start about integration and E2E tests and add some later, if there will be still time.
+Also, more importantly, I didn't add any tests so far. Although I structured the functions (especially on the backend) in a way to make them easily testable through unit tests, I decided against to write some so far in order to move faster. When splitting up the app into microservices, I will think from the start about integration and E2E tests and add some later, if there will be still time.
 
 As you can see below, I'm about 3/4 through on my way to launch the app.
 
@@ -19,13 +19,14 @@ You are welcome to go through the code as you please. I'm happy about every bit 
 ### Main Tasks before launch
 
 * <s>Create backend with Redis as the main DB</s>
-* <s>Create designs in Figma</s>
-* <s>Implement designs for screen and hook them up to backend</s>
+* <s>Create screen designs in Figma</s>
+* <s>Implement screen designs</s>
+* <s>Hook up screens to backend</s>
 * <s>Create custom navigator for React Navigation to take advantage of gestures</s>
 * <s>Create basic CI/CD pipeline</s>
 * Split backend into microservices with single API Gateway
-* Move to Postgresql
-* Add missing functionality for endpoints
+* Move from Redis to Postgresql as main DB
+* Add missing backend API functionality
 * Refine CI/CD pipeline
 * Refine custom navigator
 * Integrate Sentry
