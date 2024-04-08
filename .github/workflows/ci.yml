@@ -50,7 +50,7 @@ jobs:
         run: |
           if [[ ${{ github.ref_name }} == 'prod' ]]; then 
             echo "environment=prod" >> "$GITHUB_OUTPUT"
-          elif [[ ${{ github.ref_name }} == 'staging' ]]; then
+          elif [[ ${{ github.ref_name }} == 'main' ]]; then
             echo "environment=staging" >> "$GITHUB_OUTPUT"
           else 
             echo "environment=test" >> "$GITHUB_OUTPUT"
