@@ -25,6 +25,12 @@ jobs:
         working-directory: services/server
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4 
+        with:
+          sparse-checkout: |
+            .github
+            services
+                  
       - name: Check Required variables and secrets
         run: |
           if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
@@ -66,12 +72,6 @@ jobs:
           echo "IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}" >> "$GITHUB_OUTPUT"
           echo "IMAGE_TAG=${{ env.ENVIRONMENT }}-${{ github.sha }}" >> "$GITHUB_OUTPUT"
           echo "IMAGE=${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> "$GITHUB_OUTPUT"
-
-      - uses: actions/checkout@v4 
-        with:
-          sparse-checkout: |
-            .github
-            services
         
       - uses: azure/k8s-set-context@v4  
         with:
