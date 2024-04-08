@@ -17,11 +17,19 @@ on:
       - '.github/**'
 
 jobs:
-  select-environment:
+  ci:
+    name: Build and Push Docker Image, Deploy to Linode K8s
+    defaults:
+      run:
+        working-directory: services/server
     runs-on: ubuntu-latest
-    outputs:
-      environment: ${{ steps.select-environment.outputs.environment }}
     steps:
+      - uses: actions/checkout@v4 
+        with:
+          sparse-checkout: |
+            .github
+            services
+                  
       - name: Check Required variables and secrets
         run: |
           if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
@@ -49,35 +57,25 @@ jobs:
             echo "HELM_VERSION variable is missing";
             exit 1;
           fi
-      - name: Select Environment
-        id: select-environment
+
+      - name: Set Environment Variables
         run: |
           if [[ ${{ github.ref_name }} == 'prod' ]]; then 
-            echo "environment=prod" >> "$GITHUB_OUTPUT"
+            ENVIRONMENT='prod'
           elif [[ ${{ github.ref_name }} == 'main' ]]; then
-            echo "environment=staging" >> "$GITHUB_OUTPUT"
+            ENVIRONMENT='staging'
           else 
-            echo "environment=test" >> "$GITHUB_OUTPUT"
+            ENVIRONMENT='test'
           fi
 
-  build-and-push:
-    name: Build and Push Docker Image
-    needs: select-environment
-    env: 
-      ENVIRONMENT: ${{ needs.select-environment.outputs.environment }}
-      IMAGE_REPO: "${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}"
-      IMAGE_TAG: "${{ needs.select-environment.outputs.environment }}-${{ github.sha }}"
-    defaults:
-      run:
-        working-directory: services/server
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4 
-        with:
-          sparse-checkout: |
-            .github
-            services
-        
+          IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}
+          IMAGE_TAG="$ENVIRONMENT-${{ github.sha }}"
+
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "IMAGE_REPO=$IMAGE_REPO" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE_REPO:$IMAGE_TAG" >> $GITHUB_ENV
+
       - uses: azure/k8s-set-context@v4  
         with:
           kubeconfig: ${{ secrets.LINODE_KUBECONFIG }} # must be the kubeconfig itself, not the path to it
@@ -88,8 +86,6 @@ jobs:
 
       - name: Build the Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: docker build -f Dockerfile.prod -t ${{ env.IMAGE }} --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64=$( if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; else echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; fi ) .
-        env:
-          IMAGE: ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Login to Docker Hub 
         uses: docker/login-action@v3
@@ -99,8 +95,6 @@ jobs:
       
       - name: Push the Docker Image 
         run: docker push ${{ env.IMAGE }}
-        env:
-          IMAGE: ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Adapt app version in Helm Chart 
         run: |
@@ -117,6 +111,7 @@ jobs:
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --namespace=${{ env.ENVIRONMENT }}
 
+# TODO: health check and rollback on failure
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
           if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then
