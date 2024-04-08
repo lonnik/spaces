@@ -45,7 +45,7 @@ jobs:
           if [[ -z "${{ vars.DOCKERHUB_USERNAME }}" ]]; then
             echo "DOCKERHUB_USERNAME secret is missing";
             exit 1;
-          f
+          fi
       - name: Select Environment
         id: select-environment
         run: |
