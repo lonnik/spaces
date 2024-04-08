@@ -77,15 +77,13 @@ jobs:
 
       - name: Adapt app version in Helm Chart 
         run: |
-          ls
-          pwd
           sed -i'' \
           -e "s/APP_VERSION/${{ env.ENVIRONMENT }}-${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
       # TODO: namespace flag must be added -> --namespace="${{ env.ENVIRONMENT }}"
       - name: Apply Helm Chart
-        run: helm upgrade --install server k8s/server --generate-name --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }} --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)"
+        run: helm upgrade --install server-${{ env.ENVIRONMENT }} server k8s/server --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }} --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)"
 
       # - name: Create Dockerhub secret # different namespace for prod and staging
       #   run: |
