@@ -38,11 +38,15 @@ jobs:
           fi
 
           if [[ -z "${{ vars.DOCKERHUB_REPO }}" ]]; then
-            echo "DOCKERHUB_REPO secret is missing";
+            echo "DOCKERHUB_REPO variable is missing";
             exit 1;
           fi
           if [[ -z "${{ vars.DOCKERHUB_USERNAME }}" ]]; then
-            echo "DOCKERHUB_USERNAME secret is missing";
+            echo "DOCKERHUB_USERNAME variable is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ vars.HELM_VERSION }}" ]]; then
+            echo "HELM_VERSION variable is missing";
             exit 1;
           fi
       - name: Select Environment
@@ -80,7 +84,7 @@ jobs:
 
       - uses: azure/setup-helm@v4.1.0
         with:
-          version: '3.14.3'
+          version: "${{ vars.HELM_VERSION }}"
 
       - name: Build the Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: docker build -f Dockerfile.prod -t ${{ env.IMAGE }} --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64=$( if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; else echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; fi ) .
