@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "server.name" . }} # chart name (from Chart.yml) or nameOverride (from values.yaml
+  labels:
+    {{- include "server.labels" . | nindent 4 }} 
+spec:
+  minReadySeconds: {{ .Values.minReadySeconds}}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "server.selectorLabels" . | nindent 6 }} 
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: {{ .Values.maxSurge}}
+  template:
+    metadata:
+      labels:
+        {{- include "server.labels" . | nindent 8 }}
+    spec:
+      containers:
+      - name: spaces-server
+        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+        env: 
+        - name: ENVIRONMENT
+          value: production
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: {{ .Values.secrets.dockerHubSecret.name }}

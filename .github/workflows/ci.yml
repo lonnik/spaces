@@ -22,21 +22,47 @@ jobs:
     outputs:
       environment: ${{ steps.select-environment.outputs.environment }}
     steps:
+      - name: Check Required variables and secrets
+        run: |
+          if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
+            echo "DOCKERHUB_TOKEN secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ secrets.LINODE_KUBECONFIG }}" ]]; then
+            echo "LINODE_KUBECONFIG secret is missing";
+            exit 1;
+          fi
+
+          if [[ -z "${{ vars.DOCKERHUB_REPO }}" ]]; then
+            echo "DOCKERHUB_REPO secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ vars.DOCKERHUB_USERNAME }}" ]]; then
+            echo "DOCKERHUB_USERNAME secret is missing";
+            exit 1;
+          fi
       - name: Select Environment
         id: select-environment
         run: |
           if [[ ${{ github.ref_name }} == 'prod' ]]; then 
             echo "environment=prod" >> "$GITHUB_OUTPUT"
-          else
+          elif [[ ${{ github.ref_name }} == 'staging' ]]; then
             echo "environment=staging" >> "$GITHUB_OUTPUT"
+          else 
+            echo "environment=test" >> "$GITHUB_OUTPUT"
           fi
-          
+
   build-and-push:
     name: Build and Push Docker Image
     needs: select-environment
     env: 
       ENVIRONMENT: ${{ needs.select-environment.outputs.environment }}
-      IMAGE: "${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}:${{ needs.select-environment.outputs.environment }}-${{ github.sha }}"
+      IMAGE_REPO: "${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}"
+      IMAGE_TAG: "${{ needs.select-environment.outputs.environment }}-${{ github.sha }}"
     defaults:
       run:
         working-directory: services/server
@@ -52,8 +78,14 @@ jobs:
         with:
           kubeconfig: ${{ secrets.LINODE_KUBECONFIG }} # must be the kubeconfig itself, not the path to it
 
+      - uses: azure/setup-helm@v4.1.0
+        with:
+          version: '3.14.3'
+
       - name: Build the Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: docker build -f Dockerfile.prod -t ${{ env.IMAGE }} --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64=$( if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; else echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; fi ) .
+        env:
+          IMAGE: ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
 
       - name: Login to Docker Hub 
         uses: docker/login-action@v3
@@ -63,25 +95,23 @@ jobs:
       
       - name: Push the Docker Image 
         run: docker push ${{ env.IMAGE }}
-
-      - name: Create Dockerhub secret # different namespace for prod and staging
-        run: |
-          sed -i'' \
-          -e "s/DOCKERHUB_SECRET/$(cat ~/.docker/config.json | base64 -w 0)/g" \
-          k8s/spaces-dockerhub_secret.yml
-          kubectl apply -f k8s/spaces-dockerhub_secret.yml --namespace="${{ env.ENVIRONMENT }}"
-
-      - name: Apply Deployment # different namespace, deployment file for prod and staging
-        run: |
-          sed -i'' \
-          -e "s|DOCKERHUB_IMAGE|${{ env.IMAGE }}|g" \
-          "${{ env.DEPLOYMENT_MANIFEST_PATH }}"
-          kubectl apply -f "${{ env.DEPLOYMENT_MANIFEST_PATH }}" --namespace="${{ env.ENVIRONMENT }}"
         env:
-          DEPLOYMENT_MANIFEST_PATH: "k8s/${{ env.ENVIRONMENT }}/spaces_deploy.yml"
+          IMAGE: ${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}
 
-      - name: Apply Service # different arguments to delete_old_images script for prod and staging
-        run: kubectl apply -f k8s/spaces_svc.yml --namespace="${{ env.ENVIRONMENT }}"
+      - name: Adapt app version in Helm Chart 
+        run: |
+          sed -i'' \
+          -e "s/APP_VERSION/${{ github.sha }}/g" \
+          k8s/server/Chart.yaml
+
+      - name: Apply Helm Chart
+        run: |
+          helm upgrade server-${{ env.ENVIRONMENT }} k8s/server \
+          --install \
+          --set image.repository=${{ env.IMAGE_REPO }} \
+          --set image.tag=${{ env.IMAGE_TAG }} \
+          --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
+          --namespace=${{ env.ENVIRONMENT }}
 
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
