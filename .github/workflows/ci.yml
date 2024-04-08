@@ -80,7 +80,7 @@ jobs:
           ls
           pwd
           sed -i'' \
-          -e "s/APP_VERSION/${{ env.ENVIRONMENT }}-${{ github.sha }}/g" \ 
+          -e "s/APP_VERSION/${{ env.ENVIRONMENT }}-${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
       # TODO: namespace flag must be added -> --namespace="${{ env.ENVIRONMENT }}"
