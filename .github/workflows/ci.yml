@@ -1,5 +1,5 @@
 name: CI
-
+# TODO manifests must have same name as others before
 on: 
   push:
     branches:
@@ -23,6 +23,29 @@ jobs:
     outputs:
       environment: ${{ steps.select-environment.outputs.environment }}
     steps:
+      - name: Check Required variables and secrets
+        run: |
+          if [[ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]]; then
+            echo "DOCKERHUB_TOKEN secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" ]]; then
+            echo "FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ secrets.LINODE_KUBECONFIG }}" ]]; then
+            echo "LINODE_KUBECONFIG secret is missing";
+            exit 1;
+          fi
+
+          if [[ -z "${{ vars.DOCKERHUB_REPO }}" ]]; then
+            echo "DOCKERHUB_REPO secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ vars.DOCKERHUB_USERNAME }}" ]]; then
+            echo "DOCKERHUB_USERNAME secret is missing";
+            exit 1;
+          f
       - name: Select Environment
         id: select-environment
         run: |
