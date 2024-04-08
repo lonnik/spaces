@@ -43,10 +43,9 @@ jobs:
             exit 1;
           fi
 
-      - name: Set up Kubernetes context
-        run: |
-          echo "${{ secrets.LINODE_KUBECONFIG }}" > ./kubeconfig
-          echo "KUBECONFIG=$PWD/kubeconfig" >> $GITHUB_ENV
+      - uses: azure/k8s-set-context@v4  
+        with:
+          kubeconfig: ${{ secrets.LINODE_KUBECONFIG }} # must be the kubeconfig itself, not the path to it
 
       - uses: azure/setup-helm@v4.1.0
         with:
@@ -54,4 +53,4 @@ jobs:
 
       - name: Apply Helm Chart
         run: |
-          helm rollback server-${{ inputs.environment }} ${{ inputs.revision }}
+          helm rollback server-${{ inputs.environment }} ${{ inputs.revision }} -n ${{ inputs.environment }}
