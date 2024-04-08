@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - prod
+      - feat-integrate-helm
     paths: 
       - 'services/**'
       - '.github/**'
@@ -27,10 +28,13 @@ jobs:
         run: |
           if [[ ${{ github.ref_name }} == 'prod' ]]; then 
             echo "environment=prod" >> "$GITHUB_OUTPUT"
-          else
+          elif [[ ${{ github.ref_name }} == 'staging' ]]; then
             echo "environment=staging" >> "$GITHUB_OUTPUT"
+          else 
+            echo "environment=test" >> "$GITHUB_OUTPUT"
           fi
-          
+
+# TODO: add step to check if all variables and secrets are set
   build-and-push:
     name: Build and Push Docker Image
     needs: select-environment
@@ -63,25 +67,38 @@ jobs:
       
       - name: Push the Docker Image 
         run: docker push ${{ env.IMAGE }}
+# get dockerhub secret value
+# adapt app version in chart with sed and give sha as value
+# apply helm chart
 
-      - name: Create Dockerhub secret # different namespace for prod and staging
+      - name: Adapt app version in Helm Chart 
         run: |
           sed -i'' \
-          -e "s/DOCKERHUB_SECRET/$(cat ~/.docker/config.json | base64 -w 0)/g" \
-          k8s/spaces-dockerhub_secret.yml
-          kubectl apply -f k8s/spaces-dockerhub_secret.yml --namespace="${{ env.ENVIRONMENT }}"
+          -e "s/APP_VERSION/${{ env.ENVIRONMENT }}-${{ github.sha }}/g" \ 
+          k8s/server/Chart.yaml
 
-      - name: Apply Deployment # different namespace, deployment file for prod and staging
-        run: |
-          sed -i'' \
-          -e "s|DOCKERHUB_IMAGE|${{ env.IMAGE }}|g" \
-          "${{ env.DEPLOYMENT_MANIFEST_PATH }}"
-          kubectl apply -f "${{ env.DEPLOYMENT_MANIFEST_PATH }}" --namespace="${{ env.ENVIRONMENT }}"
-        env:
-          DEPLOYMENT_MANIFEST_PATH: "k8s/${{ env.ENVIRONMENT }}/spaces_deploy.yml"
+      # TODO: namespace flag must be added -> --namespace="${{ env.ENVIRONMENT }}"
+      - name: Apply Helm Chart
+        run: helm upgrade --install server k8s/server --generate-name --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }} --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)"
 
-      - name: Apply Service # different arguments to delete_old_images script for prod and staging
-        run: kubectl apply -f k8s/spaces_svc.yml --namespace="${{ env.ENVIRONMENT }}"
+      # - name: Create Dockerhub secret # different namespace for prod and staging
+      #   run: |
+      #     sed -i'' \
+      #     -e "s/DOCKERHUB_SECRET/$(cat ~/.docker/config.json | base64 -w 0)/g" \
+      #     k8s/spaces-dockerhub_secret.yml
+      #     kubectl apply -f k8s/spaces-dockerhub_secret.yml --namespace="${{ env.ENVIRONMENT }}"
+
+      # - name: Apply Deployment # different namespace, deployment file for prod and staging
+      #   run: |
+      #     sed -i'' \
+      #     -e "s|DOCKERHUB_IMAGE|${{ env.IMAGE }}|g" \
+      #     "${{ env.DEPLOYMENT_MANIFEST_PATH }}"
+      #     kubectl apply -f "${{ env.DEPLOYMENT_MANIFEST_PATH }}" --namespace="${{ env.ENVIRONMENT }}"
+      #   env:
+      #     DEPLOYMENT_MANIFEST_PATH: "k8s/${{ env.ENVIRONMENT }}/spaces_deploy.yml"
+
+      # - name: Apply Service # different arguments to delete_old_images script for prod and staging
+      #   run: kubectl apply -f k8s/spaces_svc.yml --namespace="${{ env.ENVIRONMENT }}"
 
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |

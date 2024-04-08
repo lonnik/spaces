@@ -1,0 +1,12 @@
+service:
+  internalPort: 8080
+replicaCount: 2
+minReadySeconds: 5
+image:
+  repository: ""
+  tag: ""
+maxSurge: 1
+secrets: 
+  dockerHubSecret:
+    name: docker-hub-secret
+    valueBase64: ""
