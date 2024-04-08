@@ -1,11 +1,10 @@
 name: CI
-# TODO manifests must have same name as others before
+
 on: 
   push:
     branches:
       - main
       - prod
-      - feat-integrate-helm # TODO: remove this line
     paths: 
       - 'services/**'
       - '.github/**'
@@ -57,7 +56,6 @@ jobs:
             echo "environment=test" >> "$GITHUB_OUTPUT"
           fi
 
-# TODO: add step to check if all variables and secrets are set
   build-and-push:
     name: Build and Push Docker Image
     needs: select-environment
@@ -106,7 +104,6 @@ jobs:
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
-      # TODO: namespace flag must be added -> --namespace="${{ env.ENVIRONMENT }}"
       - name: Apply Helm Chart
         run: |
           helm upgrade server-${{ env.ENVIRONMENT }} k8s/server \
@@ -114,7 +111,7 @@ jobs:
           --set image.repository=${{ env.IMAGE_REPO }} \
           --set image.tag=${{ env.IMAGE_TAG }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
-          --namespace="default"
+          --namespace=${{ env.ENVIRONMENT }}
 
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
