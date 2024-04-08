@@ -56,6 +56,10 @@ jobs:
         with:
           kubeconfig: ${{ secrets.LINODE_KUBECONFIG }} # must be the kubeconfig itself, not the path to it
 
+      - uses: azure/setup-helm@v4.1.0
+        with:
+          version: '3.14.3'
+
       - name: Build the Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: docker build -f Dockerfile.prod -t ${{ env.IMAGE }} --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64=$( if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; else echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; fi ) .
 
@@ -73,6 +77,8 @@ jobs:
 
       - name: Adapt app version in Helm Chart 
         run: |
+          ls
+          pwd
           sed -i'' \
           -e "s/APP_VERSION/${{ env.ENVIRONMENT }}-${{ github.sha }}/g" \ 
           k8s/server/Chart.yaml
