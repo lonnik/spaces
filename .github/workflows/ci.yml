@@ -83,7 +83,7 @@ jobs:
 
       # TODO: namespace flag must be added -> --namespace="${{ env.ENVIRONMENT }}"
       - name: Apply Helm Chart
-        run: helm upgrade --install server-${{ env.ENVIRONMENT }} k8s/server --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }} --set image.tag=${{ github.sha }} --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" --namespace="default"
+        run: helm upgrade --install server-${{ env.ENVIRONMENT }} k8s/server --set image.repository=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }} --set image.tag=${{ env.ENVIRONMENT }}-${{ github.sha }} --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" --namespace="default"
 
       # - name: Create Dockerhub secret # different namespace for prod and staging
       #   run: |
