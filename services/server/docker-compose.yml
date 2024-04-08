@@ -20,7 +20,7 @@ services:
       - ./:/app
     environment:
       - PORT=8080
-      - ENVIRONMENT=development
+      - ENVIRONMENT=development # development, production, test
     ports:
       - 8080:8080
     command: /bin/bash -c

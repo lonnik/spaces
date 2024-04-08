@@ -24,7 +24,7 @@ spec:
         image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
         env: 
         - name: ENVIRONMENT
-          value: {{ .Release.Namespace }}
+          value: production
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         imagePullPolicy: Always
