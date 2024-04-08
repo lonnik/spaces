@@ -62,17 +62,21 @@ jobs:
       - name: Set Environment Variables
         run: |
           if [[ ${{ github.ref_name }} == 'prod' ]]; then 
-            echo "ENVIRONMENT=prod" >> $GITHUB_ENV
+            ENVIRONMENT='prod'
           elif [[ ${{ github.ref_name }} == 'main' ]]; then
-            echo "ENVIRONMENT=staging" >> $GITHUB_ENV
+            ENVIRONMENT='staging'
           else 
-            echo "ENVIRONMENT=test" >> $GITHUB_ENV
+            ENVIRONMENT='test'
           fi
 
-          echo "IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}" >> $GITHUB_ENV
-          echo "IMAGE_TAG=${{ env.ENVIRONMENT }}-${{ github.sha }}" >> $GITHUB_ENV
-          echo "IMAGE=${{ env.IMAGE_REPO }}:${{ env.IMAGE_TAG }}" >> $GITHUB_ENV
-        
+          IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}
+          IMAGE_TAG="$ENVIRONMENT-${{ github.sha }}"
+
+          echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
+          echo "IMAGE_REPO=$IMAGE_REPO" >> $GITHUB_ENV
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
+          echo "IMAGE=$IMAGE_REPO:$IMAGE_TAG" >> $GITHUB_ENV
+
       - uses: azure/k8s-set-context@v4  
         with:
           kubeconfig: ${{ secrets.LINODE_KUBECONFIG }} # must be the kubeconfig itself, not the path to it
