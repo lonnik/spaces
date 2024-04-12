@@ -110,6 +110,7 @@ jobs:
 
       - name: Apply Helm Chart
         run: |
+          helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency build k8s/server
           helm upgrade server-${{ env.ENVIRONMENT }} k8s/server \
           --install \
