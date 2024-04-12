@@ -107,7 +107,7 @@ jobs:
           sed -i'' \
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
-
+# TODO add --set postgresql.enabled contitionally
       - name: Apply Helm Chart
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
