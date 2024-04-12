@@ -6,6 +6,7 @@ import (
 	"spaces-p/controllers"
 	"spaces-p/firebase"
 	"spaces-p/middlewares"
+	"spaces-p/postgres"
 	"spaces-p/redis"
 	googlegeocode "spaces-p/repositories/google_geocode"
 	localmemory "spaces-p/repositories/local_memory"
@@ -59,6 +60,9 @@ func main() {
 	// initialize redis client
 	redis.ConnectRedis()
 
+	// initialize postgres client
+	postgres.Connect()
+
 	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
 	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(os.Getenv("GOOGLE_GEOCODE_API_KEY"))
@@ -71,12 +75,13 @@ func main() {
 	threadService := services.NewThreadService(logger, redisRepo, localMemoryRepo)
 	messageService := services.NewMessageService(logger, redisRepo, localMemoryRepo)
 	addressService := services.NewAddressService(logger, redisRepo, googleGeocodeRepo)
+	healthService := services.NewHealthService(logger, postgres.Db)
 
 	// set up controllers
 	userController := controllers.NewUserController(logger, userService)
 	spaceController := controllers.NewSpaceController(logger, spaceService, spaceNotificationService, threadService, messageService)
 	addressController := controllers.NewAddressController(logger, addressService)
-	healthController := controllers.NewHealthController()
+	healthController := controllers.NewHealthController(logger, healthService)
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
