@@ -117,7 +117,6 @@ jobs:
           --set image.repository=${{ env.IMAGE_REPO }} \
           --set image.tag=${{ env.IMAGE_TAG }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
-          # --set postgresql.enabled=$( if [[ ${{ env.ENVIRONMENT }} == 'staging' ]]; then echo true; else echo false; fi ) \
           --set postgresql.enabled=true \
           --namespace=${{ env.ENVIRONMENT }}
 
