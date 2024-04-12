@@ -25,6 +25,17 @@ spec:
         env: 
         - name: ENVIRONMENT
           value: production
+        - name: DB_NAME
+          value: spacesdb
+        - name: DB_USER
+          value: spaces
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql
+              key: password
+        - name: DB_HOST
+          value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         imagePullPolicy: Always

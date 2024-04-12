@@ -116,6 +116,7 @@ jobs:
           --install \
           --set image.repository=${{ env.IMAGE_REPO }} \
           --set image.tag=${{ env.IMAGE_TAG }} \
+          --set replicaCount=1 \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --set postgresql.enabled=true \
           --namespace=${{ env.ENVIRONMENT }}
