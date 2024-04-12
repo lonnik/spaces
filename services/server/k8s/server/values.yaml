@@ -18,33 +18,33 @@ postgresql:
     password: password
     database: spacesdb
   architecture: "standalone"
-  primary:
-    persistence:
-      enabled: true
-      size: 2Gi
-      storageClass: "linode-block-storage"
-    podSecurityContext:
-      enabled: false
-      fsGroup: ""
-    containerSecurityContext:
-      enabled: false
-      runAsUser: "auto"
-  readReplicas:
-    podSecurityContext:
-      enabled: false
-      fsGroup: ""
-    containerSecurityContext:
-      enabled: false
-      runAsUser: "auto"
-  volumePermissions:
-    enabled: false
-    securityContext:
-      runAsUser: "auto" 
+  # primary:
+    # persistence:
+    #   enabled: true
+    #   size: 2Gi
+    #   storageClass: "linode-block-storage"
+  #   podSecurityContext:
+  #     enabled: false
+  #     fsGroup: ""
+  #   containerSecurityContext:
+  #     enabled: false
+  #     runAsUser: "auto"
+  # readReplicas:
+  #   podSecurityContext:
+  #     enabled: false
+  #     fsGroup: ""
+  #   containerSecurityContext:
+  #     enabled: false
+  #     runAsUser: "auto"
+  # volumePermissions:
+  #   enabled: false
+  #   securityContext:
+  #     runAsUser: "auto" 
   resources: 
     requests:
-      memory: 128Mi
-      cpu: 100m
-    limits:
-      memory: 256Mi
-      cpu: 200m
+      memory: 512Mi
+      cpu: 500m
+    # limits:
+    #   memory: 256Mi
+    #   cpu: 200m
 
