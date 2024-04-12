@@ -110,6 +110,7 @@ jobs:
 
       - name: Apply Helm Chart
         run: |
+          helm dependency build k8s/server
           helm upgrade server-${{ env.ENVIRONMENT }} k8s/server \
           --install \
           --set image.repository=${{ env.IMAGE_REPO }} \
