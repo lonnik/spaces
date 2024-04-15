@@ -32,5 +32,6 @@ spec:
         imagePullPolicy: Always
       imagePullSecrets:
       - name: {{ .Values.secrets.dockerHubSecret.name }}
+      restartPolicy: Never
       completions: 1
       parallelism: 1

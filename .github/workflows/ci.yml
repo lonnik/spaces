@@ -120,10 +120,6 @@ jobs:
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
-      - name: Debug
-        run: |
-          env
-
       - name: Apply Helm Chart
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -141,11 +137,11 @@ jobs:
 # TODO: health check and rollback on failure
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
-          /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.SERVER_REGEX }} 50 5;
-          /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.MIGRATION_REGEX }} 50 5;
+          /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.SERVER_IMAGE_REGEX }} 50 5;
+          /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.MIGRATION_IMAGE_REGEX }} 50 5;
         env:
-          SERVER_REGEX: "${{ env.ENVIRONMENT }}-server"
-          MIGRATION_REGEX: "${{ env.ENVIRONMENT }}-migration"
+          SERVER_IMAGE_REGEX: "${{ env.ENVIRONMENT }}-server"
+          MIGRATION_IMAGE_REGEX: "${{ env.ENVIRONMENT }}-migration"
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
           DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
