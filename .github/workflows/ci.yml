@@ -76,6 +76,7 @@ jobs:
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
           echo "IMAGE_REPO=$IMAGE_REPO" >> $GITHUB_ENV
           echo "SERVER_IMAGE_TAG=$SERVER_IMAGE_TAG" >> $GITHUB_ENV
+          echo "MIGRATION_IMAGE_TAG=$MIGRATION_IMAGE_TAG" >> $GITHUB_ENV
           echo "SERVER_IMAGE=$IMAGE_REPO:$SERVER_IMAGE_TAG" >> $GITHUB_ENV
           echo "MIGRATION_IMAGE=$IMAGE_REPO:$MIGRATION_IMAGE_TAG" >> $GITHUB_ENV
 
@@ -138,28 +139,13 @@ jobs:
           --namespace=${{ env.ENVIRONMENT }}
 
 # TODO: health check and rollback on failure
-      - name: Delete old Server Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
+      - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
-          if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then
-            /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
-          else
-            /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
-          fi
+          /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.SERVER_REGEX }} 50 5;
+          /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.MIGRATION_REGEX }} 50 5;
         env:
-          REGEX: "${{ env.ENVIRONMENT }}-server"
-          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
-          DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
-          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Delete old Migration Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
-        run: |
-          if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then
-            /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
-          else
-            /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
-          fi
-        env:
-          REGEX: "${{ env.ENVIRONMENT }}-migration"
+          SERVER_REGEX: "${{ env.ENVIRONMENT }}-server"
+          MIGRATION_REGEX: "${{ env.ENVIRONMENT }}-migration"
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
           DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
