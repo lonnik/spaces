@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "server.name" . }}
+  labels: 
+    {{- include "server.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "server.labels" . | nindent 8 }}
+    spec:
+      containers: 
+      - name: spaces-migration
+        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tags.migration }}
+        env: 
+        - name: ENVIRONMENT
+          value: production
+        - name: DB_NAME
+          value: {{ .Values.postgresql.auth.database }}
+        - name: DB_USER
+          value: {{ .Values.postgresql.auth.username }}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql
+              key: password
+        - name: DB_HOST
+          value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: {{ .Values.secrets.dockerHubSecret.name }}
+      completions: 1
+      parallelism: 1

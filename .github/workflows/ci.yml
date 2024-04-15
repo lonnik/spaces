@@ -70,12 +70,14 @@ jobs:
           fi
 
           IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}
-          IMAGE_TAG="$ENVIRONMENT-${{ github.sha }}"
+          SERVER_IMAGE_TAG="$ENVIRONMENT-server-${{ github.sha }}"
+          MIGRATION_IMAGE_TAG="$ENVIRONMENT-migration-${{ github.sha }}"
 
           echo "ENVIRONMENT=$ENVIRONMENT" >> $GITHUB_ENV
           echo "IMAGE_REPO=$IMAGE_REPO" >> $GITHUB_ENV
-          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
-          echo "IMAGE=$IMAGE_REPO:$IMAGE_TAG" >> $GITHUB_ENV
+          echo "SERVER_IMAGE_TAG=$SERVER_IMAGE_TAG" >> $GITHUB_ENV
+          echo "SERVER_IMAGE=$IMAGE_REPO:$SERVER_IMAGE_TAG" >> $GITHUB_ENV
+          echo "MIGRATION_IMAGE=$IMAGE_REPO:$MIGRATION_IMAGE_TAG" >> $GITHUB_ENV
 
       - uses: azure/k8s-set-context@v4  
         with:
@@ -85,12 +87,19 @@ jobs:
         with:
           version: "${{ vars.HELM_VERSION }}"
 
-      - name: Build the Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
+      - name: Build the Server Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: |
           docker build \
           -f Dockerfile.prod \
-          -t ${{ env.IMAGE }} \
+          -t ${{ env.SERVER_IMAGE }} \
           --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64=$( if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; else echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; fi ) \
+          .
+
+      - name: Build the Migration Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
+        run: |
+          docker build \
+          -f postgres/Dockerfile.migration \
+          -t ${{ env.MIGRATION_IMAGE }} \
           .
 
       - name: Login to Docker Hub 
@@ -100,7 +109,7 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
       - name: Push the Docker Image 
-        run: docker push ${{ env.IMAGE }}
+        run: docker push ${{ env.SERVER_IMAGE }}
 
       - name: Adapt app version in Helm Chart 
         run: |
@@ -115,14 +124,15 @@ jobs:
           helm upgrade server-${{ env.ENVIRONMENT }} k8s/server \
           --install \
           --set image.repository=${{ env.IMAGE_REPO }} \
-          --set image.tag=${{ env.IMAGE_TAG }} \
+          --set image.tags.server=${{ env.SERVER_IMAGE_TAG }} \
+          --set image.tags.migration=${{ env.MIGRATION_IMAGE_TAG }} \
           --set replicaCount=1 \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --set postgresql.enabled=$( if [[ ${{ env.ENVIRONMENT }} == 'staging' ]]; then echo true; elif [[ ${{ env.ENVIRONMENT }} == 'test' ]]; then echo true; else echo false; fi ) \
           --namespace=${{ env.ENVIRONMENT }}
 
 # TODO: health check and rollback on failure
-      - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
+      - name: Delete old Server Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
           if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then
             /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
@@ -130,7 +140,20 @@ jobs:
             /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
           fi
         env:
-          REGEX: "${{ env.ENVIRONMENT }}-"
+          REGEX: "${{ env.ENVIRONMENT }}-server"
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
+          DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Delete old Migration Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
+        run: |
+          if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then
+            /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
+          else
+            /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.REGEX }} 50 5;
+          fi
+        env:
+          REGEX: "${{ env.ENVIRONMENT }}-migration"
           DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME }}
           DOCKERHUB_REPO: ${{ vars.DOCKERHUB_REPO }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}

@@ -21,14 +21,14 @@ spec:
     spec:
       containers:
       - name: spaces-server
-        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tags.server }}
         env: 
         - name: ENVIRONMENT
           value: production
         - name: DB_NAME
-          value: spacesdb
+          value: {{ .Values.postgresql.auth.database }}
         - name: DB_USER
-          value: spaces
+          value: {{ .Values.postgresql.auth.username }}
         - name: DB_PASSWORD
           valueFrom:
             secretKeyRef:

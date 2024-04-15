@@ -3,13 +3,15 @@ service:
 replicaCount: 2
 minReadySeconds: 5
 image:
-  repository: ""
-  tag: ""
+  repository: REPO
+  tags: 
+    server: SERVER_TAG
+    migration: MIGRATION_TAG
 maxSurge: 1
 secrets: 
   dockerHubSecret:
     name: docker-hub-secret
-    valueBase64: ""
+    valueBase64: BASE64
 postgresql:
   image:
     tag: 15.6.0-debian-12-r15
