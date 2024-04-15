@@ -9,6 +9,8 @@ metadata:
     "helm.sh/hook-weight": "5"
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
+  completions: 1
+  parallelism: 1
   template:
     metadata:
       labels:
@@ -33,5 +35,3 @@ spec:
       imagePullSecrets:
       - name: {{ .Values.secrets.dockerHubSecret.name }}
       restartPolicy: Never
-      completions: 1
-      parallelism: 1
