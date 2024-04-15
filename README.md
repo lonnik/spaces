@@ -42,6 +42,10 @@ You are welcome to go through the code as you please. I'm happy about every bit 
 
 `http://localhost:8001/redis-stack/browser`
 
+## Migrations
+
+Create a migration: `migrate create -ext sql -dir postgres/migrations -seq <migration name>`
+
 ## Deploy a new instance
 
 ### What is needed to get started
