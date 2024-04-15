@@ -20,6 +20,7 @@ on:
 jobs:
   ci:
     name: Build and Push Docker Image, Deploy to Linode K8s
+    timeout-minutes: 5
     defaults:
       run:
         working-directory: services/server
