@@ -13,14 +13,14 @@ var (
 	postgresUser     = os.Getenv("DB_USER")
 	postgresPassword = os.Getenv("DB_PASSWORD")
 	postgresDbname   = os.Getenv("DB_NAME")
+	Db               *sqlx.DB
+	connectionString = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", postgresHost, postgresUser, postgresPassword, postgresDbname)
 )
-
-var Db *sqlx.DB
 
 func Connect() {
 	var err error
 
-	Db, err = sqlx.Open("postgres", fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", postgresHost, postgresUser, postgresPassword, postgresDbname))
+	Db, err = sqlx.Open("postgres", connectionString)
 	if err != nil {
 		panic(err)
 	}
