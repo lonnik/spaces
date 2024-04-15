@@ -18,8 +18,6 @@ spec:
       - name: spaces-migration
         image: {{ printf "%s:%s" .Values.image.repository .Values.image.tags.migration }}
         env: 
-        - name: ENVIRONMENT
-          value: production
         - name: DB_NAME
           value: {{ .Values.postgresql.auth.database }}
         - name: DB_USER

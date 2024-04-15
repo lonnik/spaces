@@ -117,6 +117,10 @@ jobs:
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
+      - name: Debug
+        run: |
+          env
+
       - name: Apply Helm Chart
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
