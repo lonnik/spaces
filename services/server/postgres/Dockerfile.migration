@@ -9,5 +9,3 @@ COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 COPY ./postgres/migrations /migrations
 
 CMD migrate -path=/migrations/ -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=disable" up
-
-# create a job, configmap for database url, and a secret for the database password, adapt ci workflow (build image and run job)
