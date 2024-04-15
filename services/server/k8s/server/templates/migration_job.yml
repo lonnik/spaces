@@ -9,7 +9,7 @@ metadata:
     "helm.sh/hook-weight": "5"
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
-  backoffLimit: 4
+  backoffLimit: 4 # when installing the Helm Chart, the migration job might be created before the database is ready
   completions: 1
   parallelism: 1
   template:
