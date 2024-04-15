@@ -108,8 +108,10 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Push the Docker Image 
-        run: docker push ${{ env.SERVER_IMAGE }}
+      - name: Push the Docker Images
+        run: |
+          docker push ${{ env.SERVER_IMAGE }}
+          docker push ${{ env.MIGRATION_IMAGE }}
 
       - name: Adapt app version in Helm Chart 
         run: |
