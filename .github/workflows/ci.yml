@@ -133,6 +133,7 @@ jobs:
           --set replicaCount=1 \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --set postgresql.enabled=$( if [[ ${{ env.ENVIRONMENT }} == 'staging' ]]; then echo true; elif [[ ${{ env.ENVIRONMENT }} == 'test' ]]; then echo true; else echo false; fi ) \
+          --wait \
           --namespace=${{ env.ENVIRONMENT }}
 
 # TODO: health check and rollback on failure
