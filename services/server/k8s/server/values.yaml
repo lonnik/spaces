@@ -23,7 +23,8 @@ postgresql:
   primary:
     extendedConfiguration: |
       log_statement = 'all'
-      log_min_duration_statement = 0
+      log_min_duration_statement = '0'
+
     persistence:
       enabled: true
       size: 10Gi
