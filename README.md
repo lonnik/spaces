@@ -38,13 +38,21 @@ You are welcome to go through the code as you please. I'm happy about every bit 
 
 `ngrok http http://localhost:8080` to start a ngrok HTTP tunnel exposing the development server
 
+`kubectl port-forward -n test <database service> 5432:5432 &` 
+
 ## Useful Links
 
 `http://localhost:8001/redis-stack/browser`
 
 ## Migrations
 
-Create a migration: `migrate create -ext sql -dir postgres/migrations -seq <migration name>`
+Create a migration: `migrate create -ext sql -dir services/server/postgres/migrations -seq <migration name>`
+
+In case of dirty database version:
+
+1. Set version manually to previous version using `migrate force`
+
+2. push again
 
 ## Deploy a new instance
 
