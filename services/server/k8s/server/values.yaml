@@ -21,7 +21,7 @@ postgresql:
     database: spacesdb
   architecture: "standalone"
   primary:
-    extentedConfiguration: |
+    extendedConfiguration: |
       log_statement = 'all'
       log_min_duration_statement = 0
     persistence:
