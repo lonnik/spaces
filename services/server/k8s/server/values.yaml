@@ -17,7 +17,7 @@ postgresql:
   image:
     tag: 15.6.0-debian-12-r15
   audit:
-    clientMinMessages: info
+    clientMinMessages: debug5
   auth:
     username: spaces
     password: password
