@@ -13,17 +13,16 @@ secrets:
     name: docker-hub-secret
     valueBase64: BASE64
 postgresql:
-  logStatements: all
   image:
     tag: 15.6.0-debian-12-r15
-  audit:
-    clientMinMessages: debug5
   auth:
     username: spaces
     password: password
     database: spacesdb
   architecture: "standalone"
   primary:
+    extentedConfiguration: |
+      log_statement = 'all'
     persistence:
       enabled: true
       size: 10Gi
