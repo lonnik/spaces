@@ -141,13 +141,13 @@ jobs:
           --namespace=${{ env.ENVIRONMENT }}
 
       - name: Verify Deployment
-        if: ${{ env.ENVIRONMENT == 'prod' }}
+        if: ${{ env.ENVIRONMENT == 'test' }}
         run: |
           kubectl rollout status deployment/server --namespace=${{ env.ENVIRONMENT }}
 
       - name: Perform health check
         id: health_check
-        if: ${{ env.ENVIRONMENT == 'prod' }}
+        if: ${{ env.ENVIRONMENT == 'test' }}
         run: |
           APP_HOST=$(kubectl get svc server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' --namespace=${{ env.ENVIRONMENT }})
           curl http://$APP_HOST/${{ env.API_VERSION }}/health
