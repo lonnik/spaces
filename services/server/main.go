@@ -85,7 +85,8 @@ func main() {
 
 	router := gin.New()
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
-	api := router.Group("/api")
+	apiVersion := os.Getenv("API_VERSION")
+	api := router.Group("/" + apiVersion)
 
 	// middleware functions
 	validateThreadInSpaceMiddleware := middlewares.ValidateThreadInSpace(logger, redisRepo)

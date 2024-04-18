@@ -136,7 +136,7 @@ jobs:
           --wait \
           --namespace=${{ env.ENVIRONMENT }}
 
-# TODO: health check and rollback on failure
+# TODO: health check and rollback on failure (only on prod)
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
           /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.SERVER_IMAGE_REGEX }} 50 5;

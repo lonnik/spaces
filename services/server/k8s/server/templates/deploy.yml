@@ -36,8 +36,23 @@ spec:
               key: password
         - name: DB_HOST
           value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc
+        - name: API_VERSION
+          value: {{ .Values.apiVersion }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /{{ .Values.apiVersion }}/health
+            port: {{ .Values.service.internalPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /{{ .Values.apiVersion }}/health
+            port: {{ .Values.service.internalPort }}
+          failureThreshold: 3
+          initialDelaySeconds: 5
+          periodSeconds: 5
       imagePullSecrets:
       - name: {{ .Values.secrets.dockerHubSecret.name }}

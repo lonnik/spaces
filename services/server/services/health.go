@@ -4,7 +4,6 @@ import (
 	"context"
 	"spaces-p/common"
 	"spaces-p/errors"
-	"spaces-p/models"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -18,7 +17,7 @@ func NewHealthService(logger common.Logger, db *sqlx.DB) *HealthService {
 	return &HealthService{logger, db}
 }
 
-func (hs *HealthService) GetDbHealth(ctx context.Context, location models.Location) error {
+func (hs *HealthService) GetDbHealth(ctx context.Context) error {
 	const op errors.Op = "services.HealthService.GetDbHealth"
 
 	var result int
