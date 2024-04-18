@@ -82,6 +82,7 @@ jobs:
           echo "MIGRATION_IMAGE_TAG=$MIGRATION_IMAGE_TAG" >> $GITHUB_ENV
           echo "SERVER_IMAGE=$IMAGE_REPO:$SERVER_IMAGE_TAG" >> $GITHUB_ENV
           echo "MIGRATION_IMAGE=$IMAGE_REPO:$MIGRATION_IMAGE_TAG" >> $GITHUB_ENV
+          echo "HELM_RELEASE=server-$ENVIRONMENT" >> $GITHUB_ENV
 
       - uses: azure/k8s-set-context@v4  
         with:
@@ -123,12 +124,12 @@ jobs:
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
-# --wait flag -> wait for all resources to be ready before running the post hook
+      # --wait flag -> wait for all resources to be ready before running the post hook
       - name: Apply Helm Chart
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency build k8s/server
-          helm upgrade server-${{ env.ENVIRONMENT }} k8s/server \
+          helm upgrade ${{ env.HELM_RELEASE }} k8s/server \
           --install \
           --set image.repository=${{ env.IMAGE_REPO }} \
           --set image.tags.server=${{ env.SERVER_IMAGE_TAG }} \
@@ -141,24 +142,23 @@ jobs:
           --namespace=${{ env.ENVIRONMENT }}
 
       - name: Verify Deployment
-        if: ${{ env.ENVIRONMENT == 'test' }}
+        if: ${{ env.ENVIRONMENT == 'prod' }}
         run: |
           kubectl rollout status deployment/server --namespace=${{ env.ENVIRONMENT }}
 
       - name: Perform health check
         id: health_check
-        if: ${{ env.ENVIRONMENT == 'test' }}
+        if: ${{ env.ENVIRONMENT == 'prod' }}
         run: |
           APP_HOST=$(kubectl get svc server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' --namespace=${{ env.ENVIRONMENT }})
           curl http://$APP_HOST/${{ env.API_VERSION }}/health --fail
 
-# only run when health_check failed
       - name: Rollback if failed
         if: ${{ failure() && steps.health_check.outcome == 'failure' }}
         run: |
-          helm rollback server-${{ env.ENVIRONMENT }} --namespace=${{ env.ENVIRONMENT }}  
+          helm rollback ${{ env.HELM_RELEASE }} --namespace=${{ env.ENVIRONMENT }}  
 
-      - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
+      - name: Delete old Images on Docker Hub
         run: |
           /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.SERVER_IMAGE_REGEX }} 50 5;
           /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.MIGRATION_IMAGE_REGEX }} 50 5;
