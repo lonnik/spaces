@@ -150,7 +150,7 @@ jobs:
         if: ${{ env.ENVIRONMENT == 'test' }}
         run: |
           APP_HOST=$(kubectl get svc server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' --namespace=${{ env.ENVIRONMENT }})
-          curl http://$APP_HOST/${{ env.API_VERSION }}/health
+          curl http://$APP_HOST/${{ env.API_VERSION }}/health --fail
 
 # only run when health_check failed
       - name: Rollback if failed
