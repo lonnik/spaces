@@ -5,6 +5,7 @@ import (
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/services"
+	"spaces-p/utils"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,9 +22,7 @@ func (hs *HealthController) HealthCheck(c *gin.Context) {
 	const op errors.Op = "controllers.HealthController.HealthCheck"
 
 	if err := hs.healthService.GetDbHealth(c); err != nil {
-		hs.logger.Error(errors.E(op, err))
-
-		c.JSON(http.StatusOK, gin.H{"message": "OK", "db": "ERROR"})
+		utils.WriteError(c, errors.E(op, err), hs.logger)
 		return
 	}
 

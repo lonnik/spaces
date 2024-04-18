@@ -164,6 +164,9 @@ func main() {
 
 	// HEALTH
 	api.GET("/health", healthController.HealthCheck)
+	api.GET("/healthz", func(ctx *gin.Context) {
+		ctx.JSON(200, gin.H{"message": "OK"})
+	})
 
 	router.Run()
 }

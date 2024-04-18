@@ -43,15 +43,15 @@ spec:
         imagePullPolicy: Always
         livenessProbe:
           httpGet:
-            path: /{{ .Values.apiVersion }}/health
+            path: /{{ .Values.apiVersion }}/healthz
             port: {{ .Values.service.internalPort }}
           initialDelaySeconds: 5
           periodSeconds: 5
         readinessProbe:
           httpGet:
-            path: /{{ .Values.apiVersion }}/health
+            path: /{{ .Values.apiVersion }}/healthz
             port: {{ .Values.service.internalPort }}
-          failureThreshold: 3
+          failureThreshold: 5
           initialDelaySeconds: 5
           periodSeconds: 5
       imagePullSecrets:

@@ -20,6 +20,8 @@ on:
 jobs:
   ci:
     name: Build and Push Docker Image, Deploy to Linode K8s
+    env:
+      API_VERSION: v1
     timeout-minutes: 5
     defaults:
       run:
@@ -121,6 +123,7 @@ jobs:
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
+# --wait flag -> wait for all resources to be ready before running the post hook
       - name: Apply Helm Chart
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -130,13 +133,31 @@ jobs:
           --set image.repository=${{ env.IMAGE_REPO }} \
           --set image.tags.server=${{ env.SERVER_IMAGE_TAG }} \
           --set image.tags.migration=${{ env.MIGRATION_IMAGE_TAG }} \
-          --set replicaCount=1 \
+          --set replicaCount=5 \
+          --set apiVersion=${{ env.API_VERSION }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --set postgresql.enabled=$( if [[ ${{ env.ENVIRONMENT }} == 'staging' ]]; then echo true; elif [[ ${{ env.ENVIRONMENT }} == 'test' ]]; then echo true; else echo false; fi ) \
           --wait \
           --namespace=${{ env.ENVIRONMENT }}
 
-# TODO: health check and rollback on failure (only on prod)
+      - name: Verify Deployment
+        if: ${{ env.ENVIRONMENT == 'prod' }}
+        run: |
+          kubectl rollout status deployment/server --namespace=${{ env.ENVIRONMENT }}
+
+      - name: Perform health check
+        id: health_check
+        if: ${{ env.ENVIRONMENT == 'prod' }}
+        run: |
+          APP_HOST=$(kubectl get svc server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' --namespace=${{ env.ENVIRONMENT }})
+          curl http://$APP_HOST/${{ env.API_VERSION }}/health
+
+# only run when health_check failed
+      - name: Rollback if failed
+        if: ${{ failure() && steps.health_check.outcome == 'failure' }}
+        run: |
+          helm rollback server-${{ env.ENVIRONMENT }} --namespace=${{ env.ENVIRONMENT }}  
+
       - name: Delete old Images on Docker Hub # different env vars (REGEX, DAYS_AGO, NTH_NEWEST)
         run: |
           /bin/bash bash_scripts/delete_old_images/delete_old_images.sh ${{ env.SERVER_IMAGE_REGEX }} 50 5;
