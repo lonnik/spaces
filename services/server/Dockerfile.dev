@@ -1,17 +1,21 @@
-FROM golang:1.20.3 as dependencies
+FROM golang:1.22.1 as dependencies
 
 WORKDIR /app
 
 RUN go install github.com/cosmtrek/air@latest
+
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
 
 COPY go.mod ./
 COPY go.sum* ./
 
 RUN go mod download 
 
-FROM dependencies as builder  
+FROM dependencies as builder
 
 COPY . .
+
+COPY --from=dependencies /go/bin/migrate /usr/local/bin/migrate
 
 RUN make build
 
