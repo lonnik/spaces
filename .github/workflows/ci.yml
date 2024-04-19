@@ -5,14 +5,6 @@ on:
     branches:
       - main
       - prod
-      - feat-postgres-container-staging
-    paths: 
-      - 'services/**'
-      - '.github/**'
-  pull_request:
-    branches:
-      - main
-      - prod
     paths: 
       - 'services/**'
       - '.github/**'
@@ -45,6 +37,10 @@ jobs:
             exit 1;
           fi
           if [[ -z "${{ secrets.LINODE_KUBECONFIG }}" ]]; then
+            echo "LINODE_KUBECONFIG secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ secrets.POSTGRES_HOST }}" ]]; then
             echo "LINODE_KUBECONFIG secret is missing";
             exit 1;
           fi
@@ -96,7 +92,7 @@ jobs:
         with:
           version: "${{ vars.HELM_VERSION }}"
 
-      - name: Build the Server Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
+      - name: Build Server Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: |
           docker build \
           -f Dockerfile.prod \
@@ -104,7 +100,7 @@ jobs:
           --build-arg FIREBASE_SERVICE_ACCOUNT_KEY_BASE64=$( if [[ ${{ env.ENVIRONMENT }} == 'prod' ]]; then echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; else echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}"; fi ) \
           .
 
-      - name: Build the Migration Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
+      - name: Build Migration Docker Image # different FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret for prod and staging
         run: |
           docker build \
           -f postgres/Dockerfile.migration \
@@ -117,7 +113,7 @@ jobs:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       
-      - name: Push the Docker Images
+      - name: Push Docker Images
         run: |
           docker push ${{ env.SERVER_IMAGE }}
           docker push ${{ env.MIGRATION_IMAGE }}
@@ -138,12 +134,13 @@ jobs:
           --set image.tags.migration=${{ env.MIGRATION_IMAGE_TAG }} \
           --set postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
           --set postgresql.enabled=false \
+          --set dbHost=${{ secrets.POSTGRES_HOST }} \
           --set replicaCount=1 \
           --set apiVersion=${{ env.API_VERSION }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --namespace=prod
 
-      - name: Apply Helm Chart
+      - name: Apply Helm Chart in non-production environments
         if: ${{ env.ENVIRONMENT != 'prod' }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami

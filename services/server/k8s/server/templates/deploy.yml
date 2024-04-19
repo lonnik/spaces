@@ -35,7 +35,7 @@ spec:
               name: {{ .Release.Name }}-postgresql
               key: password
         - name: DB_HOST
-          value: {{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc
+          value: {{ include "server.dbHost" . }}
         - name: API_VERSION
           value: {{ .Values.apiVersion }}
         ports:
