@@ -140,6 +140,7 @@ jobs:
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --namespace=prod
 
+# --wait flag -> wait for all resources to be ready before running the post hook
       - name: Apply Helm Chart in non-production environments
         if: ${{ env.ENVIRONMENT != 'prod' }}
         run: |
@@ -154,6 +155,7 @@ jobs:
           --set apiVersion=${{ env.API_VERSION }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
           --set postgresql.enabled=true \
+          --wait \
           --namespace=${{ env.ENVIRONMENT }}
 
       - name: Verify Deployment
