@@ -138,6 +138,7 @@ jobs:
           --set replicaCount=1 \
           --set apiVersion=${{ env.API_VERSION }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
+          --wait \
           --namespace=prod
 
       # --wait flag -> wait for all resources to be ready before running the post hook
