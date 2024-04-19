@@ -128,7 +128,6 @@ jobs:
       - name: Apply Helm Chart in Production
         if: ${{ env.ENVIRONMENT == 'prod' }}
         run: |
-          kubectl create secret generic ${{ env.HELM_RELEASE }}-postgresql --from-literal=password=${{ secrets.POSTGRES_PASSWORD }} --namespace=prod
           helm upgrade ${{ env.HELM_RELEASE }} k8s/server \
           --install \
           --set image.repository=${{ env.IMAGE_REPO }} \
@@ -136,6 +135,7 @@ jobs:
           --set image.tags.migration=${{ env.MIGRATION_IMAGE_TAG }} \
           --set postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
           --set postgresql.enabled=false \
+          --set dbPasswordSecret.enabled=true \
           --set dbHost=${{ secrets.POSTGRES_HOST }} \
           --set replicaCount=1 \
           --set apiVersion=${{ env.API_VERSION }} \
