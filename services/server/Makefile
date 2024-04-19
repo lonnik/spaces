@@ -10,4 +10,7 @@ build:
 develop:
 	air
 
-.PHONY: seed clean build develop
+migrate:
+	migrate -path=./postgres/migrations/ -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=disable" up
+
+.PHONY: seed clean build develop migrate

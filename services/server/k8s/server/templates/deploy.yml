@@ -21,12 +21,38 @@ spec:
     spec:
       containers:
       - name: spaces-server
-        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tag }}
+        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tags.server }}
         env: 
         - name: ENVIRONMENT
           value: production
+        - name: DB_NAME
+          value: {{ .Values.postgresql.auth.database }}
+        - name: DB_USER
+          value: {{ .Values.postgresql.auth.username }}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql
+              key: password
+        - name: DB_HOST
+          value: {{ include "server.dbHost" . }}
+        - name: API_VERSION
+          value: {{ .Values.apiVersion }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         imagePullPolicy: Always
+        livenessProbe:
+          httpGet:
+            path: /{{ .Values.apiVersion }}/healthz
+            port: {{ .Values.service.internalPort }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /{{ .Values.apiVersion }}/healthz
+            port: {{ .Values.service.internalPort }}
+          failureThreshold: 5
+          initialDelaySeconds: 5
+          periodSeconds: 5
       imagePullSecrets:
       - name: {{ .Values.secrets.dockerHubSecret.name }}

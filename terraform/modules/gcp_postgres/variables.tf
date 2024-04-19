@@ -8,27 +8,23 @@ variable "credentials_file" {
   description = "description"
 }
 
-variable "linode_token" {
-  type = string
-}
-
-variable "kubeconfig_path" {
-  type = string
-}
-
 variable "db_user_name" {
-  type = string
+  type        = string
+  description = "description"
 }
 
 variable "db_user_password" {
-  type      = string
-  sensitive = true
+  type        = string
+  description = "description"
+  sensitive   = true
 }
 
 variable "db_name" {
-  type = string
+  type        = string
+  description = "description"
 }
 
 variable "authorized_networks" {
-  type = list(map(string))
+  type        = list(map(string))
+  description = "description"
 }

@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "server.name" . }}-migration-{{ .Release.Revision }}
+  labels: 
+    {{- include "server.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  ttlSecondsAfterFinished: 300
+  backoffLimit: 4 # when installing the Helm Chart, the migration job might be created before the database is ready
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        {{- include "server.labels" . | nindent 8 }}
+    spec:
+      containers: 
+      - name: spaces-migration
+        image: {{ printf "%s:%s" .Values.image.repository .Values.image.tags.migration }}
+        env: 
+        - name: DB_NAME
+          value: {{ .Values.postgresql.auth.database }}
+        - name: DB_USER
+          value: {{ .Values.postgresql.auth.username }}
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-postgresql
+              key: password
+        - name: DB_HOST
+          value: {{ include "server.dbHost" . }}
+        imagePullPolicy: Always
+      imagePullSecrets:
+      - name: {{ .Values.secrets.dockerHubSecret.name }}
+      restartPolicy: Never

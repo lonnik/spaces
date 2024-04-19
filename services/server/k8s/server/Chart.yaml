@@ -2,6 +2,12 @@ apiVersion: v2
 name: server
 description: The Spaces Server application chart
 
+dependencies:
+  - name: postgresql
+    version: 15.2.5
+    repository: https://charts.bitnami.com/bitnami
+    condition: postgresql.enabled
+
 # A chart can be either an 'application' or a 'library' chart.
 #
 # Application charts are a collection of templates that can be packaged into versioned archives
