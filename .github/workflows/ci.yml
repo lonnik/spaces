@@ -48,6 +48,10 @@ jobs:
             echo "LINODE_KUBECONFIG secret is missing";
             exit 1;
           fi
+          if [[ -z "${{ secrets.POSTGRES_PASSWORD }}" ]]; then
+            echo "LINODE_KUBECONFIG secret is missing";
+            exit 1;
+          fi
 
           if [[ -z "${{ vars.DOCKERHUB_REPO }}" ]]; then
             echo "DOCKERHUB_REPO variable is missing";
@@ -124,8 +128,23 @@ jobs:
           -e "s/APP_VERSION/${{ github.sha }}/g" \
           k8s/server/Chart.yaml
 
-      # --wait flag -> wait for all resources to be ready before running the post hook
+      - name: Apply Helm Chart in Production
+        if: ${{ env.ENVIRONMENT == 'prod' }}
+        run: |
+          helm upgrade ${{ env.HELM_RELEASE }} k8s/server \
+          --install \
+          --set image.repository=${{ env.IMAGE_REPO }} \
+          --set image.tags.server=${{ env.SERVER_IMAGE_TAG }} \
+          --set image.tags.migration=${{ env.MIGRATION_IMAGE_TAG }} \
+          --set postgresql.auth.password=${{ secrets.POSTGRES_PASSWORD }} \
+          --set postgresql.enabled=false \
+          --set replicaCount=1 \
+          --set apiVersion=${{ env.API_VERSION }} \
+          --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
+          --namespace=prod
+
       - name: Apply Helm Chart
+        if: ${{ env.ENVIRONMENT != 'prod' }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
           helm dependency build k8s/server
@@ -134,10 +153,10 @@ jobs:
           --set image.repository=${{ env.IMAGE_REPO }} \
           --set image.tags.server=${{ env.SERVER_IMAGE_TAG }} \
           --set image.tags.migration=${{ env.MIGRATION_IMAGE_TAG }} \
-          --set replicaCount=5 \
+          --set replicaCount=1 \
           --set apiVersion=${{ env.API_VERSION }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
-          --set postgresql.enabled=$( if [[ ${{ env.ENVIRONMENT }} == 'staging' ]]; then echo true; elif [[ ${{ env.ENVIRONMENT }} == 'test' ]]; then echo true; else echo false; fi ) \
+          --set postgresql.enabled=true \
           --wait \
           --namespace=${{ env.ENVIRONMENT }}
 
