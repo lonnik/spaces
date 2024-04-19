@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - prod
+      - feat-postgres-container-staging
     paths: 
       - 'services/**'
       - '.github/**'
