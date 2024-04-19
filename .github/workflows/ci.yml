@@ -127,6 +127,7 @@ jobs:
       - name: Apply Helm Chart in Production
         if: ${{ env.ENVIRONMENT == 'prod' }}
         run: |
+          kubectl create secret generic ${{ env.HELM_RELEASE }}-postgresql --from-literal=password=${{ secrets.POSTGRES_PASSWORD }} --namespace=prod
           helm upgrade ${{ env.HELM_RELEASE }} k8s/server \
           --install \
           --set image.repository=${{ env.IMAGE_REPO }} \
@@ -138,7 +139,6 @@ jobs:
           --set replicaCount=1 \
           --set apiVersion=${{ env.API_VERSION }} \
           --set secrets.dockerHubSecret.valueBase64="$(cat ~/.docker/config.json | base64 -w 0)" \
-          --wait \
           --namespace=prod
 
       # --wait flag -> wait for all resources to be ready before running the post hook
