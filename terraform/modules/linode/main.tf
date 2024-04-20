@@ -46,3 +46,9 @@ resource "kubernetes_namespace" "staging" {
     name = "staging"
   }
 }
+
+resource "kubernetes_namespace" "dev" {
+  metadata {
+    name = "dev"
+  }
+}

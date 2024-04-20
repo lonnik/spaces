@@ -25,6 +25,12 @@ module "gcp_postgres" {
   authorized_networks = var.authorized_networks
 }
 
+module "nginx_ingress" {
+  source = "./modules/nginx_ingress"
+
+  kubeconfig_path = var.kubeconfig_path
+}
+
 output "db_connection_name" {
   value = module.gcp_postgres.instance_connection_name
 }

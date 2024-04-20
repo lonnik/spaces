@@ -15,6 +15,10 @@ secrets:
 apiVersion: v1
 dbPasswordSecret:
   enabled: false
+hosts:
+  prod: "*.niko-heidner.com"
+  staging: staging.niko-heidner.com
+  dev: dev.niko-heidner.com
 postgresql:
   image:
     tag: 15.6.0-debian-12-r15

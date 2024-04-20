@@ -10,6 +10,16 @@
 {{- end }}
 {{- end }}
 
+{{- define "server.host" -}}
+{{- if eq .Release.Namespace "prod" }}
+{{- .Values.hosts.prod }}
+{{- else if eq .Release.Namespace "staging" }}
+{{- .Values.hosts.staging }}
+{{- else }}
+{{- .Values.hosts.dev }}
+{{- end }}
+{{- end }}
+
 {{- define "server.chart" -}}
 {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
