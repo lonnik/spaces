@@ -16,7 +16,7 @@ apiVersion: v1
 dbPasswordSecret:
   enabled: false
 hosts:
-  prod: niko-heidner.com
+  prod: "*.niko-heidner.com"
   staging: staging.niko-heidner.com
   dev: dev.niko-heidner.com
 postgresql:
