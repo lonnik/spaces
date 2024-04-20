@@ -7,9 +7,6 @@ dependencies:
     version: 15.2.5
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
-  - name: ingress-nginx
-    version: 4.10.0
-    repository: https://kubernetes.github.io/ingress-nginx
 
 # A chart can be either an 'application' or a 'library' chart.
 #
