@@ -6,7 +6,7 @@ metadata:
     {{- include "server.labels" . | nindent 4 }}
 spec:
   rules:
-  - host: {{- include "server.host" . }}
+  - host: {{ include "server.host" . }}
     http:
       paths:
       - path: /
