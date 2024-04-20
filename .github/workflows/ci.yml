@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - prod
+      - feat-*
     paths: 
       - 'services/**'
       - '.github/**'
@@ -70,7 +71,7 @@ jobs:
           elif [[ ${{ github.ref_name }} == 'main' ]]; then
             ENVIRONMENT='staging'
           else 
-            ENVIRONMENT='test'
+            ENVIRONMENT='dev'
           fi
 
           IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}
@@ -147,6 +148,7 @@ jobs:
         if: ${{ env.ENVIRONMENT != 'prod' }}
         run: |
           helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
           helm dependency build k8s/server
           helm upgrade ${{ env.HELM_RELEASE }} k8s/server \
           --install \
