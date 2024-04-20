@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - prod
+      - feat-add-ingress
     paths: 
       - 'services/**'
       - '.github/**'
