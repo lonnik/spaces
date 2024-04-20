@@ -70,7 +70,7 @@ jobs:
           elif [[ ${{ github.ref_name }} == 'main' ]]; then
             ENVIRONMENT='staging'
           else 
-            ENVIRONMENT='test'
+            ENVIRONMENT='dev'
           fi
 
           IMAGE_REPO=${{ vars.DOCKERHUB_USERNAME }}/${{ vars.DOCKERHUB_REPO }}
