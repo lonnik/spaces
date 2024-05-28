@@ -1,43 +1,52 @@
 package main
 
 import (
+	"context"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
 	"os"
+	"os/signal"
 	"runtime"
-	"spaces-p/controllers"
+	"spaces-p/errors"
 	"spaces-p/firebase"
-	"spaces-p/middlewares"
 	"spaces-p/postgres"
 	"spaces-p/redis"
-	googlegeocode "spaces-p/repositories/google_geocode"
-	localmemory "spaces-p/repositories/local_memory"
-	"spaces-p/repositories/redis_repo"
-	"spaces-p/services"
 	"spaces-p/zerologger"
 	"time"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/rs/zerolog"
 )
 
-func main() {
+type config struct {
+	Port string
+	Host string
+}
+
+func run(ctx context.Context, stdout io.Writer, logfileName string) error {
+	var op errors.Op = "main.run"
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer cancel()
+
 	if os.Getenv("ENVIRONMENT") == "development" {
 		err := godotenv.Load(".env")
 		if err != nil {
-			panic("Error loading .env file")
+			return errors.E(op, err)
 		}
 	}
 
 	// Zerolog configuration
-	logFile, err := os.Create("logfile.log")
+	logFile, err := os.Create(logfileName)
 	if err != nil {
-		panic("Error creating logfile.log: >> " + err.Error())
+		return errors.E(op, err)
 	}
 	defer logFile.Close()
 
 	consoleWriter := zerolog.ConsoleWriter{
-		Out:        os.Stdout,
+		Out:        stdout,
 		TimeFormat: time.RFC3339,
 	}
 	multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
@@ -46,11 +55,11 @@ func main() {
 
 	// initialize firebase auth client
 	if err := firebase.InitAuthClient(); err != nil {
-		panic(err)
+		return errors.E(op, err)
 	}
 
 	cors := cors.New(cors.Config{
-		// todo AllowOrigins based on production or development environment
+		// TODO: AllowOrigins based on production or development environment
 		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
 		AllowCredentials: true,
@@ -58,115 +67,49 @@ func main() {
 	})
 
 	// initialize redis client
-	redis.ConnectRedis()
+	redisClient := redis.GetRedisClient()
 
 	// initialize postgres client
-	postgres.Connect()
+	postgresClient, err := postgres.GetPostgresClient()
+	if err != nil {
+		return errors.E(op, err)
+	}
 
-	// set repos
-	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
-	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(os.Getenv("GOOGLE_GEOCODE_API_KEY"))
-	localMemoryRepo := localmemory.NewLocalMemoryRepo()
+	// TODO: find way how handle config/env vars suitable with running tests
+	config := config{
+		Port: ":8080",
+		Host: "localhost",
+	}
 
-	// set up services
-	userService := services.NewUserService(logger, redisRepo)
-	spaceService := services.NewSpaceService(logger, redisRepo, localMemoryRepo)
-	spaceNotificationService := services.NewSpaceNotificationsService(logger, redisRepo, localMemoryRepo)
-	threadService := services.NewThreadService(logger, redisRepo, localMemoryRepo)
-	messageService := services.NewMessageService(logger, redisRepo, localMemoryRepo)
-	addressService := services.NewAddressService(logger, redisRepo, googleGeocodeRepo)
-	healthService := services.NewHealthService(logger, postgres.Db)
+	srv := NewServer(logger, cors, redisClient, postgresClient)
 
-	// set up controllers
-	userController := controllers.NewUserController(logger, userService)
-	spaceController := controllers.NewSpaceController(logger, spaceService, spaceNotificationService, threadService, messageService)
-	addressController := controllers.NewAddressController(logger, addressService)
-	healthController := controllers.NewHealthController(logger, healthService)
+	httpServer := &http.Server{
+		Addr:    net.JoinHostPort(config.Host, config.Port),
+		Handler: srv,
+	}
 
-	router := gin.New()
-	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
-	apiVersion := os.Getenv("API_VERSION")
-	api := router.Group("/" + apiVersion)
+	go func() {
+		logger.Info("listening on %s\n", httpServer.Addr)
+		if err = httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
+		}
+	}()
 
-	// middleware functions
-	validateThreadInSpaceMiddleware := middlewares.ValidateThreadInSpace(logger, redisRepo)
-	validateMessageInThreadMiddleware := middlewares.ValidateMessageInThread(logger, redisRepo)
-	isSpaceSubscriberMiddleware := middlewares.IsSpaceSubscriber(logger, redisRepo)
+	<-ctx.Done()
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		return errors.E(op, err)
+	}
 
-	// USERS
-	api.POST("/users", userController.CreateUserFromIdToken)
-	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), userController.GetUser)
+	return nil
+}
 
-	// AUTHENTICATED USER
-	api.GET("/user",
-		middlewares.EnsureAuthenticated(logger, redisRepo, false, false),
-		userController.GetAuthedUser,
-	)
-	api.PUT("/user", middlewares.EnsureAuthenticated(logger, redisRepo, true, false)) // TODO
-	api.DELETE("/user")                                                               // TODO
+func main() {
+	var ctx = context.Background()
 
-	// SPACES
-	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.GetSpaces)
-	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.CreateSpace)
-	api.GET("/spaces/:spaceid", spaceController.GetSpace)
-	api.GET("/spaces/:spaceid/updates/ws",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, true),
-		isSpaceSubscriberMiddleware,
-		spaceController.SpaceConnect,
-	)
-	api.GET("/spaces/:spaceid/subscribers",
-		spaceController.GetSpaceSubscribers,
-	)
-	api.POST("/spaces/:spaceid/subscribers",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		spaceController.AddSpaceSubscriber,
-	)
-	api.GET("/spaces/:spaceid/toplevel-threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		spaceController.GetTopLevelThreads,
-	)
-	api.POST("/spaces/:spaceid/toplevel-threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		isSpaceSubscriberMiddleware,
-		spaceController.CreateTopLevelThread,
-	)
-	api.GET("/spaces/:spaceid/threads/:threadid",
-		validateThreadInSpaceMiddleware,
-		spaceController.GetThreadWithMessages,
-	)
-	api.POST("/spaces/:spaceid/threads/:threadid/messages",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		validateThreadInSpaceMiddleware,
-		isSpaceSubscriberMiddleware,
-		spaceController.CreateMessage,
-	)
-	api.GET("/spaces/:spaceid/threads/:threadid/messages/:messageid",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		validateThreadInSpaceMiddleware,
-		validateMessageInThreadMiddleware,
-		spaceController.GetMessage,
-	)
-	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		validateThreadInSpaceMiddleware,
-		validateMessageInThreadMiddleware,
-		spaceController.CreateThread,
-	)
-	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/likes",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
-		validateThreadInSpaceMiddleware,
-		validateMessageInThreadMiddleware,
-		spaceController.LikeMessage,
-	)
-
-	// ADDRESSES
-	api.GET("/address", addressController.GetAddress)
-
-	// HEALTH
-	api.GET("/health", healthController.HealthCheck)
-	api.GET("/healthz", func(ctx *gin.Context) {
-		ctx.JSON(200, gin.H{"message": "OK"})
-	})
-
-	router.Run()
+	if err := run(ctx, os.Stdout, "logfile.log"); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
 }

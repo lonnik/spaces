@@ -2,6 +2,7 @@ package redis
 
 import (
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -14,16 +15,23 @@ const (
 	redisPort     = "6379"
 )
 
-var RedisClient *redis.Client
+var (
+	redisClient *redis.Client
+	once        sync.Once
+)
 
-func ConnectRedis() {
-	fmt.Println("Connecting to Redis ...")
+func GetRedisClient() *redis.Client {
+	once.Do(func() {
+		fmt.Println("Connecting to Redis ...")
 
-	RedisClient = redis.NewClient(&redis.Options{
-		Addr:         redisHost + ":" + redisPort,
-		Password:     redisPassword,
-		DB:           redisDbname,
-		ReadTimeout:  20 * time.Second,
-		WriteTimeout: 20 * time.Second,
+		redisClient = redis.NewClient(&redis.Options{
+			Addr:         redisHost + ":" + redisPort,
+			Password:     redisPassword,
+			DB:           redisDbname,
+			ReadTimeout:  20 * time.Second,
+			WriteTimeout: 20 * time.Second,
+		})
 	})
+
+	return redisClient
 }

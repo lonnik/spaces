@@ -11,8 +11,10 @@ import (
 )
 
 func main() {
-	redis.ConnectRedis()
-	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
+	redisClient := redis.GetRedisClient()
+	redisRepo := redis_repo.NewRedisRepository(redisClient)
+
+	// TODO: delete all users
 
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
