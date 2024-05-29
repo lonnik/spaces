@@ -11,7 +11,8 @@ import (
 )
 
 func main() {
-	redisClient := redis.GetRedisClient()
+	redisPort := os.Getenv("REDIS_PORT")
+	redisClient := redis.GetRedisClient(redisPort)
 	redisRepo := redis_repo.NewRedisRepository(redisClient)
 
 	// TODO: delete all users
@@ -19,7 +20,9 @@ func main() {
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
 
-	if err := redisRepo.DeleteAllKeys(); err != nil {
+	isDevelopment := os.Getenv("ENVIRONMENT") == "development"
+
+	if err := redisRepo.DeleteAllKeys(isDevelopment); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}

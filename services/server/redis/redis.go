@@ -12,7 +12,6 @@ const (
 	redisHost     = "redis"
 	redisPassword = ""
 	redisDbname   = 0
-	redisPort     = "6379"
 )
 
 var (
@@ -20,7 +19,7 @@ var (
 	once        sync.Once
 )
 
-func GetRedisClient() *redis.Client {
+func GetRedisClient(redisPort string) *redis.Client {
 	once.Do(func() {
 		fmt.Println("Connecting to Redis ...")
 

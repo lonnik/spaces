@@ -2,7 +2,6 @@ package redis_repo
 
 import (
 	"context"
-	"os"
 	"spaces-p/common"
 	"spaces-p/errors"
 
@@ -19,10 +18,10 @@ func NewRedisRepository(redisClient *redis.Client) *RedisRepository {
 	return &RedisRepository{redisClient}
 }
 
-func (repo *RedisRepository) DeleteAllKeys() error {
+func (repo *RedisRepository) DeleteAllKeys(isDevelopment bool) error {
 	const op errors.Op = "redis_repo.RedisRepository.DeleteAllKeys"
 
-	if os.Getenv("ENVIRONMENT") != "development" {
+	if !isDevelopment {
 		return errors.E(op, common.ErrOnlyAllowedInDevEnv)
 	}
 

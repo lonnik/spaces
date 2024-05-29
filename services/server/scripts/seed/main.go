@@ -24,7 +24,8 @@ import (
 func main() {
 	var ctx = context.Background()
 
-	redisClient := redis.GetRedisClient()
+	redisPort := os.Getenv("REDIS_PORT")
+	redisClient := redis.GetRedisClient(redisPort)
 	redisRepo := redis_repo.NewRedisRepository(redisClient)
 	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 

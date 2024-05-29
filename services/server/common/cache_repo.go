@@ -8,7 +8,7 @@ import (
 )
 
 type CacheRepository interface {
-	DeleteAllKeys() error
+	DeleteAllKeys(isDevelopment bool) error
 	UserCacheRepository
 	SpaceCacheRepository
 	ThreadCacheRepository

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"os"
 	"spaces-p/common"
 	"spaces-p/controllers"
 	"spaces-p/middlewares"
@@ -22,12 +21,13 @@ func addRoutes(
 	logger common.Logger,
 	redisClient *redis.Client,
 	postgresClient *sqlx.DB,
+	googleGeocodeApiKey string,
 ) {
 	api := router.Group("/" + apiVersion)
 
 	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redisClient)
-	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(os.Getenv("GOOGLE_GEOCODE_API_KEY"))
+	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(googleGeocodeApiKey)
 	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 
 	// set up services

@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"fmt"
-	"os"
 	"sync"
 
 	"github.com/jmoiron/sqlx"
@@ -10,18 +9,15 @@ import (
 )
 
 var (
-	postgresHost     = os.Getenv("DB_HOST")
-	postgresUser     = os.Getenv("DB_USER")
-	postgresPassword = os.Getenv("DB_PASSWORD")
-	postgresDbname   = os.Getenv("DB_NAME")
-	connectionString = fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", postgresHost, postgresUser, postgresPassword, postgresDbname)
-	db               *sqlx.DB
-	mu               sync.Mutex
+	db   *sqlx.DB
+	rwmu sync.RWMutex
 )
 
-func GetPostgresClient() (*sqlx.DB, error) {
-	mu.Lock()
-	defer mu.Unlock()
+func GetPostgresClient(postgresHost, postgresUser, postgresPassword, postgresDbname string) (*sqlx.DB, error) {
+	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", postgresHost, postgresUser, postgresPassword, postgresDbname)
+
+	rwmu.Lock()
+	defer rwmu.Unlock()
 
 	if db != nil {
 		return db, nil
