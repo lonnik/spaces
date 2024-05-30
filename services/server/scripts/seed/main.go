@@ -6,6 +6,7 @@ import (
 	"io"
 	"math/rand"
 	"os"
+	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/firebase"
 	"spaces-p/models"
@@ -16,7 +17,6 @@ import (
 	"spaces-p/zerologger"
 	"time"
 
-	"firebase.google.com/go/v4/auth"
 	"github.com/go-faker/faker/v4"
 	"github.com/rs/zerolog"
 )
@@ -32,7 +32,8 @@ func main() {
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
 
-	if err := firebase.InitAuthClient(); err != nil {
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx)
+	if err != nil {
 		logger.Error(err)
 		panic(err)
 	}
@@ -46,7 +47,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := seedUsers(ctx, userService, newFakeUsers); err != nil {
+	if err := seedUsers(ctx, firebaseAuthClient, userService, newFakeUsers); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
@@ -57,7 +58,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := seedUsers(ctx, userService, newUsers); err != nil {
+	if err := seedUsers(ctx, firebaseAuthClient, userService, newUsers); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
@@ -117,18 +118,16 @@ func createFakeUsers(ctx context.Context, number int) ([]models.NewFakeUser, err
 	return fakeUsers, nil
 }
 
-func seedUsers(ctx context.Context, userService *services.UserService, newFakeUsers []models.NewFakeUser) error {
+func seedUsers(ctx context.Context, authClient common.AuthClient, userService *services.UserService, newFakeUsers []models.NewFakeUser) error {
 	const op errors.Op = "main.seedUsers"
 
 	for i := range newFakeUsers {
-		fireBaseUserparams := (&auth.UserToCreate{}).Email(newFakeUsers[i].Email).Password("password1?").EmailVerified(true)
-
-		u, err := firebase.AuthClient.CreateUser(ctx, fireBaseUserparams)
+		userUid, err := authClient.CreateUser(ctx, newFakeUsers[i].Email, "password1?", true)
 		if err != nil {
 			return errors.E(op, err)
 		}
 
-		newFakeUsers[i].ID = models.UserUid(u.UID)
+		newFakeUsers[i].ID = userUid
 		if err := userService.CreateUser(ctx, newFakeUsers[i].NewUser); err != nil {
 			return errors.E(op, err)
 		}

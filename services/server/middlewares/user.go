@@ -1,11 +1,10 @@
 package middlewares
 
 import (
+	"fmt"
 	"net/http"
 	"spaces-p/common"
 	"spaces-p/errors"
-	"spaces-p/firebase"
-	"spaces-p/models"
 	"spaces-p/utils"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +12,7 @@ import (
 
 func EnsureAuthenticated(
 	logger common.Logger,
+	authClient common.AuthClient,
 	cacheRepo common.CacheRepository,
 	emailIsVerified, isSignedUp bool,
 ) gin.HandlerFunc {
@@ -27,29 +27,19 @@ func EnsureAuthenticated(
 			return
 		}
 
-		token, err := firebase.AuthClient.VerifyIDToken(ctx, bearerToken)
-		if err != nil {
+		userTokenData, err := authClient.VerifyToken(ctx, bearerToken)
+		switch {
+		case err != nil:
+			abortAndWriteError(c, errors.E(op, err, http.StatusUnauthorized), logger)
+			return
+		case !userTokenData.EmailIsVerified:
+			err := fmt.Errorf("email is not verified")
 			abortAndWriteError(c, errors.E(op, err, http.StatusUnauthorized), logger)
 			return
 		}
 
-		// verify that user's email is verified
-		if emailIsVerified {
-			isVerified, ok := token.Claims["email_verified"].(bool)
-			switch {
-			case !ok:
-				errNoVerifiedClaim := errors.New("there is no is_verified claim with bool value")
-				abortAndWriteError(c, errors.E(op, errNoVerifiedClaim, http.StatusBadRequest), logger)
-				return
-			case !isVerified:
-				errNotVerified := errors.New("email is not verified")
-				abortAndWriteError(c, errors.E(op, errNotVerified, http.StatusUnauthorized), logger)
-				return
-			}
-		}
-
 		// verify that user exists
-		user, err := cacheRepo.GetUserById(ctx, models.UserUid(token.UID))
+		user, err := cacheRepo.GetUserById(ctx, userTokenData.ID)
 		switch {
 		case errors.Is(err, common.ErrNotFound):
 			abortAndWriteError(c, errors.E(op, err, http.StatusUnauthorized), logger)

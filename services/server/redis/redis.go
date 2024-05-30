@@ -19,6 +19,7 @@ var (
 	once        sync.Once
 )
 
+// TODO: is this logical passing in arguments with the singleton pattern?
 func GetRedisClient(redisPort string) *redis.Client {
 	once.Do(func() {
 		fmt.Println("Connecting to Redis ...")

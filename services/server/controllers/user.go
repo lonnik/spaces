@@ -13,10 +13,11 @@ import (
 type UserController struct {
 	userService *services.UserService
 	logger      common.Logger
+	authClient  common.AuthClient
 }
 
-func NewUserController(logger common.Logger, userService *services.UserService) *UserController {
-	return &UserController{userService, logger}
+func NewUserController(logger common.Logger, userService *services.UserService, authClient common.AuthClient) *UserController {
+	return &UserController{userService, logger, authClient}
 }
 
 func (uc *UserController) CreateUserFromIdToken(c *gin.Context) {
@@ -31,7 +32,7 @@ func (uc *UserController) CreateUserFromIdToken(c *gin.Context) {
 		return
 	}
 
-	user, err := uc.userService.CreateUserFromIdToken(ctx, body.IdToken)
+	user, err := uc.userService.CreateUserFromIdToken(ctx, uc.authClient, body.IdToken)
 	if err != nil {
 		utils.WriteError(c, errors.E(op, err), uc.logger)
 		return

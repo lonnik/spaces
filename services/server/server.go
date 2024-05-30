@@ -18,12 +18,13 @@ func NewServer(
 	redisClient *redis.Client,
 	postgresClient *sqlx.DB,
 	googleGeocodeApiKey string,
+	authClient common.AuthClient,
 ) http.Handler {
 	var router = gin.New()
 
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)
 
-	addRoutes(apiVersion, router, logger, redisClient, postgresClient, googleGeocodeApiKey)
+	addRoutes(apiVersion, router, logger, redisClient, postgresClient, googleGeocodeApiKey, authClient)
 
 	return router.Handler()
 }

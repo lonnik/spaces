@@ -22,6 +22,7 @@ func addRoutes(
 	redisClient *redis.Client,
 	postgresClient *sqlx.DB,
 	googleGeocodeApiKey string,
+	authClient common.AuthClient,
 ) {
 	api := router.Group("/" + apiVersion)
 
@@ -40,7 +41,7 @@ func addRoutes(
 	healthService := services.NewHealthService(logger, postgresClient)
 
 	// set up controllers
-	userController := controllers.NewUserController(logger, userService)
+	userController := controllers.NewUserController(logger, userService, authClient)
 	spaceController := controllers.NewSpaceController(logger, spaceService, spaceNotificationService, threadService, messageService)
 	addressController := controllers.NewAddressController(logger, addressService)
 	healthController := controllers.NewHealthController(logger, healthService)
@@ -52,22 +53,22 @@ func addRoutes(
 
 	// USERS
 	api.POST("/users", userController.CreateUserFromIdToken)
-	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), userController.GetUser)
+	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), userController.GetUser)
 
 	// AUTHENTICATED USER
 	api.GET("/user",
-		middlewares.EnsureAuthenticated(logger, redisRepo, false, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, false, false),
 		userController.GetAuthedUser,
 	)
-	api.PUT("/user", middlewares.EnsureAuthenticated(logger, redisRepo, true, false)) // TODO
-	api.DELETE("/user")                                                               // TODO
+	api.PUT("/user", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false)) // TODO
+	api.DELETE("/user")                                                                           // TODO
 
 	// SPACES
-	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.GetSpaces)
-	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, redisRepo, true, false), spaceController.CreateSpace)
+	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.GetSpaces)
+	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.CreateSpace)
 	api.GET("/spaces/:spaceid", spaceController.GetSpace)
 	api.GET("/spaces/:spaceid/updates/ws",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, true),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, true),
 		isSpaceSubscriberMiddleware,
 		spaceController.SpaceConnect,
 	)
@@ -75,15 +76,15 @@ func addRoutes(
 		spaceController.GetSpaceSubscribers,
 	)
 	api.POST("/spaces/:spaceid/subscribers",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		spaceController.AddSpaceSubscriber,
 	)
 	api.GET("/spaces/:spaceid/toplevel-threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		spaceController.GetTopLevelThreads,
 	)
 	api.POST("/spaces/:spaceid/toplevel-threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		isSpaceSubscriberMiddleware,
 		spaceController.CreateTopLevelThread,
 	)
@@ -92,25 +93,25 @@ func addRoutes(
 		spaceController.GetThreadWithMessages,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		validateThreadInSpaceMiddleware,
 		isSpaceSubscriberMiddleware,
 		spaceController.CreateMessage,
 	)
 	api.GET("/spaces/:spaceid/threads/:threadid/messages/:messageid",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		validateThreadInSpaceMiddleware,
 		validateMessageInThreadMiddleware,
 		spaceController.GetMessage,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/threads",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		validateThreadInSpaceMiddleware,
 		validateMessageInThreadMiddleware,
 		spaceController.CreateThread,
 	)
 	api.POST("/spaces/:spaceid/threads/:threadid/messages/:messageid/likes",
-		middlewares.EnsureAuthenticated(logger, redisRepo, true, false),
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		validateThreadInSpaceMiddleware,
 		validateMessageInThreadMiddleware,
 		spaceController.LikeMessage,

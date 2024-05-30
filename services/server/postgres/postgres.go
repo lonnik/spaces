@@ -13,6 +13,7 @@ var (
 	rwmu sync.RWMutex
 )
 
+// TODO: is this logical passing in arguments with the singleton pattern?
 func GetPostgresClient(postgresHost, postgresUser, postgresPassword, postgresDbname string) (*sqlx.DB, error) {
 	connectionString := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", postgresHost, postgresUser, postgresPassword, postgresDbname)
 

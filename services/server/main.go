@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/firebase"
 	"spaces-p/redis"
@@ -20,7 +21,13 @@ import (
 	"github.com/rs/zerolog"
 )
 
-func run(ctx context.Context, stdout io.Writer, logfileName string, getenv func(string) (string, error)) error {
+func run(
+	ctx context.Context,
+	stdout io.Writer,
+	logfileName string,
+	getenv func(string) (string, error),
+	authClient common.AuthClient,
+) error {
 	var op errors.Op = "main.run"
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
@@ -39,11 +46,6 @@ func run(ctx context.Context, stdout io.Writer, logfileName string, getenv func(
 	multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
 	logger := zerologger.New(multi)
 	logger.Info("GOMAXPROCS: >> ", runtime.GOMAXPROCS(0))
-
-	// initialize firebase auth client
-	if err := firebase.InitAuthClient(); err != nil {
-		return errors.E(op, err)
-	}
 
 	cors := cors.New(cors.Config{
 		// TODO: AllowOrigins based on production or development environment
@@ -67,8 +69,6 @@ func run(ctx context.Context, stdout io.Writer, logfileName string, getenv func(
 	// 	return errors.E(op, err)
 	// }
 
-	// TODO: find way how handle config/env vars suitable with running tests
-
 	apiVersion, err := getenv("API_VERSION")
 	if err != nil {
 		return errors.E(op, err)
@@ -84,7 +84,7 @@ func run(ctx context.Context, stdout io.Writer, logfileName string, getenv func(
 		return errors.E(op, err)
 	}
 
-	srv := NewServer(apiVersion, logger, cors, redisClient, nil, googleGeocodeApiKey)
+	srv := NewServer(apiVersion, logger, cors, redisClient, nil, googleGeocodeApiKey, authClient)
 
 	httpServer := &http.Server{
 		Addr:    net.JoinHostPort("localhost", port),
@@ -146,7 +146,13 @@ func main() {
 		return val, nil
 	}
 
-	if err := run(ctx, os.Stdout, "logfile.log", getEnv); err != nil {
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(context.Background())
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+
+	if err := run(ctx, os.Stdout, "logfile.log", getEnv, firebaseAuthClient); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
