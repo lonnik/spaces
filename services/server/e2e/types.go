@@ -1,0 +1,39 @@
+package e2e
+
+import (
+	"context"
+	"spaces-p/common"
+	"spaces-p/models"
+)
+
+type test[T []string] struct {
+	name            string
+	url             string
+	currentTestUser models.BaseUser
+	wantStatusCode  int
+	wantData        T
+}
+
+type EmptyAuthClient struct {
+	currentTestUser *models.BaseUser
+}
+
+func (tac *EmptyAuthClient) VerifyToken(ctx context.Context, idToken string) (*common.UserTokenData, error) {
+	return &common.UserTokenData{
+		SignInProvider:  "email",
+		EmailIsVerified: true,
+		BaseUser:        *tac.getCurrentTestUser(),
+	}, nil
+}
+
+func (tac *EmptyAuthClient) CreateUser(ctx context.Context, email, password string, emailIsVerified bool) (models.UserUid, error) {
+	return "", nil
+}
+
+func (tac *EmptyAuthClient) getCurrentTestUser() *models.BaseUser {
+	return tac.currentTestUser
+}
+
+func (tac *EmptyAuthClient) setCurrentTestUser(newCurrentTestUser models.BaseUser) {
+	tac.currentTestUser = &newCurrentTestUser
+}
