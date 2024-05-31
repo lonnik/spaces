@@ -12,7 +12,9 @@ import (
 
 func main() {
 	redisPort := os.Getenv("REDIS_PORT")
-	redisClient := redis.GetRedisClient(redisPort)
+	redisHost := os.Getenv("REDIS_HOST")
+
+	redisClient := redis.GetRedisClient(redisHost, redisPort)
 	redisRepo := redis_repo.NewRedisRepository(redisClient)
 
 	// TODO: delete all users

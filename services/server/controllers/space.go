@@ -61,11 +61,11 @@ func (uc *SpaceController) GetSpaces(c *gin.Context) {
 	}
 	switch {
 	case query.Location != "" && query.UserId != "":
-		err := errors.New("either the \"location\" or \"user_id\" query parameter must be specified")
+		err := errors.New("either the \"location\" or \"user_id\" query parameter must be specified, but not both")
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
 	case query.Location == "" && query.UserId == "":
-		err := errors.New("either the \"location\" or \"user_id\" query parameter must be specified, but not both")
+		err := errors.New("either the \"location\" or \"user_id\" query parameter must be specified")
 		utils.WriteError(c, errors.E(op, err, http.StatusBadRequest), uc.logger)
 		return
 	case query.Location != "" && query.Radius == 0:

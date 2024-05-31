@@ -25,7 +25,9 @@ func main() {
 	var ctx = context.Background()
 
 	redisPort := os.Getenv("REDIS_PORT")
-	redisClient := redis.GetRedisClient(redisPort)
+	redisHost := os.Getenv("REDIS_HOST")
+
+	redisClient := redis.GetRedisClient(redisHost, redisPort)
 	redisRepo := redis_repo.NewRedisRepository(redisClient)
 	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 
@@ -41,7 +43,7 @@ func main() {
 	spaceService := services.NewSpaceService(logger, redisRepo, localMemoryRepo)
 	userService := services.NewUserService(logger, redisRepo)
 
-	newFakeUsers, err := createFakeUsers(ctx, 3)
+	newFakeUsers, err := createFakeUsers(3)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
@@ -102,7 +104,7 @@ func createRecordsFromFile[T models.NewSpace | models.NewFakeUser](ctx context.C
 	return newRecords, nil
 }
 
-func createFakeUsers(ctx context.Context, number int) ([]models.NewFakeUser, error) {
+func createFakeUsers(number int) ([]models.NewFakeUser, error) {
 	const op errors.Op = "main.createFakeUsers"
 
 	var fakeUsers = make([]models.NewFakeUser, 0, number)

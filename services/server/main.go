@@ -60,8 +60,13 @@ func run(
 		return errors.E(op, err)
 	}
 
+	redisHost, err := getenv("REDIS_HOST")
+	if err != nil {
+		return errors.E(op, err)
+	}
+
 	// initialize redis client
-	redisClient := redis.GetRedisClient(redisPort)
+	redisClient := redis.GetRedisClient(redisHost, redisPort)
 
 	// initialize postgres client
 	// postgresClient, err := postgres.GetPostgresClient()
@@ -131,6 +136,7 @@ func main() {
 		"DB_NAME":                os.Getenv("DB_NAME"),
 		"ENVIRONMENT":            os.Getenv("ENVIRONMENT"),
 		"API_VERSION":            os.Getenv("API_VERSION"),
+		"REDIS_HOST":             os.Getenv("REDIS_HOST"),
 		"REDIS_PORT":             os.Getenv("REDIS_PORT"),
 		"GOOGLE_GEOCODE_API_KEY": os.Getenv("GOOGLE_GEOCODE_API_KEY"),
 		"PORT":                   port,

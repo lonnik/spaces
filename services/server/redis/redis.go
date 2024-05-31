@@ -9,7 +9,6 @@ import (
 )
 
 const (
-	redisHost     = "redis"
 	redisPassword = ""
 	redisDbname   = 0
 )
@@ -20,7 +19,7 @@ var (
 )
 
 // TODO: is this logical passing in arguments with the singleton pattern?
-func GetRedisClient(redisPort string) *redis.Client {
+func GetRedisClient(redisHost, redisPort string) *redis.Client {
 	once.Do(func() {
 		fmt.Println("Connecting to Redis ...")
 
