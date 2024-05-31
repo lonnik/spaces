@@ -9,12 +9,26 @@ import (
 )
 
 var users = map[string]models.BaseUser{
-	"userA": {
-		ID:        models.UserUid("userid"),
+	"user1": {
+		ID:        models.UserUid("user1"),
 		Username:  "niko",
 		FirstName: "Nikolas",
 		LastName:  "Heidner",
-		AvatarUrl: "https://www.avatars.com/lkj",
+		AvatarUrl: "https://www.avatars.com/niko",
+	},
+	"user2": {
+		ID:        models.UserUid("user2"),
+		Username:  "luka",
+		FirstName: "Luka",
+		LastName:  "Stärk",
+		AvatarUrl: "https://www.avatars.com/luka",
+	},
+	"user3": {
+		ID:        models.UserUid("user3"),
+		Username:  "przemi",
+		FirstName: "Przemek",
+		LastName:  "Borucki",
+		AvatarUrl: "https://www.avatars.com/przemi",
 	},
 }
 
