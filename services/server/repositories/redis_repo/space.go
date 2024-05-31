@@ -209,6 +209,22 @@ func (repo *RedisRepository) SetSpace(ctx context.Context, newSpace models.NewSp
 	return spaceId, nil
 }
 
+func (repo *RedisRepository) DeleteSpace(ctx context.Context, spaceId uuid.Uuid) error {
+	const op errors.Op = "redis_repo.RedisRepository.DeleteSpace"
+	var spaceKey = getSpaceKey(spaceId)
+	var spaceCoordinatesKey = getSpaceCoordinatesKey()
+
+	if err := repo.redisClient.Del(ctx, spaceKey).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	if err := repo.redisClient.ZRem(ctx, spaceCoordinatesKey, spaceId.String()).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
+}
+
 func (repo *RedisRepository) HasSpaceThread(ctx context.Context, spaceId, threadId uuid.Uuid) (bool, error) {
 	const op errors.Op = "redis_repo.RedisRepository.HasSpaceThread"
 
@@ -237,6 +253,22 @@ func (repo *RedisRepository) SetSpaceSubscriber(ctx context.Context, spaceId uui
 		Score:  score,
 		Member: spaceId.String(),
 	}).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	return nil
+}
+
+func (repo *RedisRepository) DeleteSpaceSubscriber(ctx context.Context, spaceId uuid.Uuid, userUid models.UserUid) error {
+	const op errors.Op = "redis_repo.RedisRepository.DeleteSpaceSubscriber"
+	var spaceSubscribersKey = getSpaceSubscribersKey(spaceId)
+	var userSpacesKey = getUserSpacesKey(userUid)
+
+	if err := repo.redisClient.ZRem(ctx, spaceSubscribersKey, string(userUid)).Err(); err != nil {
+		return errors.E(op, err)
+	}
+
+	if err := repo.redisClient.ZRem(ctx, userSpacesKey, spaceId.String()).Err(); err != nil {
 		return errors.E(op, err)
 	}
 

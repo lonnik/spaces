@@ -98,12 +98,29 @@ func TestGetSpaces(
 		spaces[spaceName].ID = spaceId
 	}
 
-	redisRepo.SetSpaceSubscriber(ctx, spaces["space1"].ID, Users["user1"].ID)
-	redisRepo.SetSpaceSubscriber(ctx, spaces["space2"].ID, Users["user1"].ID)
+	if err := redisRepo.SetSpaceSubscriber(ctx, spaces["space1"].ID, Users["user1"].ID); err != nil {
+		t.Fatalf("redisRepo.SetSpaceSubscriber() err = %s; want nil", err)
+	}
 
-	// TODO: deferred delete space and space subscriber function calls
-	// TODO: implement DeleteSpace function
-	// TODO: implement DeleteSpaceSubscriber function
+	if err := redisRepo.SetSpaceSubscriber(ctx, spaces["space2"].ID, Users["user1"].ID); err != nil {
+		t.Fatalf("redisRepo.SetSpaceSubscriber() err = %s; want nil", err)
+	}
+
+	t.Cleanup(func() {
+		for _, space := range spaces {
+			if err := redisRepo.DeleteSpace(ctx, space.ID); err != nil {
+				t.Fatalf("redisRepo.DeleteSpace() err = %s; want nil", err)
+			}
+		}
+
+		if err := redisRepo.DeleteSpaceSubscriber(ctx, spaces["space1"].ID, Users["user1"].ID); err != nil {
+			t.Fatalf("redisRepo.DeleteSpaceSubscriber() err = %s; want nil", err)
+		}
+
+		if err := redisRepo.DeleteSpaceSubscriber(ctx, spaces["space2"].ID, Users["user1"].ID); err != nil {
+			t.Fatalf("redisRepo.DeleteSpaceSubscriber() err = %s; want nil", err)
+		}
+	})
 
 	client := http.Client{}
 	tests := getTests(apiEndpoint)
