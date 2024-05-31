@@ -3,6 +3,7 @@ package firebase
 import (
 	"context"
 	"fmt"
+	"os"
 	"spaces-p/common"
 	"spaces-p/errors"
 	"spaces-p/models"
@@ -10,6 +11,7 @@ import (
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
+	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 )
 
@@ -79,6 +81,34 @@ func (fac *FirebaseAuthClient) CreateUser(ctx context.Context, email, password s
 	}
 
 	return models.UserUid(u.UID), nil
+}
+
+func (fac *FirebaseAuthClient) DeleteAllUsers(ctx context.Context) error {
+	const op errors.Op = "firebase.FirebaseAuthClient.DeleteAllUsers"
+	isDevelopmentEnv := os.Getenv("ENVIRONMENT") == "development"
+
+	if !isDevelopmentEnv {
+		return errors.E(op, common.ErrOnlyAllowedInDevEnv)
+	}
+
+	userIterator := fac.client.Users(ctx, "")
+
+loop:
+	for {
+		exportedUserRecord, err := userIterator.Next()
+		switch {
+		case errors.Is(err, iterator.Done):
+			break loop
+		case err != nil:
+			return errors.E(op, err)
+		}
+
+		if err := fac.client.DeleteUser(ctx, exportedUserRecord.UID); err != nil {
+			return errors.E(op, err)
+		}
+	}
+
+	return nil
 }
 
 func (fac *FirebaseAuthClient) getBaseUserDataFromTokenClaims(tokenClaims map[string]any, userId models.UserUid) *models.BaseUser {

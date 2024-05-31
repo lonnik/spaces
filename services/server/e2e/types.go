@@ -30,6 +30,10 @@ func (tac *EmptyAuthClient) CreateUser(ctx context.Context, email, password stri
 	return "", nil
 }
 
+func (tac *EmptyAuthClient) DeleteAllUsers(ctx context.Context) error {
+	return nil
+}
+
 func (tac *EmptyAuthClient) getCurrentTestUser() *models.BaseUser {
 	return tac.currentTestUser
 }
