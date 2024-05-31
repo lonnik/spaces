@@ -54,7 +54,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	newUsers, err := createRecordsFromFile[models.NewFakeUser](ctx, "newUsersFixture.json")
+	newUsers, err := createRecordsFromFile[models.NewFakeUser]("newUsersFixture.json")
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
@@ -65,7 +65,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	newSpaces, err := createRecordsFromFile[models.NewSpace](ctx, "newSpacesFixture.json")
+	newSpaces, err := createRecordsFromFile[models.NewSpace]("newSpacesFixture.json")
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
@@ -82,7 +82,7 @@ func main() {
 	}
 }
 
-func createRecordsFromFile[T models.NewSpace | models.NewFakeUser](ctx context.Context, fileName string) ([]T, error) {
+func createRecordsFromFile[T models.NewSpace | models.NewFakeUser](fileName string) ([]T, error) {
 	const op errors.Op = "main.createFakeUsersFromFile"
 
 	jsonFile, err := os.Open(fileName)
