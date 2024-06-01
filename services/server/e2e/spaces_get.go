@@ -130,9 +130,6 @@ func TestGetSpaces(
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			test := test
-			t.Parallel()
-
 			req, err := http.NewRequest(http.MethodGet, test.url, nil)
 			if err != nil {
 				t.Fatalf("http.NewRequest() err = %s; want nil", err)

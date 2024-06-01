@@ -40,8 +40,8 @@ type NewSpace struct {
 }
 
 type Location struct {
-	Long float64 `json:"longitude"`
-	Lat  float64 `json:"latitude"`
+	Long float64 `json:"longitude" binding:"required,min=-180,max=180"`
+	Lat  float64 `json:"latitude" binding:"required,min=-90,max=90"`
 }
 
 func (loc *Location) ParseString(str string) error {
