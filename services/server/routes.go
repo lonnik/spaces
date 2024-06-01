@@ -64,7 +64,7 @@ func addRoutes(
 	api.DELETE("/user")                                                                           // TODO
 
 	// SPACES
-	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.GetSpaces)
+	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.GetSpaces) // tested
 	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.CreateSpace)
 	api.GET("/spaces/:spaceid", spaceController.GetSpace)
 	api.GET("/spaces/:spaceid/updates/ws",
