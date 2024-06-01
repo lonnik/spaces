@@ -2,7 +2,7 @@ package e2e
 
 import "spaces-p/models"
 
-var Users = map[string]models.BaseUser{
+var TestUsers = map[string]models.BaseUser{
 	"user1": {
 		ID:        models.UserUid("user1"),
 		Username:  "niko",
@@ -26,7 +26,7 @@ var Users = map[string]models.BaseUser{
 	},
 }
 
-var spaces = map[string]*models.Space{
+var testSpaces = map[string]*models.Space{
 	"space1": {
 		BaseSpace: models.BaseSpace{
 			Name:               "Thulestraße 31",

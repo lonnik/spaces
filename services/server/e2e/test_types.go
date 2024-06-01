@@ -6,12 +6,13 @@ import (
 	"spaces-p/models"
 )
 
-type test[T []string] struct {
+type test[A, W any] struct {
 	name            string
 	url             string
 	currentTestUser models.BaseUser
+	args            A
 	wantStatusCode  int
-	wantData        T
+	wantData        W
 }
 
 type EmptyAuthClient struct {
