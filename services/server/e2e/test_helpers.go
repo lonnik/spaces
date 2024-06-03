@@ -22,3 +22,20 @@ func createTestUsers(ctx context.Context, t *testing.T, repo common.CacheReposit
 		}
 	}
 }
+
+func createTestSpaces(ctx context.Context, t *testing.T, repo common.CacheRepository) []*models.Space {
+	createdTestSpaces := make([]*models.Space, len(testSpaces))
+
+	for i, testSpace := range testSpaces {
+		spaceId, err := repo.SetSpace(ctx, models.NewSpace{BaseSpace: testSpace.BaseSpace, AdminId: testSpace.AdminId})
+		if err != nil {
+			t.Fatalf("repo.SetSpace() err = %s; want nil", err)
+		}
+
+		copiedTestSpace := *testSpace
+		createdTestSpaces[i] = &copiedTestSpace
+		createdTestSpaces[i].ID = spaceId
+	}
+
+	return createdTestSpaces
+}

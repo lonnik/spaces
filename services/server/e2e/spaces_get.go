@@ -20,63 +20,63 @@ func getGetSpacesTests(apiEndpoint string) []test[*struct{}, []string] {
 		{
 			name:            "by location with maximum radius",
 			url:             fmt.Sprintf("%s/spaces?location=%s&radius=1000", apiEndpoint, thulestr32Location.String()),
-			currentTestUser: TestUsers["user3"],
+			currentTestUser: TestUsers[2],
 			wantStatusCode:  http.StatusOK,
 			wantData:        []string{"Thulestraße 31", "Lunderstr 2", "Haus am Park", "Trelleborger Str. 6"},
 		},
 		{
 			name:            "by location with 2 offset",
 			url:             fmt.Sprintf("%s/spaces?location=%s&radius=1000&offset=2", apiEndpoint, thulestr32Location.String()),
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			wantStatusCode:  http.StatusOK,
 			wantData:        []string{"Haus am Park", "Trelleborger Str. 6"},
 		},
 		{
 			name:            "by location with 2 offset and 1 count",
 			url:             fmt.Sprintf("%s/spaces?location=%s&radius=1000&offset=2&count=1", apiEndpoint, thulestr32Location.String()),
-			currentTestUser: TestUsers["user3"],
+			currentTestUser: TestUsers[2],
 			wantStatusCode:  http.StatusOK,
 			wantData:        []string{"Haus am Park"},
 		},
 		{
 			name:            "by location with small radius",
 			url:             fmt.Sprintf("%s/spaces?location=%s&radius=1", apiEndpoint, thulestr32Location.String()),
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			wantStatusCode:  http.StatusOK,
 			wantData:        []string{"Thulestraße 31", "Lunderstr 2"},
 		},
 		{
 			name:            "by location without radius",
 			url:             fmt.Sprintf("%s/spaces?location=%s", apiEndpoint, thulestr32Location.String()),
-			currentTestUser: TestUsers["user2"],
+			currentTestUser: TestUsers[1],
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        []string{},
 		},
 		{
 			name:            "by user id",
-			url:             fmt.Sprintf("%s/spaces?user_id=%s", apiEndpoint, TestUsers["user1"].ID),
-			currentTestUser: TestUsers["user2"],
+			url:             fmt.Sprintf("%s/spaces?user_id=%s", apiEndpoint, TestUsers[0].ID),
+			currentTestUser: TestUsers[1],
 			wantStatusCode:  http.StatusOK,
 			wantData:        []string{"Lunderstr 2", "Thulestraße 31"}, // sorted by joining time descending
 		},
 		{
 			name:            "by user id with offset",
-			url:             fmt.Sprintf("%s/spaces?user_id=%s&offset=1", apiEndpoint, TestUsers["user1"].ID),
-			currentTestUser: TestUsers["user2"],
+			url:             fmt.Sprintf("%s/spaces?user_id=%s&offset=1", apiEndpoint, TestUsers[0].ID),
+			currentTestUser: TestUsers[1],
 			wantStatusCode:  http.StatusOK,
 			wantData:        []string{"Thulestraße 31"},
 		},
 		{
 			name:            "by user id that doesn't exist",
 			url:             fmt.Sprintf("%s/spaces?user_id=nonexistent", apiEndpoint),
-			currentTestUser: TestUsers["user2"],
+			currentTestUser: TestUsers[1],
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        []string{},
 		},
 		{
 			name:            "by neither location nor user",
 			url:             fmt.Sprintf("%s/spaces", apiEndpoint),
-			currentTestUser: TestUsers["user2"],
+			currentTestUser: TestUsers[1],
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        []string{},
 		},
@@ -91,27 +91,14 @@ func TestGetSpaces(
 	repo common.CacheRepository,
 	authClient *EmptyAuthClient,
 ) {
-	copiedTestSpaces := make(map[string]*models.Space, len(testSpaces))
-
 	createTestUsers(ctx, t, repo)
 
-	for spaceName, testSpace := range testSpaces {
-		spaceId, err := repo.SetSpace(ctx, models.NewSpace{BaseSpace: testSpace.BaseSpace, AdminId: testSpace.AdminId})
-		if err != nil {
-			t.Fatalf("repo.SetSpace() err = %s; want nil", err)
+	createdTestSpaces := createTestSpaces(ctx, t, repo)
+
+	for _, createdTestSpace := range createdTestSpaces[:2] {
+		if err := repo.SetSpaceSubscriber(ctx, createdTestSpace.ID, TestUsers[0].ID); err != nil {
+			t.Fatalf("repo.SetSpaceSubscriber() err = %s; want nil", err)
 		}
-
-		copiedTestSpace := *testSpace
-		copiedTestSpaces[spaceName] = &copiedTestSpace
-		copiedTestSpaces[spaceName].ID = spaceId
-	}
-
-	if err := repo.SetSpaceSubscriber(ctx, copiedTestSpaces["space1"].ID, TestUsers["user1"].ID); err != nil {
-		t.Fatalf("repo.SetSpaceSubscriber() err = %s; want nil", err)
-	}
-
-	if err := repo.SetSpaceSubscriber(ctx, copiedTestSpaces["space2"].ID, TestUsers["user1"].ID); err != nil {
-		t.Fatalf("repo.SetSpaceSubscriber() err = %s; want nil", err)
 	}
 
 	t.Cleanup(func() {

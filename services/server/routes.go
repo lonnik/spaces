@@ -66,7 +66,7 @@ func addRoutes(
 	// SPACES
 	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.GetSpaces)    // tested
 	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.CreateSpace) // tested
-	api.GET("/spaces/:spaceid", spaceController.GetSpace)                                                                         // to test
+	api.GET("/spaces/:spaceid", spaceController.GetSpace)                                                                         // tested
 	api.GET("/spaces/:spaceid/updates/ws",
 		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, true),
 		isSpaceSubscriberMiddleware,

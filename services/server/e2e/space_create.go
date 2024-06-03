@@ -20,15 +20,15 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusOK,
-			wantData:        (*testSpaces["space1"]).BaseSpace,
+			wantData:        (*testSpaces[0]).BaseSpace,
 		},
 		{
 			name:            "create space without name",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -36,7 +36,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space without color hexa code",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -44,7 +44,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space with invalid color hexa code",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -52,7 +52,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space without radius",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","location":{"longitude":13.420215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -60,7 +60,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space with radius of 999",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":999,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -68,7 +68,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space without location",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -76,7 +76,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space with invalid location (longitude)",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":-189.20215,"latitude":52.555241}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},
@@ -84,7 +84,7 @@ func getCreateSpaceTests(url string) []test[string, models.BaseSpace] {
 		{
 			name:            "create space with invalid location (latitude)",
 			url:             url,
-			currentTestUser: TestUsers["user1"],
+			currentTestUser: TestUsers[0],
 			args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":91.5835}}`,
 			wantStatusCode:  http.StatusBadRequest,
 			wantData:        models.BaseSpace{},

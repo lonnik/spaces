@@ -26,7 +26,7 @@ func (ss *SpaceService) GetSpace(ctx context.Context, spaceId uuid.Uuid) (*model
 	space, err := ss.cacheRepo.GetSpace(ctx, spaceId)
 	switch {
 	case errors.Is(err, common.ErrNotFound):
-		return nil, errors.E(op, err, http.StatusBadRequest)
+		return nil, errors.E(op, err, http.StatusNotFound)
 	case err != nil:
 		return nil, errors.E(op, err, http.StatusInternalServerError)
 	}
