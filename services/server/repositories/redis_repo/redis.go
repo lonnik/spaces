@@ -21,9 +21,9 @@ func NewRedisRepository(redisClient *redis.Client) *RedisRepository {
 
 func (repo *RedisRepository) DeleteAllKeys() error {
 	const op errors.Op = "redis_repo.RedisRepository.DeleteAllKeys"
-	isDevelopmentEnv := os.Getenv("ENVIRONMENT") == "development"
+	isDevelopmentTestEnv := os.Getenv("ENVIRONMENT") == "development" || os.Getenv("ENVIRONMENT") == "test"
 
-	if !isDevelopmentEnv {
+	if !isDevelopmentTestEnv {
 		return errors.E(op, common.ErrOnlyAllowedInDevEnv)
 	}
 

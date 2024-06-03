@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"spaces-p/common"
 	"spaces-p/models"
-	"spaces-p/repositories/redis_repo"
 	"spaces-p/uuid"
 	"testing"
 
@@ -96,9 +96,18 @@ func TestCreateSpace(
 	ctx context.Context,
 	t *testing.T,
 	apiEndpoint string,
-	redisRepo *redis_repo.RedisRepository,
+	repo common.CacheRepository,
 	authClient *EmptyAuthClient,
 ) {
+	createTestUsers(ctx, t, repo)
+
+	t.Cleanup(func() {
+		err := repo.DeleteAllKeys()
+		if err != nil {
+			t.Fatalf("repo.DeleteAllKeys() err = %s; want nil", err)
+		}
+	})
+
 	url := fmt.Sprintf("%s/spaces", apiEndpoint)
 	client := http.Client{}
 	tests := getCreateSpaceTests(url)
@@ -107,6 +116,7 @@ func TestCreateSpace(
 		t.Run(test.name, func(t *testing.T) {
 			authClient.setCurrentTestUser(test.currentTestUser) // this user is used as admin id
 
+			// act
 			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte(test.args)))
 			if err != nil {
 				t.Fatalf("http.NewRequest() err = %s; want nil", err)
@@ -119,6 +129,7 @@ func TestCreateSpace(
 			}
 			defer resp.Body.Close()
 
+			// assert
 			if resp.StatusCode != test.wantStatusCode {
 				t.Fatalf("resp.StatusCode = %d; want %d", resp.StatusCode, test.wantStatusCode)
 			}
@@ -143,9 +154,15 @@ func TestCreateSpace(
 				t.Fatalf("spaceCreatedResp[\"data\"][\"spaceId\"] ok = %v; want = true", ok)
 			}
 
-			createdSpace, err := redisRepo.GetSpace(ctx, spaceId)
+			t.Cleanup(func() {
+				if err := repo.DeleteSpace(ctx, spaceId); err != nil {
+					t.Fatalf("repo.DeleteAllKeys() err = %s; want nil", err)
+				}
+			})
+
+			createdSpace, err := repo.GetSpace(ctx, spaceId)
 			if err != nil {
-				t.Fatalf("redisRepo.GetSpace() err = %s; want nil", err)
+				t.Fatalf("repo.GetSpace() err = %s; want nil", err)
 			}
 
 			assert.Equal(t, test.currentTestUser.ID, createdSpace.AdminId)

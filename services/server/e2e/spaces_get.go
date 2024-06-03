@@ -6,15 +6,16 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"reflect"
+	"spaces-p/common"
 	"spaces-p/models"
-	"spaces-p/repositories/redis_repo"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var thulestr32Location = models.Location{Long: 13.419932, Lat: 52.554956}
 
-func getTests(apiEndpoint string) []test[*struct{}, []string] {
+func getGetSpacesTests(apiEndpoint string) []test[*struct{}, []string] {
 	return []test[*struct{}, []string]{
 		{
 			name:            "by location with maximum radius",
@@ -87,46 +88,41 @@ func TestGetSpaces(
 	ctx context.Context,
 	t *testing.T,
 	apiEndpoint string,
-	redisRepo *redis_repo.RedisRepository,
+	repo common.CacheRepository,
 	authClient *EmptyAuthClient,
 ) {
-	copiedTestSpaces := copyMap(testSpaces)
+	copiedTestSpaces := make(map[string]*models.Space, len(testSpaces))
 
-	for spaceName, testSpace := range copiedTestSpaces {
-		spaceId, err := redisRepo.SetSpace(ctx, models.NewSpace{BaseSpace: testSpace.BaseSpace, AdminId: testSpace.AdminId})
+	createTestUsers(ctx, t, repo)
+
+	for spaceName, testSpace := range testSpaces {
+		spaceId, err := repo.SetSpace(ctx, models.NewSpace{BaseSpace: testSpace.BaseSpace, AdminId: testSpace.AdminId})
 		if err != nil {
-			t.Fatalf("redisRepo.SetSpace() err = %s; want nil", err)
+			t.Fatalf("repo.SetSpace() err = %s; want nil", err)
 		}
 
-		testSpaces[spaceName].ID = spaceId
+		copiedTestSpace := *testSpace
+		copiedTestSpaces[spaceName] = &copiedTestSpace
+		copiedTestSpaces[spaceName].ID = spaceId
 	}
 
-	if err := redisRepo.SetSpaceSubscriber(ctx, testSpaces["space1"].ID, TestUsers["user1"].ID); err != nil {
-		t.Fatalf("redisRepo.SetSpaceSubscriber() err = %s; want nil", err)
+	if err := repo.SetSpaceSubscriber(ctx, copiedTestSpaces["space1"].ID, TestUsers["user1"].ID); err != nil {
+		t.Fatalf("repo.SetSpaceSubscriber() err = %s; want nil", err)
 	}
 
-	if err := redisRepo.SetSpaceSubscriber(ctx, testSpaces["space2"].ID, TestUsers["user1"].ID); err != nil {
-		t.Fatalf("redisRepo.SetSpaceSubscriber() err = %s; want nil", err)
+	if err := repo.SetSpaceSubscriber(ctx, copiedTestSpaces["space2"].ID, TestUsers["user1"].ID); err != nil {
+		t.Fatalf("repo.SetSpaceSubscriber() err = %s; want nil", err)
 	}
 
 	t.Cleanup(func() {
-		for _, testSpace := range testSpaces {
-			if err := redisRepo.DeleteSpace(ctx, testSpace.ID); err != nil {
-				t.Fatalf("redisRepo.DeleteSpace() err = %s; want nil", err)
-			}
-		}
-
-		if err := redisRepo.DeleteSpaceSubscriber(ctx, testSpaces["space1"].ID, TestUsers["user1"].ID); err != nil {
-			t.Fatalf("redisRepo.DeleteSpaceSubscriber() err = %s; want nil", err)
-		}
-
-		if err := redisRepo.DeleteSpaceSubscriber(ctx, testSpaces["space2"].ID, TestUsers["user1"].ID); err != nil {
-			t.Fatalf("redisRepo.DeleteSpaceSubscriber() err = %s; want nil", err)
+		err := repo.DeleteAllKeys()
+		if err != nil {
+			t.Fatalf("repo.DeleteAllKeys() err = %s; want nil", err)
 		}
 	})
 
 	client := http.Client{}
-	tests := getTests(apiEndpoint)
+	tests := getGetSpacesTests(apiEndpoint)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -173,9 +169,7 @@ func assertSpacesResponse(t *testing.T, response *http.Response, wantStatusCode 
 
 	gotSpaceNames := getSpaceNames(t, spacesResponse["data"])
 
-	if !reflect.DeepEqual(gotSpaceNames, wantData) {
-		t.Errorf("got = %v; want %v", gotSpaceNames, wantData)
-	}
+	assert.Equal(t, wantData, gotSpaceNames)
 }
 
 func getSpaceNames(t *testing.T, spaces []models.SpaceWithDistance) []string {

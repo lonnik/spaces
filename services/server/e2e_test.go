@@ -17,8 +17,8 @@ func TestApi(t *testing.T) {
 
 	var ctx = context.Background()
 
-	redisHost, redisPort, redisRepo, teardownFunc := setupTestEnv(ctx, t, e2e.TestUsers)
-	defer t.Cleanup(teardownFunc)
+	redisHost, redisPort, redisRepo, teardownFunc := setupTestEnv(ctx, t)
+	t.Cleanup(teardownFunc)
 
 	apiVersion := "v1"
 	serverPort := "8081"
@@ -46,6 +46,8 @@ func TestApi(t *testing.T) {
 	authClient := &e2e.EmptyAuthClient{}
 
 	apiEndpoint := runServer(ctx, t, getEnv, authClient, apiVersion, serverPort)
+
+	t.Setenv("ENVIRONMENT", "test")
 
 	t.Run("GET /spaces", func(t *testing.T) {
 		e2e.TestGetSpaces(ctx, t, apiEndpoint, redisRepo, authClient)

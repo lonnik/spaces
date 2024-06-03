@@ -52,8 +52,8 @@ func addRoutes(
 	isSpaceSubscriberMiddleware := middlewares.IsSpaceSubscriber(logger, redisRepo)
 
 	// USERS
-	api.POST("/users", userController.CreateUserFromIdToken)
-	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), userController.GetUser)
+	api.POST("/users", userController.CreateUserFromIdToken)                                                                       // to test
+	api.GET("/users/:userid", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), userController.GetUser) // to test
 
 	// AUTHENTICATED USER
 	api.GET("/user",
@@ -64,18 +64,18 @@ func addRoutes(
 	api.DELETE("/user")                                                                           // TODO
 
 	// SPACES
-	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.GetSpaces) // tested
-	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.CreateSpace)
-	api.GET("/spaces/:spaceid", spaceController.GetSpace)
+	api.GET("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.GetSpaces)    // tested
+	api.POST("/spaces", middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false), spaceController.CreateSpace) // tested
+	api.GET("/spaces/:spaceid", spaceController.GetSpace)                                                                         // to test
 	api.GET("/spaces/:spaceid/updates/ws",
 		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, true),
 		isSpaceSubscriberMiddleware,
 		spaceController.SpaceConnect,
 	)
-	api.GET("/spaces/:spaceid/subscribers",
+	api.GET("/spaces/:spaceid/subscribers", // to test
 		spaceController.GetSpaceSubscribers,
 	)
-	api.POST("/spaces/:spaceid/subscribers",
+	api.POST("/spaces/:spaceid/subscribers", // to test
 		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
 		spaceController.AddSpaceSubscriber,
 	)
@@ -118,7 +118,7 @@ func addRoutes(
 	)
 
 	// ADDRESSES
-	api.GET("/address", addressController.GetAddress)
+	api.GET("/address", addressController.GetAddress) // to test
 
 	// HEALTH
 	api.GET("/health", healthController.HealthCheck)
