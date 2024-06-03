@@ -3,9 +3,7 @@ package e2e
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"spaces-p/common"
 	"spaces-p/models"
@@ -99,66 +97,33 @@ func TestCreateSpace(
 	repo common.CacheRepository,
 	authClient *EmptyAuthClient,
 ) {
-	createTestUsers(ctx, t, repo)
-
-	t.Cleanup(func() {
-		err := repo.DeleteAllKeys()
-		if err != nil {
-			t.Fatalf("repo.DeleteAllKeys() err = %s; want nil", err)
-		}
-	})
-
 	url := fmt.Sprintf("%s/spaces", apiEndpoint)
 	client := http.Client{}
 	tests := getCreateSpaceTests(url)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			authClient.setCurrentTestUser(test.currentTestUser) // this user is used as admin id
-
-			// act
-			req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader([]byte(test.args)))
-			if err != nil {
-				t.Fatalf("http.NewRequest() err = %s; want nil", err)
-			}
-			req.Header.Add("Authorization", "Bearer fake_bearer_token")
-
-			resp, err := client.Do(req)
-			if err != nil {
-				t.Fatalf("client.Do() err = %s; want nil", err)
-			}
-			defer resp.Body.Close()
-
-			// assert
-			if resp.StatusCode != test.wantStatusCode {
-				t.Fatalf("resp.StatusCode = %d; want %d", resp.StatusCode, test.wantStatusCode)
-			}
-
-			if !isSuccessStatusCode(t, resp.StatusCode) {
-				return
-			}
-
-			body, err := io.ReadAll(resp.Body)
-			if err != nil {
-				t.Fatalf("io.ReadAll() err = %s; want nil", err)
-			}
-
-			var spaceCreatedResp map[string]map[string]uuid.Uuid
-			err = json.Unmarshal(body, &spaceCreatedResp)
-			if err != nil {
-				t.Fatalf("json.Unmarshal() err = %s; want nil", err)
-			}
-
-			spaceId, ok := spaceCreatedResp["data"]["spaceId"]
-			if !ok {
-				t.Fatalf("spaceCreatedResp[\"data\"][\"spaceId\"] ok = %v; want = true", ok)
-			}
-
+			createTestUsers(ctx, t, repo)
 			t.Cleanup(func() {
-				if err := repo.DeleteSpace(ctx, spaceId); err != nil {
+				err := repo.DeleteAllKeys()
+				if err != nil {
 					t.Fatalf("repo.DeleteAllKeys() err = %s; want nil", err)
 				}
 			})
+
+			authClient.setCurrentTestUser(test.currentTestUser) // this user is used as admin id
+
+			// act
+			spaceCreatedResp, teardown := makeRequest[map[string]map[string]uuid.Uuid](t, client, http.MethodPost, url, bytes.NewReader([]byte(test.args)), test.wantStatusCode)
+			t.Cleanup(teardown)
+			if spaceCreatedResp == nil {
+				return
+			}
+
+			spaceId, ok := (*spaceCreatedResp)["data"]["spaceId"]
+			if !ok {
+				t.Fatalf("spaceCreatedResp[\"data\"][\"spaceId\"] ok = %v; want = true", ok)
+			}
 
 			createdSpace, err := repo.GetSpace(ctx, spaceId)
 			if err != nil {
