@@ -16,13 +16,15 @@ func isSuccessStatusCode(t *testing.T, statusCode int) bool {
 	return statusCode >= http.StatusOK && statusCode <= http.StatusIMUsed
 }
 
-func createTestUsers(ctx context.Context, t *testing.T, repo common.CacheRepository) {
+func createTestUsers(ctx context.Context, t *testing.T, repo common.CacheRepository) []models.BaseUser {
 	// set up all users
 	for _, user := range TestUsers {
 		if err := repo.SetUser(ctx, models.NewUser(user)); err != nil {
 			t.Fatalf("redisRepo.SetUser() err = %s; want nil", err)
 		}
 	}
+
+	return TestUsers
 }
 
 func createTestSpaces(ctx context.Context, t *testing.T, repo common.CacheRepository) []*models.Space {
@@ -44,8 +46,20 @@ func createTestSpaces(ctx context.Context, t *testing.T, repo common.CacheReposi
 
 // makes a request and when the status code of the response is in the 200er range, then it parses the response body and returns it.
 // If the response status code is not in the 200er range, it returns nil as the first return value.
-func makeRequest[T any](t *testing.T, httpClient http.Client, method, url string, requestBody io.Reader, wantStatusCode int) (*T, func()) {
+func makeRequest[T any](
+	t *testing.T,
+	httpClient http.Client,
+	method, url string,
+	requestBody io.Reader,
+	wantStatusCode int,
+	asUser models.BaseUser,
+	authClient *EmptyAuthClient,
+) (*T, func()) {
 	t.Helper()
+
+	authClient.setCurrentTestUser(asUser) // this user is used as admin id
+	defer authClient.setCurrentTestUser(models.BaseUser{})
+
 	req, err := http.NewRequest(method, url, requestBody)
 	if err != nil {
 		t.Fatalf("http.NewRequest() err = %s; want nil", err)

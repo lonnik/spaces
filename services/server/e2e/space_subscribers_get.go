@@ -97,9 +97,7 @@ func TestGetSpaceSubscribers(
 	client := http.Client{}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			authClient.setCurrentTestUser(test.currentTestUser)
-
-			spacesResponse, teardown := makeRequest[map[string][]models.User](t, client, http.MethodGet, test.url, nil, test.wantStatusCode)
+			spacesResponse, teardown := makeRequest[map[string][]models.User](t, client, http.MethodGet, test.url, nil, test.wantStatusCode, test.currentTestUser, authClient)
 			t.Cleanup(teardown)
 			if spacesResponse == nil {
 				return
@@ -139,5 +137,8 @@ func connectUserToSpace(ctx context.Context, t *testing.T, apiEndpoint string, a
 		t.Fatalf("websocket.Dial() err = %s; want nil", err)
 	}
 
-	return cancel
+	return func() {
+		cancel()
+		authClient.setCurrentTestUser(models.BaseUser{})
+	}
 }

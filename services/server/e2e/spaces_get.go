@@ -111,9 +111,7 @@ func TestGetSpaces(
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			authClient.setCurrentTestUser(test.currentTestUser)
-
-			spacesResponse, teardown := makeRequest[map[string][]models.SpaceWithDistance](t, client, http.MethodGet, test.url, nil, test.wantStatusCode)
+			spacesResponse, teardown := makeRequest[map[string][]models.SpaceWithDistance](t, client, http.MethodGet, test.url, nil, test.wantStatusCode, test.currentTestUser, authClient)
 			t.Cleanup(teardown)
 			if spacesResponse == nil {
 				return

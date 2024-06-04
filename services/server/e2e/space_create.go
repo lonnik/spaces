@@ -111,10 +111,8 @@ func TestCreateSpace(
 				}
 			})
 
-			authClient.setCurrentTestUser(test.currentTestUser) // this user is used as admin id
-
 			// act
-			spaceCreatedResp, teardown := makeRequest[map[string]map[string]uuid.Uuid](t, client, http.MethodPost, url, bytes.NewReader([]byte(test.args)), test.wantStatusCode)
+			spaceCreatedResp, teardown := makeRequest[map[string]map[string]uuid.Uuid](t, client, http.MethodPost, test.url, bytes.NewReader([]byte(test.args)), test.wantStatusCode, test.currentTestUser, authClient)
 			t.Cleanup(teardown)
 			if spaceCreatedResp == nil {
 				return
