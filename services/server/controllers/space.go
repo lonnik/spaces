@@ -261,7 +261,8 @@ func (uc *SpaceController) SpaceConnect(c *gin.Context) {
 	}
 
 	err = uc.spaceNotificationService.SpaceConnect(ctx, c, spaceId, *user)
-	utils.WriteError(c, errors.E(op, err), uc.logger)
+	// don't write http status to response again
+	uc.logger.Error(err)
 }
 
 func (uc *SpaceController) CreateTopLevelThread(c *gin.Context) {

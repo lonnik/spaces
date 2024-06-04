@@ -85,15 +85,11 @@ func IsSpaceSubscriber(
 		isSpaceSubscriber, err := cacheRepo.HasSpaceSubscriber(ctx, spaceId, user.ID)
 		switch {
 		case err != nil:
-			if err != nil {
-				abortAndWriteError(c, errors.E(op, err, http.StatusInternalServerError), logger)
-				return
-			}
+			abortAndWriteError(c, errors.E(op, err, http.StatusInternalServerError), logger)
+			return
 		case !isSpaceSubscriber:
-			if err != nil {
-				abortAndWriteError(c, errors.E(op, err, http.StatusForbidden), logger)
-				return
-			}
+			abortAndWriteError(c, errors.E(op, err, http.StatusForbidden), logger)
+			return
 		}
 
 		c.Next()

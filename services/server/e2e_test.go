@@ -55,7 +55,10 @@ func TestApi(t *testing.T) {
 	t.Run("POST /spaces", func(t *testing.T) {
 		e2e.TestCreateSpace(ctx, t, apiEndpoint, redisRepo, authClient)
 	})
-	t.Run("GET /space", func(t *testing.T) {
+	t.Run("GET /spaces/:spaceid", func(t *testing.T) {
 		e2e.TestGetSpace(ctx, t, apiEndpoint, redisRepo, authClient)
+	})
+	t.Run("GET /spaces/:spaceid/subscribers", func(t *testing.T) {
+		e2e.TestGetSpaceSubscribers(ctx, t, apiEndpoint, redisRepo, authClient)
 	})
 }

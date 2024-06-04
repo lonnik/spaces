@@ -13,6 +13,11 @@ func getUuidFromPath(c *gin.Context, segment string) (uuid.Uuid, error) {
 	const op errors.Op = "utils.getUuidFromPath"
 
 	segmentValue := c.Param(segment)
+	if segmentValue == "" {
+		err := fmt.Errorf("empty value")
+		return uuid.Nil, errors.E(op, err)
+	}
+
 	id, err := uuid.Parse(segmentValue)
 	if err != nil {
 		return uuid.Nil, errors.E(op, err)

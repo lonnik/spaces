@@ -86,8 +86,13 @@ func (ss *SpaceService) GetTopLevelThreads(ctx context.Context, spaceId uuid.Uui
 func (ss *SpaceService) GetSpaceSubscribers(ctx context.Context, spaceId uuid.Uuid, activeSubscribers bool, offset, count int64) ([]models.User, error) {
 	const op errors.Op = "services.SpaceService.GetSpaceSubscribers"
 
+	// verify if space exists
+	_, err := ss.GetSpace(ctx, spaceId)
+	if err != nil {
+		return nil, err
+	}
+
 	var subscribers = []models.User{}
-	var err error
 	switch activeSubscribers {
 	case true:
 		subscribers, err = ss.cacheRepo.GetSpaceActiveSubscribers(ctx, spaceId, offset, count)

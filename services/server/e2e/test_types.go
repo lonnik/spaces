@@ -23,7 +23,7 @@ func (tac *EmptyAuthClient) VerifyToken(ctx context.Context, idToken string) (*c
 	return &common.UserTokenData{
 		SignInProvider:  "email",
 		EmailIsVerified: true,
-		BaseUser:        *tac.getCurrentTestUser(),
+		BaseUser:        *tac.currentTestUser,
 	}, nil
 }
 
@@ -33,10 +33,6 @@ func (tac *EmptyAuthClient) CreateUser(ctx context.Context, email, password stri
 
 func (tac *EmptyAuthClient) DeleteAllUsers(ctx context.Context) error {
 	return nil
-}
-
-func (tac *EmptyAuthClient) getCurrentTestUser() *models.BaseUser {
-	return tac.currentTestUser
 }
 
 func (tac *EmptyAuthClient) setCurrentTestUser(newCurrentTestUser models.BaseUser) {
