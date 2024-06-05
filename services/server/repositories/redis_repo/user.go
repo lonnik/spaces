@@ -19,7 +19,7 @@ func (repo *RedisRepository) GetUserById(ctx context.Context, id models.UserUid)
 		return nil, errors.E(op, common.ErrNotFound)
 	}
 
-	return repo.parseUser(ctx, id, r), nil
+	return repo.parseUser(id, r), nil
 }
 
 func (repo *RedisRepository) SetUser(ctx context.Context, newUser models.NewUser) error {
@@ -40,7 +40,7 @@ func (repo *RedisRepository) SetUser(ctx context.Context, newUser models.NewUser
 	return nil
 }
 
-func (repo *RedisRepository) parseUser(ctx context.Context, userUid models.UserUid, stringMap map[string]string) *models.User {
+func (repo *RedisRepository) parseUser(userUid models.UserUid, stringMap map[string]string) *models.User {
 	firstNameStr := stringMap[userFields.userFirstNameField]
 	lastNameStr := stringMap[userFields.userLastNameField]
 	userNameStr := stringMap[userFields.userUsernameField]

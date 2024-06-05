@@ -33,6 +33,8 @@ func TestApi(t *testing.T) {
 			return apiVersion, nil
 		case "GOOGLE_GEOCODE_API_KEY":
 			return "1234", nil
+		case "HOST":
+			return "localhost", nil
 		case "PORT":
 			return serverPort, nil
 		default:
@@ -44,8 +46,9 @@ func TestApi(t *testing.T) {
 	t.Cleanup(cancel)
 
 	authClient := &e2e.EmptyAuthClient{}
+	geocodeRepo := &e2e.SpyGeocodeRepository{}
 
-	apiEndpoint := runServer(ctx, t, getEnv, authClient, apiVersion, serverPort)
+	apiEndpoint := runServer(ctx, t, getEnv, authClient, apiVersion, serverPort, geocodeRepo)
 
 	t.Setenv("ENVIRONMENT", "test")
 
@@ -63,5 +66,8 @@ func TestApi(t *testing.T) {
 	})
 	t.Run("POST /spaces/:spaceid/subscribers", func(t *testing.T) {
 		e2e.TestCreateSpaceSubscriber(ctx, t, apiEndpoint, redisRepo, authClient)
+	})
+	t.Run("GET /address", func(t *testing.T) {
+		e2e.TestGetAddress(ctx, t, apiEndpoint, redisRepo, authClient, geocodeRepo)
 	})
 }

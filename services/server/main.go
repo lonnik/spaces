@@ -13,6 +13,8 @@ import (
 	"spaces-p/errors"
 	"spaces-p/firebase"
 	"spaces-p/redis"
+	googlegeocode "spaces-p/repositories/google_geocode"
+	"spaces-p/utils"
 	"spaces-p/zerologger"
 	"time"
 
@@ -27,6 +29,7 @@ func run(
 	logfileName string,
 	getenv func(string) (string, error),
 	authClient common.AuthClient,
+	geoCodeRepo common.GeocodeRepository,
 ) error {
 	var op errors.Op = "main.run"
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
@@ -79,20 +82,20 @@ func run(
 		return errors.E(op, err)
 	}
 
-	googleGeocodeApiKey, err := getenv("GOOGLE_GEOCODE_API_KEY")
-	if err != nil {
-		return errors.E(op, err)
-	}
-
 	port, err := getenv("PORT")
 	if err != nil {
 		return errors.E(op, err)
 	}
 
-	srv := NewServer(apiVersion, logger, cors, redisClient, nil, googleGeocodeApiKey, authClient)
+	host, err := getenv("HOST")
+	if err != nil {
+		return errors.E(op, err)
+	}
+
+	srv := NewServer(apiVersion, logger, cors, redisClient, nil, authClient, geoCodeRepo)
 
 	httpServer := &http.Server{
-		Addr:    net.JoinHostPort("localhost", port),
+		Addr:    net.JoinHostPort(host, port),
 		Handler: srv,
 	}
 
@@ -124,41 +127,21 @@ func main() {
 		}
 	}
 
-	port := "8080"
-	if os.Getenv("PORT") != "" {
-		port = os.Getenv("PORT")
-	}
-
-	envVars := map[string]string{
-		"DB_HOST":                os.Getenv("DB_HOST"),
-		"DB_USER":                os.Getenv("DB_USER"),
-		"DB_PASSWORD":            os.Getenv("DB_PASSWORD"),
-		"DB_NAME":                os.Getenv("DB_NAME"),
-		"ENVIRONMENT":            os.Getenv("ENVIRONMENT"),
-		"API_VERSION":            os.Getenv("API_VERSION"),
-		"REDIS_HOST":             os.Getenv("REDIS_HOST"),
-		"REDIS_PORT":             os.Getenv("REDIS_PORT"),
-		"GOOGLE_GEOCODE_API_KEY": os.Getenv("GOOGLE_GEOCODE_API_KEY"),
-		"PORT":                   port,
-	}
-
-	getEnv := func(key string) (string, error) {
-		val, ok := envVars[key]
-		if val == "" || !ok {
-			err := fmt.Errorf("no value found for key: %s", key)
-			return "", err
-		}
-
-		return val, nil
-	}
-
 	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(context.Background())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}
 
-	if err := run(ctx, os.Stdout, "logfile.log", getEnv, firebaseAuthClient); err != nil {
+	googleGeocodeApiKey, err := utils.GetEnv("GOOGLE_GEOCODE_API_KEY")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+
+	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(googleGeocodeApiKey)
+
+	if err := run(ctx, os.Stdout, "logfile.log", utils.GetEnv, firebaseAuthClient, googleGeocodeRepo); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}

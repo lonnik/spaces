@@ -57,7 +57,7 @@ func makeRequest[T any](
 ) (*T, func()) {
 	t.Helper()
 
-	authClient.setCurrentTestUser(asUser) // this user is used as admin id
+	authClient.setCurrentTestUser(asUser)
 	defer authClient.setCurrentTestUser(models.BaseUser{})
 
 	req, err := http.NewRequest(method, url, requestBody)

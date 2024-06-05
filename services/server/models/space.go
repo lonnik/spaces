@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/mmcloughlin/geohash"
 )
 
@@ -40,8 +41,8 @@ type NewSpace struct {
 }
 
 type Location struct {
-	Long float64 `json:"longitude" binding:"required,min=-180,max=180"`
-	Lat  float64 `json:"latitude" binding:"required,min=-90,max=90"`
+	Long float64 `json:"longitude" binding:"required,min=-180,max=180" validate:"required,min=-180,max=180"`
+	Lat  float64 `json:"latitude" binding:"required,min=-90,max=90" validate:"required,min=-90,max=90"`
 }
 
 func (loc *Location) ParseString(str string) error {
@@ -53,18 +54,27 @@ func (loc *Location) ParseString(str string) error {
 		return errors.E(op, err)
 	}
 
+	newLoc := &Location{}
 	var err error
-	loc.Long, err = strconv.ParseFloat(parts[0], 64)
+	newLoc.Long, err = strconv.ParseFloat(parts[0], 64)
 	if err != nil {
 		err := fmt.Errorf("invalid longitude: %s", parts[0])
 		return errors.E(op, err)
 	}
 
-	loc.Lat, err = strconv.ParseFloat(parts[1], 64)
+	newLoc.Lat, err = strconv.ParseFloat(parts[1], 64)
 	if err != nil {
 		err := fmt.Errorf("invalid latitude: %s", parts[1])
 		return errors.E(op, err)
 	}
+
+	validate := validator.New()
+	err = validate.Struct(*newLoc)
+	if err != nil {
+		return errors.E(op, err)
+	}
+
+	*loc = *newLoc
 
 	return nil
 }

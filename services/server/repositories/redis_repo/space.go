@@ -382,7 +382,7 @@ func (repo *RedisRepository) getSpaceSubscribers(ctx context.Context, collection
 	var users = make([]models.User, 0, len(userIdStrs))
 	for i, cmd := range cmds {
 		userStringMap := cmd.(*redis.MapStringStringCmd).Val()
-		user := repo.parseUser(ctx, models.UserUid(userIdStrs[i]), userStringMap)
+		user := repo.parseUser(models.UserUid(userIdStrs[i]), userStringMap)
 
 		users = append(users, *user)
 	}

@@ -32,9 +32,10 @@ func runServer(
 	getEnv func(string) (string, error),
 	authClient common.AuthClient,
 	apiVersion, port string,
+	geoCodeRepo common.GeocodeRepository,
 ) (apiEndpoint string) {
 	go func() {
-		if err := run(ctx, os.Stdout, "logfile_test.log", getEnv, authClient); err != nil {
+		if err := run(ctx, os.Stdout, "logfile_test.log", getEnv, authClient, geoCodeRepo); err != nil {
 			t.Errorf("run(() err = %s; want nil", err)
 		}
 	}()

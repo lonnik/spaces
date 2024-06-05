@@ -30,6 +30,7 @@ services:
     volumes:
       - ./:/app
     environment:
+      - HOST=0.0.0.0
       - PORT=8080
       - ENVIRONMENT=development # development, production, test
       - DB_NAME=spacesdb

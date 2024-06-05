@@ -33,12 +33,13 @@ type Result struct {
 }
 
 type ResponseBody struct {
-	Status  string   `json:"status"`
-	Results []Result `json:"results"`
+	Status       string   `json:"status"`
+	Results      []Result `json:"results"`
+	ErrorMessage string   `json:"error_message"`
 }
 
-func (gcr *GoogleGeocodeRepo) FetchAddressForCoordinates(ctx context.Context, location models.Location) (*models.Address, error) {
-	const op errors.Op = "googlegeocode.GoogleGeocodeRepo.FetchAddressForCoordinates"
+func (gcr *GoogleGeocodeRepo) GetAddress(ctx context.Context, location models.Location) (*models.Address, error) {
+	const op errors.Op = "googlegeocode.GoogleGeocodeRepo.GetAddress"
 
 	url, err := gcr.constructReverseGeoCodeUrl(location)
 	if err != nil {
@@ -72,8 +73,12 @@ func (gcr *GoogleGeocodeRepo) FetchAddressForCoordinates(ctx context.Context, lo
 		return &models.Address{}, errors.E(op, err)
 	}
 
-	if responseBody.Status == "ZERO_RESULTS" || len(responseBody.Results) == 0 {
+	if responseBody.Status == "ZERO_RESULTS" {
 		return &models.Address{}, errors.E(op, ErrZeroResults)
+	}
+	if len(responseBody.Results) == 0 {
+		err := fmt.Errorf("response status = %v: error message = %v", responseBody.Status, responseBody.ErrorMessage)
+		return &models.Address{}, errors.E(op, err)
 	}
 	if responseBody.Status != "OK" {
 		return &models.Address{}, errors.E(op, ErrNonSuccessResponseStatus)
@@ -82,6 +87,25 @@ func (gcr *GoogleGeocodeRepo) FetchAddressForCoordinates(ctx context.Context, lo
 	result := getResult(responseBody.Results)
 
 	return constructAddressFromResult(result), nil
+}
+
+func (gcr *GoogleGeocodeRepo) constructReverseGeoCodeUrl(location models.Location) (string, error) {
+	const op errors.Op = "googlegeocode.GoogleGeocodeRepo.constructReverseGeoCodeUrl"
+
+	u, err := url.Parse(baseUrl)
+	if err != nil {
+		return "", errors.E(op, err)
+	}
+
+	urlParams := url.Values{}
+	latLngValue := fmt.Sprintf("%f,%f", location.Lat, location.Long)
+	resultTypeValue := strings.Join(acceptedResultTypes, "|")
+	urlParams.Add("latlng", latLngValue)
+	urlParams.Add("key", gcr.apiKey)
+	urlParams.Add("result_type", resultTypeValue)
+	u.RawQuery = urlParams.Encode()
+
+	return u.String(), nil
 }
 
 func constructAddressFromResult(result Result) *models.Address {
@@ -156,23 +180,4 @@ func getResultTypeIndex(resultType string) int {
 	}
 
 	return len(acceptedResultTypes)
-}
-
-func (gcr *GoogleGeocodeRepo) constructReverseGeoCodeUrl(location models.Location) (string, error) {
-	const op errors.Op = "googlegeocode.GoogleGeocodeRepo.constructReverseGeoCodeUrl"
-
-	u, err := url.Parse(baseUrl)
-	if err != nil {
-		return "", errors.E(op, err)
-	}
-
-	urlParams := url.Values{}
-	latLngValue := fmt.Sprintf("%f,%f", location.Lat, location.Long)
-	resultTypeValue := strings.Join(acceptedResultTypes, "|")
-	urlParams.Add("latlng", latLngValue)
-	urlParams.Add("key", gcr.apiKey)
-	urlParams.Add("result_type", resultTypeValue)
-	u.RawQuery = urlParams.Encode()
-
-	return u.String(), nil
 }

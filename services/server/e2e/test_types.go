@@ -38,3 +38,26 @@ func (tac *EmptyAuthClient) DeleteAllUsers(ctx context.Context) error {
 func (tac *EmptyAuthClient) setCurrentTestUser(newCurrentTestUser models.BaseUser) {
 	tac.currentTestUser = &newCurrentTestUser
 }
+
+type SpyGeocodeRepository struct {
+	calledCount        int
+	currentTestAddress *models.Address
+	currentErr         error
+}
+
+func (gr *SpyGeocodeRepository) GetAddress(ctx context.Context, location models.Location) (*models.Address, error) {
+	gr.calledCount++
+
+	return gr.currentTestAddress, gr.currentErr
+}
+
+func (gr *SpyGeocodeRepository) setTestAddress(newCurrentTestAddress models.Address, err error) {
+	gr.currentTestAddress = &newCurrentTestAddress
+	gr.currentErr = err
+}
+
+func (gr *SpyGeocodeRepository) reset() {
+	gr.calledCount = 0
+	gr.currentTestAddress = nil
+	gr.currentErr = nil
+}

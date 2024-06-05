@@ -74,8 +74,8 @@ func TestGetSpace(
 		t.Run(test.name, func(t *testing.T) {
 			url := fmt.Sprintf("%s/%s", test.url, test.args)
 
-			spaceResponse, teardown := makeRequest[map[string]models.Space](t, client, http.MethodGet, url, nil, test.wantStatusCode, test.currentTestUser, authClient)
-			t.Cleanup(teardown)
+			spaceResponse, teardownFunc := makeRequest[map[string]models.Space](t, client, http.MethodGet, url, nil, test.wantStatusCode, test.currentTestUser, authClient)
+			t.Cleanup(teardownFunc)
 			if spaceResponse == nil {
 				return
 			}

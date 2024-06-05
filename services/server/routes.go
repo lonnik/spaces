@@ -4,7 +4,6 @@ import (
 	"spaces-p/common"
 	"spaces-p/controllers"
 	"spaces-p/middlewares"
-	googlegeocode "spaces-p/repositories/google_geocode"
 	localmemory "spaces-p/repositories/local_memory"
 	"spaces-p/repositories/redis_repo"
 	"spaces-p/services"
@@ -21,14 +20,13 @@ func addRoutes(
 	logger common.Logger,
 	redisClient *redis.Client,
 	postgresClient *sqlx.DB,
-	googleGeocodeApiKey string,
 	authClient common.AuthClient,
+	geoCodeRepo common.GeocodeRepository,
 ) {
 	api := router.Group("/" + apiVersion)
 
 	// set repos
 	redisRepo := redis_repo.NewRedisRepository(redisClient)
-	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(googleGeocodeApiKey)
 	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 
 	// set up services
@@ -37,7 +35,7 @@ func addRoutes(
 	spaceNotificationService := services.NewSpaceNotificationsService(logger, redisRepo, localMemoryRepo)
 	threadService := services.NewThreadService(logger, redisRepo, localMemoryRepo)
 	messageService := services.NewMessageService(logger, redisRepo, localMemoryRepo)
-	addressService := services.NewAddressService(logger, redisRepo, googleGeocodeRepo)
+	addressService := services.NewAddressService(logger, redisRepo, geoCodeRepo)
 	healthService := services.NewHealthService(logger, postgresClient)
 
 	// set up controllers
@@ -119,7 +117,10 @@ func addRoutes(
 	)
 
 	// ADDRESSES
-	api.GET("/address", addressController.GetAddress) // to test
+	api.GET("/address",
+		middlewares.EnsureAuthenticated(logger, authClient, redisRepo, true, false),
+		addressController.GetAddress,
+	) // tested
 
 	// HEALTH
 	api.GET("/health", healthController.HealthCheck)

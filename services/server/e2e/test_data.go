@@ -60,3 +60,24 @@ var testSpaces = []*models.Space{
 		},
 	},
 }
+
+var testAddresses = []*models.Address{
+	{
+		GeoHash:          "u33dcrk5",
+		Street:           "Lunder Str.",
+		StreetNumber:     "4",
+		City:             "Berlin",
+		PostalCode:       13189,
+		Country:          "Germany",
+		FormattedAddress: "Lunder Str. 4, 13189 Berlin, Germany",
+	},
+	{
+		GeoHash:          "u33dcrmg",
+		Street:           "Thulestraße",
+		StreetNumber:     "41",
+		City:             "Berlin",
+		PostalCode:       13189,
+		Country:          "Germany",
+		FormattedAddress: "Thulestraße 41, 13189 Berlin, Germany",
+	},
+}
