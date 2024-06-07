@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"net"
 	"net/http"
 	"os"
@@ -25,8 +24,7 @@ import (
 
 func run(
 	ctx context.Context,
-	stdout io.Writer,
-	logfileName string,
+	logger common.Logger,
 	getenv func(string) (string, error),
 	authClient common.AuthClient,
 	geoCodeRepo common.GeocodeRepository,
@@ -35,19 +33,6 @@ func run(
 	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
 	defer cancel()
 
-	// Zerolog configuration
-	logFile, err := os.Create(logfileName)
-	if err != nil {
-		return errors.E(op, err)
-	}
-	defer logFile.Close()
-
-	consoleWriter := zerolog.ConsoleWriter{
-		Out:        stdout,
-		TimeFormat: time.RFC3339,
-	}
-	multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
-	logger := zerologger.New(multi)
 	logger.Info("GOMAXPROCS: >> ", runtime.GOMAXPROCS(0))
 
 	cors := cors.New(cors.Config{
@@ -141,7 +126,22 @@ func main() {
 
 	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(googleGeocodeApiKey)
 
-	if err := run(ctx, os.Stdout, "logfile.log", utils.GetEnv, firebaseAuthClient, googleGeocodeRepo); err != nil {
+	// logger configuration
+	logFile, err := os.Create("logfile.log")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+
+	consoleWriter := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: time.RFC3339,
+	}
+	multi := zerolog.MultiLevelWriter(consoleWriter, logFile)
+	logger := zerologger.New(multi)
+
+	if err := run(ctx, logger, utils.GetEnv, firebaseAuthClient, googleGeocodeRepo); err != nil {
 		fmt.Fprintf(os.Stderr, "%s\n", err)
 		os.Exit(1)
 	}

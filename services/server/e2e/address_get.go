@@ -79,7 +79,7 @@ func TestGetAddress(
 			}{},
 		},
 		{
-			name:            "get address with invalid location",
+			name:            "get address with missing location",
 			url:             fmt.Sprintf("%s/address", apiEndpoint),
 			currentTestUser: TestUsers[0],
 			args:            *testAddresses[0],

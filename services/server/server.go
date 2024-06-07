@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"spaces-p/common"
 	"spaces-p/middlewares"
 
@@ -20,6 +21,7 @@ func NewServer(
 	authClient common.AuthClient,
 	geoCodeRepo common.GeocodeRepository,
 ) http.Handler {
+	gin.SetMode(os.Getenv("GIN_MODE"))
 	var router = gin.New()
 
 	router.Use(middlewares.GinZerologLogger(logger), gin.Recovery(), cors)

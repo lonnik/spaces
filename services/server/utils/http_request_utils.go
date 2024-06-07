@@ -27,15 +27,36 @@ func getUuidFromPath(c *gin.Context, segment string) (uuid.Uuid, error) {
 }
 
 func GetSpaceIdFromPath(c *gin.Context) (spaceId uuid.Uuid, err error) {
-	return getUuidFromPath(c, "spaceid")
+	const op errors.Op = "utils.GetSpaceIdFromPath"
+
+	spaceId, err = getUuidFromPath(c, "spaceid")
+	if err != nil {
+		return uuid.Nil, errors.E(op, err)
+	}
+
+	return spaceId, nil
 }
 
 func GetThreadIdFromPath(c *gin.Context) (threadId uuid.Uuid, err error) {
-	return getUuidFromPath(c, "threadid")
+	const op errors.Op = "utils.GetThreadIdFromPath"
+
+	threadId, err = getUuidFromPath(c, "threadid")
+	if err != nil {
+		return uuid.Nil, errors.E(op, err)
+	}
+
+	return threadId, nil
 }
 
 func GetMessageIdFromPath(c *gin.Context) (threadId uuid.Uuid, err error) {
-	return getUuidFromPath(c, "messageid")
+	const op errors.Op = "utils.GetMessageIdFromPath"
+
+	threadId, err = getUuidFromPath(c, "messageid")
+	if err != nil {
+		return uuid.Nil, errors.E(op, err)
+	}
+
+	return threadId, nil
 }
 
 func GetUserUidFromPath(c *gin.Context) models.UserUid {

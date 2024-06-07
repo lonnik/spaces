@@ -48,9 +48,10 @@ func TestApi(t *testing.T) {
 	authClient := &e2e.EmptyAuthClient{}
 	geocodeRepo := &e2e.SpyGeocodeRepository{}
 
-	apiEndpoint := runServer(ctx, t, getEnv, authClient, apiVersion, serverPort, geocodeRepo)
-
 	t.Setenv("ENVIRONMENT", "test")
+	t.Setenv("GIN_MODE", "test")
+
+	apiEndpoint := runServer(ctx, t, getEnv, authClient, apiVersion, serverPort, geocodeRepo)
 
 	t.Run("GET /spaces", func(t *testing.T) {
 		e2e.TestGetSpaces(ctx, t, apiEndpoint, redisRepo, authClient)

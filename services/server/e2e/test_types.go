@@ -4,6 +4,7 @@ import (
 	"context"
 	"spaces-p/common"
 	"spaces-p/models"
+	"time"
 )
 
 type test[A, W any] struct {
@@ -60,4 +61,11 @@ func (gr *SpyGeocodeRepository) reset() {
 	gr.calledCount = 0
 	gr.currentTestAddress = nil
 	gr.currentErr = nil
+}
+
+type EmptyLogger struct{}
+
+func (lg *EmptyLogger) Info(v ...any)  {}
+func (lg *EmptyLogger) Error(v ...any) {}
+func (lg *EmptyLogger) RequestInfo(method, path, clientIP string, statusCode int, latency time.Duration) {
 }

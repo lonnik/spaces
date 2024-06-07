@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bytes"
 	"context"
+	"log"
 	"net/http"
 	"testing"
 	"time"
@@ -56,14 +58,22 @@ func waitForReady(
 func setupRedis(ctx context.Context, t *testing.T) (endpoint string, teardownFunc func()) {
 	t.Helper()
 
+	var logger = testcontainers.Logger
+	if !testing.Verbose() {
+		buf := &bytes.Buffer{}
+		logger = log.New(buf, "", log.LstdFlags)
+	}
+
 	req := testcontainers.ContainerRequest{
 		Image:        "redis:latest",
 		ExposedPorts: []string{"6379/tcp"},
 		WaitingFor:   wait.ForLog("Ready to accept connections"),
 	}
+
 	redisC, err := testcontainers.GenericContainer(ctx, testcontainers.GenericContainerRequest{
 		ContainerRequest: req,
 		Started:          true,
+		Logger:           logger,
 	})
 	if err != nil {
 		t.Fatalf("could not start redis: %s", err)
