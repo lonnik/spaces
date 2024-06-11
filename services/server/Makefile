@@ -5,12 +5,12 @@ clean:
 	go run scripts/clean/main.go
 
 build:
-	go build -o ./tmp/main .
+	go build -o ./tmp/main ./cmd
 
 develop:
 	air
 
 migrate:
-	migrate -path=./postgres/migrations/ -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=disable" up
+	migrate -path=./pkg/postgres/migrations/ -database "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:5432/${DB_NAME}?sslmode=disable" up
 
 .PHONY: seed clean build develop migrate

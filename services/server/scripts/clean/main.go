@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"os"
-	"spaces-p/firebase"
-	"spaces-p/redis"
-	"spaces-p/repositories/redis_repo"
-	"spaces-p/zerologger"
+	"spaces-p/pkg/firebase"
+	"spaces-p/pkg/redis"
+	"spaces-p/pkg/repositories/redis_repo"
+	"spaces-p/pkg/zerologger"
 	"time"
 
 	"github.com/rs/zerolog"
