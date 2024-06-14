@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 	"spaces-p/pkg/models"
@@ -53,7 +54,7 @@ func request(t *testing.T, method, url, authorizationToken string, body io.Reade
 	if err != nil {
 		t.Fatalf("http.NewRequest() err = %s; want nil", err)
 	}
-	req.Header.Add("Authorization", authorizationToken)
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", authorizationToken))
 
 	resp, err := httpClient.Do(req)
 	if err != nil {
