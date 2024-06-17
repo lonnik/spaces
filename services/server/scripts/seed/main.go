@@ -38,7 +38,7 @@ func main() {
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
 
-	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx)
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx, "./secrets/firebase_service_account_key.json")
 	if err != nil {
 		logger.Error(err)
 		panic(err)
@@ -53,7 +53,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := seedUsers(ctx, firebaseAuthClient, userService, newFakeUsers); err != nil {
+	if err := seedUsers(ctx, firebaseAuthClient, userService, newFakeUsers, "password1?"); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
@@ -64,7 +64,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := seedUsers(ctx, firebaseAuthClient, userService, newUsers); err != nil {
+	if err := seedUsers(ctx, firebaseAuthClient, userService, newUsers, "password1?"); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
@@ -102,11 +102,11 @@ func createFakeUsers(number int) ([]models.NewFakeUser, error) {
 	return fakeUsers, nil
 }
 
-func seedUsers(ctx context.Context, authClient common.AuthClient, userService *services.UserService, newFakeUsers []models.NewFakeUser) error {
+func seedUsers(ctx context.Context, authClient common.AuthClient, userService *services.UserService, newFakeUsers []models.NewFakeUser, password string) error {
 	const op errors.Op = "main.seedUsers"
 
 	for i := range newFakeUsers {
-		userUid, err := authClient.CreateUser(ctx, newFakeUsers[i].Email, "password1?", true)
+		userUid, err := authClient.CreateUser(ctx, newFakeUsers[i].Email, password, true)
 		if err != nil {
 			return errors.E(op, err)
 		}

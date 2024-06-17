@@ -20,6 +20,10 @@ var (
 func TestMain(m *testing.M) {
 	flag.Parse()
 
+	os.Setenv("ENVIRONMENT", "test")
+	// TODO: remove line after removing gin dependency
+	os.Setenv("GIN_MODE", "test")
+
 	teardownFunc, err := helpers.SetupE2EEnv(apiVersion, serverPort)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "helpers.SetupE2EEnv() err = %s; want nil\n", err)
@@ -27,6 +31,9 @@ func TestMain(m *testing.M) {
 	}
 
 	defer teardownFunc()
+	defer os.Unsetenv("ENVIRONMENT")
+	// TODO: remove line after removing gin dependency
+	defer os.Unsetenv("GIN_MODE")
 
 	exitCode := m.Run()
 	os.Exit(exitCode)

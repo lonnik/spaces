@@ -24,7 +24,7 @@ func main() {
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
 
-	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx)
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx, "./secrets/firebase_service_account_key.json")
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)

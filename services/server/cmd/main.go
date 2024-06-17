@@ -15,6 +15,10 @@ import (
 	"github.com/rs/zerolog"
 )
 
+var (
+	firebaseCredentialsFilename = "./secrets/firebase_service_account_key.json"
+)
+
 func main() {
 	ctx := context.Background()
 
@@ -23,7 +27,7 @@ func main() {
 		exitOnError(err)
 	}
 
-	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(context.Background())
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(context.Background(), firebaseCredentialsFilename)
 	exitOnError(err)
 
 	googleGeocodeApiKey, err := utils.GetEnv("GOOGLE_GEOCODE_API_KEY")

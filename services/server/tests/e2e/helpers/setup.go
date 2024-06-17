@@ -59,14 +59,9 @@ func SetupE2EEnv(apiVersion, serverPort string) (func(), error) {
 	Tc.AuthClient = &StubAuthClient{}
 	Tc.GeocodeRepo = &SpyGeocodeRepository{}
 
-	os.Setenv("ENVIRONMENT", "test")
-	os.Setenv("GIN_MODE", "test")
-
 	teardownFunc := func() {
 		teardownRedisFunc()
 		cancel()
-		os.Unsetenv("ENVIRONMENT")
-		os.Unsetenv("GIN_MODE")
 	}
 
 	Tc.ApiEndpoint, err = runServer(ctx, getEnv, Tc.AuthClient, apiVersion, serverPort, Tc.GeocodeRepo)

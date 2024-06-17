@@ -19,10 +19,10 @@ type FirebaseAuthClient struct {
 	client *auth.Client
 }
 
-func NewFirebaseAuthClient(ctx context.Context) (*FirebaseAuthClient, error) {
+func NewFirebaseAuthClient(ctx context.Context, credentialsFilename string) (*FirebaseAuthClient, error) {
 	const op errors.Op = "firebase.NewFirebaseAuthClient"
 
-	opt := option.WithCredentialsFile("./secrets/firebase_service_account_key.json")
+	opt := option.WithCredentialsFile(credentialsFilename)
 
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
@@ -85,9 +85,11 @@ func (fac *FirebaseAuthClient) CreateUser(ctx context.Context, email, password s
 
 func (fac *FirebaseAuthClient) DeleteAllUsers(ctx context.Context) error {
 	const op errors.Op = "firebase.FirebaseAuthClient.DeleteAllUsers"
-	isDevelopmentEnv := os.Getenv("ENVIRONMENT") == "development"
+	env := os.Getenv("ENVIRONMENT")
+	isDevelopmentEnv := env == "development"
+	isTestEnv := env == "test"
 
-	if !isDevelopmentEnv {
+	if !isDevelopmentEnv && !isTestEnv {
 		return errors.E(op, common.ErrOnlyAllowedInDevEnv)
 	}
 
