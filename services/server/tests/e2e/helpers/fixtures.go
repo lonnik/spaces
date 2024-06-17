@@ -1,29 +1,97 @@
 package helpers
 
-import "spaces-p/pkg/models"
+import (
+	"fmt"
+	"spaces-p/pkg/models"
+	"spaces-p/pkg/utils"
+	"sync"
+	"testing"
+)
 
-var UserFixtures = []models.BaseUser{
-	{
-		ID:        models.UserUid("user1"),
-		Username:  "niko",
-		FirstName: "Nikolas",
-		LastName:  "Heidner",
-		AvatarUrl: "https://www.avatars.com/niko",
-	},
-	{
-		ID:        models.UserUid("user2"),
-		Username:  "luka",
-		FirstName: "Luka",
-		LastName:  "Stärk",
-		AvatarUrl: "https://www.avatars.com/luka",
-	},
-	{
-		ID:        models.UserUid("user3"),
-		Username:  "przemi",
-		FirstName: "Przemek",
-		LastName:  "Borucki",
-		AvatarUrl: "https://www.avatars.com/przemi",
-	},
+const (
+	usersFixtureFilePath     = "../../fixtures/users.json"
+	spacesFixtureFilePath    = "../../fixtures/spaces.json"
+	addressesFixtureFilePath = "../../fixtures/addresses.json"
+)
+
+var (
+	users        []models.BaseUser
+	usersErr     error
+	usersMu      sync.Mutex
+	addresses    []models.Address
+	addressesErr error
+)
+
+func GetUsers(t *testing.T) []models.BaseUser {
+	usersMu.Lock()
+	defer usersMu.Unlock()
+
+	if usersErr != nil {
+		t.Fatal(usersErr)
+	}
+
+	if users == nil {
+		users = getUsersFromFile(t, usersFixtureFilePath)
+	}
+
+	return users
+}
+
+func GetUser(t *testing.T, index int) *models.BaseUser {
+	users := GetUsers(t)
+
+	if index < 0 || index >= len(users) {
+		t.Fatalf("user index = %d; want a value between 0 and %d", index, len(users)-1)
+	}
+
+	return &(users)[index]
+}
+
+func getUsersFromFile(t *testing.T, fileName string) []models.BaseUser {
+	newUsers, err := utils.LoadRecordsFromJSONFile[models.BaseUser](fileName)
+	if err != nil {
+		usersErr = fmt.Errorf("utils.GetRecordsFromFile() err = %w; want nil", err)
+		t.Fatal(err)
+	}
+
+	for i := range newUsers {
+		newUsers[i].ID = models.UserUid(fmt.Sprintf("user%d", i+1))
+		newUsers[i].AvatarUrl = fmt.Sprintf("https://www.avatars.com/%s", newUsers[i].Username)
+	}
+
+	return newUsers
+}
+
+func GetAddresses(t *testing.T) []models.Address {
+	if addressesErr != nil {
+		t.Fatal(addressesErr)
+	}
+
+	if addresses == nil {
+		addresses = getAddressesFromFile(t, addressesFixtureFilePath)
+	}
+
+	return addresses
+}
+
+func GetAddress(t *testing.T, index int) *models.Address {
+	addresses := GetAddresses(t)
+
+	if index < 0 || index >= len(addresses) {
+		t.Fatalf("address index = %d; want a value between 0 and %d", index, len(addresses)-1)
+	}
+
+	return &(addresses[index])
+}
+
+func getAddressesFromFile(t *testing.T, fileName string) []models.Address {
+	addresses, err := utils.LoadRecordsFromJSONFile[models.Address](fileName)
+	if err != nil {
+		addressesErr = fmt.Errorf("utils.GetRecordsFromFile() err = %w; want nil", err)
+		t.Fatal(err)
+	}
+
+	return addresses
 }
 
 var SpaceFixtures = []*models.Space{
@@ -58,26 +126,5 @@ var SpaceFixtures = []*models.Space{
 			Radius:             50,
 			Location:           models.Location{Long: 13.418482, Lat: 52.554775},
 		},
-	},
-}
-
-var AddressFixtures = []*models.Address{
-	{
-		GeoHash:          "u33dcrk5",
-		Street:           "Lunder Str.",
-		StreetNumber:     "4",
-		City:             "Berlin",
-		PostalCode:       13189,
-		Country:          "Germany",
-		FormattedAddress: "Lunder Str. 4, 13189 Berlin, Germany",
-	},
-	{
-		GeoHash:          "u33dcrmg",
-		Street:           "Thulestraße",
-		StreetNumber:     "41",
-		City:             "Berlin",
-		PostalCode:       13189,
-		Country:          "Germany",
-		FormattedAddress: "Thulestraße 41, 13189 Berlin, Germany",
 	},
 }

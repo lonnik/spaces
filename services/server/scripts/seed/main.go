@@ -2,8 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"math/rand"
 	"os"
 	"spaces-p/pkg/common"
@@ -14,11 +12,17 @@ import (
 	localmemory "spaces-p/pkg/repositories/local_memory"
 	"spaces-p/pkg/repositories/redis_repo"
 	"spaces-p/pkg/services"
+	"spaces-p/pkg/utils"
 	"spaces-p/pkg/zerologger"
 	"time"
 
 	"github.com/go-faker/faker/v4"
 	"github.com/rs/zerolog"
+)
+
+const (
+	usersFixtureFilePath  = "fixtures/users.json"
+	spacesFixtureFilePath = "fixtures/spaces.json"
 )
 
 func main() {
@@ -54,7 +58,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	newUsers, err := createRecordsFromFile[models.NewFakeUser]("newUsersFixture.json")
+	newUsers, err := utils.LoadRecordsFromJSONFile[models.NewFakeUser](usersFixtureFilePath)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
@@ -65,7 +69,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	newSpaces, err := createRecordsFromFile[models.NewSpace]("newSpacesFixture.json")
+	newSpaces, err := utils.LoadRecordsFromJSONFile[models.NewSpace](spacesFixtureFilePath)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
@@ -80,28 +84,6 @@ func main() {
 			os.Exit(1)
 		}
 	}
-}
-
-func createRecordsFromFile[T models.NewSpace | models.NewFakeUser](fileName string) ([]T, error) {
-	const op errors.Op = "main.createFakeUsersFromFile"
-
-	jsonFile, err := os.Open(fileName)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	defer jsonFile.Close()
-
-	newRecordsBytes, err := io.ReadAll(jsonFile)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	var newRecords = make([]T, 0)
-	if err := json.Unmarshal(newRecordsBytes, &newRecords); err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	return newRecords, nil
 }
 
 func createFakeUsers(number int) ([]models.NewFakeUser, error) {

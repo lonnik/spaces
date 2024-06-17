@@ -33,7 +33,7 @@ func TestGetSpace(t *testing.T) {
 		{
 			Name:            "get space 1",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            createdTestSpaces[0].ID.String(),
 			WantStatusCode:  http.StatusOK,
 			WantData:        createdTestSpaces[0].BaseSpace,
@@ -41,7 +41,7 @@ func TestGetSpace(t *testing.T) {
 		{
 			Name:            "get space 2",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            createdTestSpaces[1].ID.String(),
 			WantStatusCode:  http.StatusOK,
 			WantData:        createdTestSpaces[1].BaseSpace,
@@ -49,7 +49,7 @@ func TestGetSpace(t *testing.T) {
 		{
 			Name:            "get space by fake space ID",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            uuid.New().String(),
 			WantStatusCode:  http.StatusNotFound,
 			WantData:        models.BaseSpace{},
@@ -57,7 +57,7 @@ func TestGetSpace(t *testing.T) {
 		{
 			Name:            "get space by invalid space ID",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            "lkj",
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},

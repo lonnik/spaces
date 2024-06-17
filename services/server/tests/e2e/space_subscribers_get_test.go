@@ -19,7 +19,7 @@ func TestGetSpaceSubscribers(t *testing.T) {
 
 	createdTestSpaces := helpers.CreateTestSpaces(ctx, t, helpers.Tc.Repo)
 
-	for _, user := range helpers.UserFixtures {
+	for _, user := range helpers.GetUsers(t) {
 		if err := helpers.Tc.Repo.SetSpaceSubscriber(ctx, createdTestSpaces[0].ID, user.ID); err != nil {
 			t.Fatalf("helpers.Tc.Repo.SetSpaceSubscriber() err = %s; want nil", err)
 		}
@@ -32,58 +32,58 @@ func TestGetSpaceSubscribers(t *testing.T) {
 		}
 	})
 
-	teardownFunc := connectUserToSpace(ctx, t, helpers.Tc.ApiEndpoint, helpers.Tc.AuthClient, *createdTestSpaces[0], helpers.UserFixtures[0])
+	teardownFunc := connectUserToSpace(ctx, t, helpers.Tc.ApiEndpoint, helpers.Tc.AuthClient, *createdTestSpaces[0], *helpers.GetUser(t, 0))
 	t.Cleanup(teardownFunc)
-	teardownFunc = connectUserToSpace(ctx, t, helpers.Tc.ApiEndpoint, helpers.Tc.AuthClient, *createdTestSpaces[0], helpers.UserFixtures[1])
+	teardownFunc = connectUserToSpace(ctx, t, helpers.Tc.ApiEndpoint, helpers.Tc.AuthClient, *createdTestSpaces[0], *helpers.GetUser(t, 1))
 	t.Cleanup(teardownFunc)
 
 	tests := []helpers.Test[*struct{}, []string]{
 		{
 			Name:            "get all active space subscribers",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers?active=true", helpers.Tc.ApiEndpoint, createdTestSpaces[0].ID),
-			CurrentTestUser: helpers.UserFixtures[1],
+			CurrentTestUser: *helpers.GetUser(t, 1),
 			WantStatusCode:  http.StatusOK,
-			WantData:        []string{helpers.UserFixtures[1].Username, helpers.UserFixtures[0].Username},
+			WantData:        []string{(*helpers.GetUser(t, 1)).Username, (*helpers.GetUser(t, 0)).Username},
 		},
 		{
 			Name:            "get all space subscribers",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers", helpers.Tc.ApiEndpoint, createdTestSpaces[0].ID),
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			WantStatusCode:  http.StatusOK,
-			WantData:        []string{helpers.UserFixtures[2].Username, helpers.UserFixtures[1].Username, helpers.UserFixtures[0].Username}, // ordered in joined space descending
+			WantData:        []string{(*helpers.GetUser(t, 2)).Username, (*helpers.GetUser(t, 1)).Username, (*helpers.GetUser(t, 0)).Username}, // ordered in joined space descending
 		},
 		{
 			Name:            "get all space subscribers with offset 1",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers?offset=1", helpers.Tc.ApiEndpoint, createdTestSpaces[0].ID),
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			WantStatusCode:  http.StatusOK,
-			WantData:        []string{helpers.UserFixtures[1].Username, helpers.UserFixtures[0].Username}, // ordered in joined space descending
+			WantData:        []string{(*helpers.GetUser(t, 1)).Username, (*helpers.GetUser(t, 0)).Username}, // ordered in joined space descending
 		},
 		{
 			Name:            "get all space subscribers with offset 1 and count 1",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers?offset=1&count=1", helpers.Tc.ApiEndpoint, createdTestSpaces[0].ID),
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			WantStatusCode:  http.StatusOK,
-			WantData:        []string{helpers.UserFixtures[1].Username}, // ordered in joined space descending
+			WantData:        []string{(*helpers.GetUser(t, 1)).Username}, // ordered in joined space descending
 		},
 		{
 			Name:            "get all active space subscribers with offset 1",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers?active=true&offset=1&count=1", helpers.Tc.ApiEndpoint, createdTestSpaces[0].ID),
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			WantStatusCode:  http.StatusOK,
-			WantData:        []string{helpers.UserFixtures[0].Username}, // ordered in joined space descending
+			WantData:        []string{(*helpers.GetUser(t, 0)).Username}, // ordered in joined space descending
 		},
 		{
 			Name:            "get all active space subscribers with invalid space ID",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers", helpers.Tc.ApiEndpoint, ""),
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        []string{}, // ordered in joined space descending
 		},
 		{
 			Name:            "get all active space subscribers with non existing space ID",
 			Url:             fmt.Sprintf("%s/spaces/%s/subscribers", helpers.Tc.ApiEndpoint, uuid.New()),
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			WantStatusCode:  http.StatusNotFound,
 			WantData:        []string{}, // ordered in joined space descending
 		},

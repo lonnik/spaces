@@ -26,7 +26,7 @@ func WaitForReady(
 			fmt.Printf("error making request: %s", err.Error())
 		case res.StatusCode == http.StatusOK:
 			res.Body.Close()
-			fmt.Printf("endpoint is ready!")
+			fmt.Printf("endpoint is ready!\n")
 			return nil
 		default:
 			res.Body.Close()

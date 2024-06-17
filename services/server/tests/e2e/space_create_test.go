@@ -13,12 +13,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
+func getCreateSpaceTests(t *testing.T, url string) []helpers.Test[string, models.BaseSpace] {
 	return []helpers.Test[string, models.BaseSpace]{
 		{
 			Name:            "create space",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusOK,
 			WantData:        (*helpers.SpaceFixtures[0]).BaseSpace,
@@ -26,7 +26,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space without name",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -34,7 +34,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space without color hexa code",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -42,7 +42,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space with invalid color hexa code",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -50,7 +50,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space without radius",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","location":{"longitude":13.420215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -58,7 +58,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space with radius of 999",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":999,"location":{"longitude":13.420215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -66,7 +66,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space without location",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -74,7 +74,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space with invalid location (longitude)",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":-189.20215,"latitude":52.555241}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -82,7 +82,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 		{
 			Name:            "create space with invalid location (latitude)",
 			Url:             url,
-			CurrentTestUser: helpers.UserFixtures[0],
+			CurrentTestUser: *helpers.GetUser(t, 0),
 			Args:            `{"name":"Thulestraße 31","themeColorHexaCode":"#A1BA6D","radius":68,"location":{"longitude":13.420215,"latitude":91.5835}}`,
 			WantStatusCode:  http.StatusBadRequest,
 			WantData:        models.BaseSpace{},
@@ -93,7 +93,7 @@ func getCreateSpaceTests(url string) []helpers.Test[string, models.BaseSpace] {
 func TestCreateSpace(t *testing.T) {
 	url := fmt.Sprintf("%s/spaces", helpers.Tc.ApiEndpoint)
 	client := http.Client{}
-	tests := getCreateSpaceTests(url)
+	tests := getCreateSpaceTests(t, url)
 	ctx := context.Background()
 
 	for _, test := range tests {
