@@ -65,7 +65,7 @@ func (fac *FirebaseAuthClient) VerifyToken(ctx context.Context, idToken string) 
 	var userToken = &common.UserTokenData{
 		SignInProvider:  common.SignInProvider(signInProvider),
 		EmailIsVerified: emailIsVerified,
-		BaseUser:        *fac.getBaseUserDataFromTokenClaims(token.Claims, models.UserUid(token.UID)),
+		UserId:          models.UserUid(token.UID),
 	}
 
 	return userToken, nil
@@ -81,6 +81,24 @@ func (fac *FirebaseAuthClient) CreateUser(ctx context.Context, email, password s
 	}
 
 	return models.UserUid(u.UID), nil
+}
+
+func (fac *FirebaseAuthClient) GetUser(ctx context.Context, userId models.UserUid) (*models.BaseUser, error) {
+	const op errors.Op = "firebase.FirebaseAuthClient.GetUser"
+
+	user, err := fac.client.GetUser(ctx, string(userId))
+	if err != nil {
+		return nil, errors.E(op, err)
+	}
+
+	fmt.Printf("user.CustomClaims: %+v\n", user.CustomClaims)
+
+	return &models.BaseUser{
+		ID:        models.UserUid(user.UID),
+		AvatarUrl: user.PhotoURL,
+		FirstName: user.DisplayName,
+		LastName:  user.CustomClaims["lastName"].(string),
+	}, nil
 }
 
 func (fac *FirebaseAuthClient) DeleteAllUsers(ctx context.Context) error {

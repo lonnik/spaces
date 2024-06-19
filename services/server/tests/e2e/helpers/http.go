@@ -25,8 +25,8 @@ func MakeRequest[T any](
 ) (*T, func()) {
 	t.Helper()
 
-	authClient.SetCurrentTestUser(asUser)
-	defer authClient.SetCurrentTestUser(models.BaseUser{})
+	authClient.SetCurrentTestUser(asUser.ID)
+	defer authClient.SetCurrentTestUser("")
 
 	resp, teardownFunc := request(t, method, url, "fake_authorization_token", requestBody, httpClient)
 

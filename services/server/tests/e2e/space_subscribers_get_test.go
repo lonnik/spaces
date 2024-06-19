@@ -123,7 +123,7 @@ func getUserUsernames(t *testing.T, users []models.User) []string {
 }
 
 func connectUserToSpace(ctx context.Context, t *testing.T, apiEndpoint string, authClient *helpers.StubAuthClient, space models.Space, user models.BaseUser) func() {
-	authClient.SetCurrentTestUser(user)
+	authClient.SetCurrentTestUser(user.ID)
 
 	ctx, cancel := context.WithCancel(ctx)
 
@@ -137,6 +137,6 @@ func connectUserToSpace(ctx context.Context, t *testing.T, apiEndpoint string, a
 
 	return func() {
 		cancel()
-		authClient.SetCurrentTestUser(models.BaseUser{})
+		authClient.SetCurrentTestUser("")
 	}
 }

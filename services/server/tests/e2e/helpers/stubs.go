@@ -12,14 +12,14 @@ import (
 
 // implements the common.AuthClient interface
 type StubAuthClient struct {
-	currentTestUser *models.BaseUser
+	currentTestUserId models.UserUid
 }
 
 func (tac *StubAuthClient) VerifyToken(ctx context.Context, idToken string) (*common.UserTokenData, error) {
 	return &common.UserTokenData{
 		SignInProvider:  "email",
 		EmailIsVerified: true,
-		BaseUser:        *tac.currentTestUser,
+		UserId:          tac.currentTestUserId,
 	}, nil
 }
 
@@ -31,8 +31,8 @@ func (tac *StubAuthClient) DeleteAllUsers(ctx context.Context) error {
 	return nil
 }
 
-func (tac *StubAuthClient) SetCurrentTestUser(newCurrentTestUser models.BaseUser) {
-	tac.currentTestUser = &newCurrentTestUser
+func (tac *StubAuthClient) SetCurrentTestUser(newCurrentTestUserId models.UserUid) {
+	tac.currentTestUserId = newCurrentTestUserId
 }
 
 // implements the common.GeocodeRepository interface

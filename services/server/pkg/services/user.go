@@ -59,17 +59,18 @@ func (us *UserService) CreateUserFromIdToken(ctx context.Context, authClient com
 	}
 
 	// check if user already exists in DB using UID
-	_, err = us.cacheRepo.GetUserById(ctx, userToken.ID)
+	_, err = us.cacheRepo.GetUserById(ctx, userToken.UserId)
 	switch {
 	case errors.Is(err, common.ErrNotFound):
-		if err := us.cacheRepo.SetUser(ctx, models.NewUser(userToken.BaseUser)); err != nil {
+		newUserData := models.NewUser(models.BaseUser{ID: userToken.UserId})
+		if err := us.cacheRepo.SetUser(ctx, newUserData); err != nil {
 			return nil, errors.E(op, err, http.StatusInternalServerError)
 		}
 	case err != nil:
 		return nil, errors.E(op, err, http.StatusInternalServerError)
 	}
 
-	user, err := us.cacheRepo.GetUserById(ctx, userToken.ID)
+	user, err := us.cacheRepo.GetUserById(ctx, userToken.UserId)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}

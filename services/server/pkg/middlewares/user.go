@@ -39,7 +39,7 @@ func EnsureAuthenticated(
 		}
 
 		// verify that user exists
-		user, err := cacheRepo.GetUserById(ctx, userTokenData.ID)
+		user, err := cacheRepo.GetUserById(ctx, userTokenData.UserId)
 		switch {
 		case errors.Is(err, common.ErrNotFound):
 			abortAndWriteError(c, errors.E(op, err, http.StatusUnauthorized), logger)

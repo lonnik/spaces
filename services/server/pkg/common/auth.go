@@ -10,7 +10,7 @@ type SignInProvider string
 type UserTokenData struct {
 	SignInProvider  SignInProvider
 	EmailIsVerified bool
-	models.BaseUser
+	UserId          models.UserUid
 }
 
 type AuthClient interface {
