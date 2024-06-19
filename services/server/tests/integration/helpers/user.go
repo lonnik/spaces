@@ -11,7 +11,7 @@ import (
 
 // signInWithEmailPassword signs in a user using email and password
 // and returns the ID token.
-func SignInWithEmailPassword(email, password string) (idToken string, err error) {
+func FirebaseAuthSignInByEmail(email, password string) (idToken string, err error) {
 	apiKey := os.Getenv("TEST_FIREBASE_API_KEY")
 
 	url := fmt.Sprintf("https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=%s", apiKey)

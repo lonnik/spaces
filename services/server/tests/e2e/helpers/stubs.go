@@ -27,8 +27,8 @@ func (tac *StubAuthClient) CreateUser(ctx context.Context, email, password strin
 	return "", nil
 }
 
-func (tac *StubAuthClient) DeleteAllUsers(ctx context.Context) error {
-	return nil
+func (tac *StubAuthClient) DeleteAllUsers(ctx context.Context) (int, error) {
+	return 0, nil
 }
 
 func (tac *StubAuthClient) SetCurrentTestUser(newCurrentTestUserId models.UserUid) {

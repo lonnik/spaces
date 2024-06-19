@@ -16,5 +16,5 @@ type UserTokenData struct {
 type AuthClient interface {
 	VerifyToken(ctx context.Context, idToken string) (*UserTokenData, error)
 	CreateUser(ctx context.Context, email, password string, emailIsVerified bool) (models.UserUid, error)
-	DeleteAllUsers(ctx context.Context) error
+	DeleteAllUsers(ctx context.Context) (int, error)
 }

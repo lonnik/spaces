@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := firebaseAuthClient.DeleteAllUsers(ctx); err != nil {
+	if _, err := firebaseAuthClient.DeleteAllUsers(ctx); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}

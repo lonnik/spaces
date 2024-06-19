@@ -7,7 +7,6 @@ import (
 	"spaces-p/pkg/common"
 	"spaces-p/pkg/errors"
 	"spaces-p/pkg/models"
-	"strings"
 
 	firebase "firebase.google.com/go/v4"
 	"firebase.google.com/go/v4/auth"
@@ -16,7 +15,7 @@ import (
 )
 
 type FirebaseAuthClient struct {
-	client *auth.Client
+	Client *auth.Client
 }
 
 func NewFirebaseAuthClient(ctx context.Context, credentialsFilename string) (*FirebaseAuthClient, error) {
@@ -40,7 +39,7 @@ func NewFirebaseAuthClient(ctx context.Context, credentialsFilename string) (*Fi
 func (fac *FirebaseAuthClient) VerifyToken(ctx context.Context, idToken string) (*common.UserTokenData, error) {
 	const op errors.Op = "firebase.FirebaseAuthClient.VerifyToken"
 
-	token, err := fac.client.VerifyIDToken(ctx, idToken)
+	token, err := fac.Client.VerifyIDToken(ctx, idToken)
 	if err != nil {
 		return nil, errors.E(op, err)
 	}
@@ -75,7 +74,7 @@ func (fac *FirebaseAuthClient) CreateUser(ctx context.Context, email, password s
 	const op errors.Op = "firebase.FirebaseAuthClient.CreateUser"
 
 	fireBaseUserparams := (&auth.UserToCreate{}).Email(email).Password(password).EmailVerified(emailIsVerified)
-	u, err := fac.client.CreateUser(ctx, fireBaseUserparams)
+	u, err := fac.Client.CreateUser(ctx, fireBaseUserparams)
 	if err != nil {
 		return "", errors.E(op, err)
 	}
@@ -83,35 +82,17 @@ func (fac *FirebaseAuthClient) CreateUser(ctx context.Context, email, password s
 	return models.UserUid(u.UID), nil
 }
 
-func (fac *FirebaseAuthClient) GetUser(ctx context.Context, userId models.UserUid) (*models.BaseUser, error) {
-	const op errors.Op = "firebase.FirebaseAuthClient.GetUser"
-
-	user, err := fac.client.GetUser(ctx, string(userId))
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	fmt.Printf("user.CustomClaims: %+v\n", user.CustomClaims)
-
-	return &models.BaseUser{
-		ID:        models.UserUid(user.UID),
-		AvatarUrl: user.PhotoURL,
-		FirstName: user.DisplayName,
-		LastName:  user.CustomClaims["lastName"].(string),
-	}, nil
-}
-
-func (fac *FirebaseAuthClient) DeleteAllUsers(ctx context.Context) error {
+func (fac *FirebaseAuthClient) DeleteAllUsers(ctx context.Context) (usersDeletedCount int, err error) {
 	const op errors.Op = "firebase.FirebaseAuthClient.DeleteAllUsers"
 	env := os.Getenv("ENVIRONMENT")
 	isDevelopmentEnv := env == "development"
 	isTestEnv := env == "test"
 
 	if !isDevelopmentEnv && !isTestEnv {
-		return errors.E(op, common.ErrOnlyAllowedInDevEnv)
+		return usersDeletedCount, errors.E(op, common.ErrOnlyAllowedInDevEnv)
 	}
 
-	userIterator := fac.client.Users(ctx, "")
+	userIterator := fac.Client.Users(ctx, "")
 
 loop:
 	for {
@@ -120,34 +101,36 @@ loop:
 		case errors.Is(err, iterator.Done):
 			break loop
 		case err != nil:
-			return errors.E(op, err)
+			return usersDeletedCount, errors.E(op, err)
 		}
 
-		if err := fac.client.DeleteUser(ctx, exportedUserRecord.UID); err != nil {
-			return errors.E(op, err)
+		if err := fac.Client.DeleteUser(ctx, exportedUserRecord.UID); err != nil {
+			return usersDeletedCount, errors.E(op, err)
 		}
+
+		usersDeletedCount++
 	}
 
-	return nil
+	return usersDeletedCount, nil
 }
 
-func (fac *FirebaseAuthClient) getBaseUserDataFromTokenClaims(tokenClaims map[string]any, userId models.UserUid) *models.BaseUser {
-	avatarUrl, _ := tokenClaims["picture"].(string)
-	var firstName string
-	var lastName string
-	name, ok := tokenClaims["name"].(string)
-	if ok {
-		nameArr := strings.Split(name, " ")
-		firstName = nameArr[0]
-		if len(nameArr) > 1 {
-			lastName = strings.Join(nameArr[1:], " ")
-		}
-	}
+// func (fac *FirebaseAuthClient) getBaseUserDataFromTokenClaims(tokenClaims map[string]any, userId models.UserUid) *models.BaseUser {
+// 	avatarUrl, _ := tokenClaims["picture"].(string)
+// 	var firstName string
+// 	var lastName string
+// 	name, ok := tokenClaims["name"].(string)
+// 	if ok {
+// 		nameArr := strings.Split(name, " ")
+// 		firstName = nameArr[0]
+// 		if len(nameArr) > 1 {
+// 			lastName = strings.Join(nameArr[1:], " ")
+// 		}
+// 	}
 
-	return &models.BaseUser{
-		ID:        userId,
-		AvatarUrl: avatarUrl,
-		FirstName: firstName,
-		LastName:  lastName,
-	}
-}
+// 	return &models.BaseUser{
+// 		ID:        userId,
+// 		AvatarUrl: avatarUrl,
+// 		FirstName: firstName,
+// 		LastName:  lastName,
+// 	}
+// }
