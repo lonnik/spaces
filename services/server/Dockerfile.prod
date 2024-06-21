@@ -13,7 +13,9 @@ RUN go mod download
 
 COPY . .
 
-RUN echo $FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 | base64 -d > firebase/firebase_service_account_key.json
+RUN mkdir -p secrets
+
+RUN echo $FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 | base64 -d > secrets/firebase_service_account_key.json
 
 RUN make build
 

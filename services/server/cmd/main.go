@@ -27,7 +27,7 @@ func main() {
 		exitOnError(err)
 	}
 
-	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(context.Background(), firebaseCredentialsFilename)
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx, firebaseCredentialsFilename)
 	exitOnError(err)
 
 	googleGeocodeApiKey, err := utils.GetEnv("GOOGLE_GEOCODE_API_KEY")
