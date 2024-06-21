@@ -6,17 +6,41 @@ on:
       - main
       - prod
       - feat-*
+      - test-*
     paths: 
       - 'services/**'
       - '.github/**'
   workflow_dispatch:
 
 jobs:
+  test:
+    name: Run Tests
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/server
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .github
+            services
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.2'
+      - name: Install dependencies
+        run: go mod download
+      - name: Run tests
+        run: make test
+
   ci:
     name: Build and Push Docker Image, Deploy to Linode K8s
     env:
       API_VERSION: v1
     timeout-minutes: 5
+    needs: test
     defaults:
       run:
         working-directory: services/server
@@ -43,11 +67,11 @@ jobs:
             exit 1;
           fi
           if [[ -z "${{ secrets.POSTGRES_HOST }}" ]]; then
-            echo "LINODE_KUBECONFIG secret is missing";
+            echo "POSTGRES_HOST secret is missing";
             exit 1;
           fi
           if [[ -z "${{ secrets.POSTGRES_PASSWORD }}" ]]; then
-            echo "LINODE_KUBECONFIG secret is missing";
+            echo "POSTGRES_PASSWORD secret is missing";
             exit 1;
           fi
 
