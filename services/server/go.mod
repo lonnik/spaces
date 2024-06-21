@@ -1,8 +1,6 @@
 module spaces-p
 
-go 1.21
-
-toolchain go1.22.2
+go 1.22.2
 
 require (
 	firebase.google.com/go/v4 v4.13.0
