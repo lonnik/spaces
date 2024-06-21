@@ -21,9 +21,6 @@ type FirebaseAuthClient struct {
 func NewFirebaseAuthClient(ctx context.Context, credentialsFilename string) (*FirebaseAuthClient, error) {
 	const op errors.Op = "firebase.NewFirebaseAuthClient"
 
-	curWd, _ := os.Getwd()
-	fmt.Printf("curWd :>> %v\n", curWd)
-
 	opt := option.WithCredentialsFile(credentialsFilename)
 
 	app, err := firebase.NewApp(ctx, nil, opt)
