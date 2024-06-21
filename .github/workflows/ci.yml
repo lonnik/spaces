@@ -26,14 +26,24 @@ jobs:
           sparse-checkout: |
             .github
             services
+
+      - name: Check Required variables and secrets
+        run: |
+          if [[ -z "${{ secrets.TEST_FIREBASE_API_KEY }}" ]]; then
+            echo "DOCKERHUB_TOKEN secret is missing";
+            exit 1;
+          fi
+
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22.2'
+
       - name: Install dependencies
         run: go mod download
+
       - name: Run tests
-        run: make test
+        run: TEST_FIREBASE_API_KEY=${{ secrets.TEST_FIREBASE_API_KEY }} make test
 
   ci:
     name: Build and Push Docker Image, Deploy to Linode K8s
