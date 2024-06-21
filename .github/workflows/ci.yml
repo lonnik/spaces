@@ -30,7 +30,11 @@ jobs:
       - name: Check Required variables and secrets
         run: |
           if [[ -z "${{ secrets.TEST_FIREBASE_API_KEY }}" ]]; then
-            echo "DOCKERHUB_TOKEN secret is missing";
+            echo "TEST_FIREBASE_API_KEY secret is missing";
+            exit 1;
+          fi
+          if [[ -z "${{ secrets.TEST_FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" ]]; then
+            echo "TEST_FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 secret is missing";
             exit 1;
           fi
 
@@ -41,6 +45,10 @@ jobs:
 
       - name: Install dependencies
         run: go mod download
+
+      - name: Create firebase-service-account.json file
+        run: |
+          echo "${{ secrets.TEST_FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" | base64 -d > ./secrets/firebase-service-account.json
 
       - name: Run tests
         run: TEST_FIREBASE_API_KEY=${{ secrets.TEST_FIREBASE_API_KEY }} make test
