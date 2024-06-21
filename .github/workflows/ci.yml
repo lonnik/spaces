@@ -50,9 +50,12 @@ jobs:
         run: |
           mkdir -p ./secrets
           echo "${{ secrets.TEST_FIREBASE_SERVICE_ACCOUNT_KEY_BASE64 }}" | base64 -d > ./secrets/firebase-service-account.json
+          ls -la ./secrets
 
       - name: Run tests
-        run: TEST_FIREBASE_API_KEY=${{ secrets.TEST_FIREBASE_API_KEY }} make test
+        run: |
+          ls -la ./secrets
+          TEST_FIREBASE_API_KEY=${{ secrets.TEST_FIREBASE_API_KEY }} make test
 
   ci:
     name: Build and Push Docker Image, Deploy to Linode K8s
