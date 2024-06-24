@@ -17,6 +17,7 @@ import (
 
 var (
 	firebaseCredentialsFilename = "./secrets/firebase_service_account_key.json"
+	logFilename                 = "logfile.log"
 )
 
 func main() {
@@ -36,7 +37,7 @@ func main() {
 	googleGeocodeRepo := googlegeocode.NewGoogleGeocodeRepo(googleGeocodeApiKey)
 
 	// logger configuration
-	logFile, err := os.Create("logfile.log")
+	logFile, err := os.Create(logFilename)
 	exitOnError(err)
 	defer logFile.Close()
 
