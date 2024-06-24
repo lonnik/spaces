@@ -43,7 +43,7 @@ ios
 
 **/*.log
 **/tmp/
-.env
+.env*
 
 *_key.json
 

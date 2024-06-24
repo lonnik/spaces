@@ -2,36 +2,44 @@ package main
 
 import (
 	"context"
-	"encoding/json"
-	"io"
 	"math/rand"
 	"os"
-	"spaces-p/errors"
-	"spaces-p/firebase"
-	"spaces-p/models"
-	"spaces-p/redis"
-	localmemory "spaces-p/repositories/local_memory"
-	"spaces-p/repositories/redis_repo"
-	"spaces-p/services"
-	"spaces-p/zerologger"
+	"spaces-p/pkg/common"
+	"spaces-p/pkg/errors"
+	"spaces-p/pkg/firebase"
+	"spaces-p/pkg/models"
+	"spaces-p/pkg/redis"
+	localmemory "spaces-p/pkg/repositories/local_memory"
+	"spaces-p/pkg/repositories/redis_repo"
+	"spaces-p/pkg/services"
+	"spaces-p/pkg/utils"
+	"spaces-p/pkg/zerologger"
 	"time"
 
-	"firebase.google.com/go/v4/auth"
 	"github.com/go-faker/faker/v4"
 	"github.com/rs/zerolog"
+)
+
+const (
+	usersFixtureFilePath  = "fixtures/users.json"
+	spacesFixtureFilePath = "fixtures/spaces.json"
 )
 
 func main() {
 	var ctx = context.Background()
 
-	redis.ConnectRedis()
-	redisRepo := redis_repo.NewRedisRepository(redis.RedisClient)
+	redisPort := os.Getenv("REDIS_PORT")
+	redisHost := os.Getenv("REDIS_HOST")
+
+	redisClient := redis.GetRedisClient(redisHost, redisPort)
+	redisRepo := redis_repo.NewRedisRepository(redisClient)
 	localMemoryRepo := localmemory.NewLocalMemoryRepo()
 
 	zl := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: time.RFC3339}).With().Timestamp().Logger()
 	logger := zerologger.New(zl)
 
-	if err := firebase.InitAuthClient(); err != nil {
+	firebaseAuthClient, err := firebase.NewFirebaseAuthClient(ctx, "./secrets/firebase_service_account_key.json")
+	if err != nil {
 		logger.Error(err)
 		panic(err)
 	}
@@ -39,29 +47,29 @@ func main() {
 	spaceService := services.NewSpaceService(logger, redisRepo, localMemoryRepo)
 	userService := services.NewUserService(logger, redisRepo)
 
-	newFakeUsers, err := createFakeUsers(ctx, 3)
+	newFakeUsers, err := createFakeUsers(3)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
-	if err := seedUsers(ctx, userService, newFakeUsers); err != nil {
+	if err := seedUsers(ctx, firebaseAuthClient, userService, newFakeUsers, "password1?"); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
-	newUsers, err := createRecordsFromFile[models.NewFakeUser](ctx, "newUsersFixture.json")
+	newUsers, err := utils.LoadRecordsFromJSONFile[models.NewFakeUser](usersFixtureFilePath)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
-	if err := seedUsers(ctx, userService, newUsers); err != nil {
+	if err := seedUsers(ctx, firebaseAuthClient, userService, newUsers, "password1?"); err != nil {
 		logger.Error(err)
 		os.Exit(1)
 	}
 
-	newSpaces, err := createRecordsFromFile[models.NewSpace](ctx, "newSpacesFixture.json")
+	newSpaces, err := utils.LoadRecordsFromJSONFile[models.NewSpace](spacesFixtureFilePath)
 	if err != nil {
 		logger.Error(err)
 		os.Exit(1)
@@ -78,29 +86,7 @@ func main() {
 	}
 }
 
-func createRecordsFromFile[T models.NewSpace | models.NewFakeUser](ctx context.Context, fileName string) ([]T, error) {
-	const op errors.Op = "main.createFakeUsersFromFile"
-
-	jsonFile, err := os.Open(fileName)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-	defer jsonFile.Close()
-
-	newRecordsBytes, err := io.ReadAll(jsonFile)
-	if err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	var newRecords = make([]T, 0)
-	if err := json.Unmarshal(newRecordsBytes, &newRecords); err != nil {
-		return nil, errors.E(op, err)
-	}
-
-	return newRecords, nil
-}
-
-func createFakeUsers(ctx context.Context, number int) ([]models.NewFakeUser, error) {
+func createFakeUsers(number int) ([]models.NewFakeUser, error) {
 	const op errors.Op = "main.createFakeUsers"
 
 	var fakeUsers = make([]models.NewFakeUser, 0, number)
@@ -116,18 +102,16 @@ func createFakeUsers(ctx context.Context, number int) ([]models.NewFakeUser, err
 	return fakeUsers, nil
 }
 
-func seedUsers(ctx context.Context, userService *services.UserService, newFakeUsers []models.NewFakeUser) error {
+func seedUsers(ctx context.Context, authClient common.AuthClient, userService *services.UserService, newFakeUsers []models.NewFakeUser, password string) error {
 	const op errors.Op = "main.seedUsers"
 
 	for i := range newFakeUsers {
-		fireBaseUserparams := (&auth.UserToCreate{}).Email(newFakeUsers[i].Email).Password("password1?").EmailVerified(true)
-
-		u, err := firebase.AuthClient.CreateUser(ctx, fireBaseUserparams)
+		userUid, err := authClient.CreateUser(ctx, newFakeUsers[i].Email, password, true)
 		if err != nil {
 			return errors.E(op, err)
 		}
 
-		newFakeUsers[i].ID = models.UserUid(u.UID)
+		newFakeUsers[i].ID = userUid
 		if err := userService.CreateUser(ctx, newFakeUsers[i].NewUser); err != nil {
 			return errors.E(op, err)
 		}

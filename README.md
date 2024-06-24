@@ -8,9 +8,10 @@ One of the many use cases would be to create a space for your neighbors. Another
 
 From a technical viewpoint, the application consists of a Golang backend with a Redis DB connected to it and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and will be split into microservices. I am aware that this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end. I will soon move most of the DB functionality from Redis to Postgres to take advantage of the benefits a relational database brings to me (foreign keys, schemas, complex queries etc.).
 
-Take into consideration that I worked on this project by myself. So even though things such as maintainability were an important aspect to me, I didn't add any tests so far. Although I structured the functions (especially on the backend) in a way to make them easily testable through unit tests, I decided against to write some so far in order to move faster. When splitting up the app into microservices, I will think from the start about integration and E2E tests and add some later, if there will be still time.
+### Testing
 
-As you can see below, I'm about 3/4 through on my way to launch the app.
+My testing strategy for the backend service puts an emphasis on end-to-end tests to avoid having brittle tests. This way, I can have fast running tests that cover the whole API from authentication to the DB layer implementation. External APIs (eg Firebase) are mocked and tested using separate integration tests. Important (util) functions are additionally tested using classic unit tests.
+The E2E tests fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
 
 You are welcome to go through the code as you please. I'm happy about every bit of feedback!
 
@@ -25,8 +26,6 @@ You are welcome to go through the code as you please. I'm happy about every bit 
 * Split backend into microservices with single API Gateway
 * Move from Redis to Postgresql as main DB
 * Add missing backend API functionality
-* Refine CI/CD pipeline
-* Refine custom navigator
 * Integrate Sentry
 * Submit app to Appstore and Playstore
 

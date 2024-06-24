@@ -1,0 +1,20 @@
+[
+  {
+    "geoHash": "u33dcrk5",
+    "street": "Lunder Str.",
+    "streetNumber": "4",
+    "city": "Berlin",
+    "postalCode": 13189,
+    "country": "Germany",
+    "formattedAddress": "Lunder Str. 4, 13189 Berlin, Germany"
+  },
+  {
+    "geoHash": "u33dcrmg",
+    "street": "Thulestraße",
+    "streetNumber": "41",
+    "city": "Berlin",
+    "postalCode": 13189,
+    "country": "Germany",
+    "formattedAddress": "Thulestraße 41, 13189 Berlin, Germany"
+  }
+]
