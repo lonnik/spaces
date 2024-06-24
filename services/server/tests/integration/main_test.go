@@ -11,7 +11,7 @@ import (
 func TestMain(m *testing.M) {
 	err := godotenv.Load("../../.env.test")
 	if err != nil {
-		fmt.Println("Error loading .env.test file")
+		fmt.Println(".env.test file couldn't be loaded")
 	}
 
 	os.Setenv("ENVIRONMENT", "test")
