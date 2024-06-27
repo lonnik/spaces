@@ -2,15 +2,15 @@
 
 TODO: use grammarly and hemmingway
 
-<img src="https://github.com/lonnik/spaces/assets/16211241/583e057e-f667-47bb-a789-649cc61bc7ae" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/37f1e8a6-f02b-47f4-bd45-f3c86de0ad8c" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/a4934596-fb74-4571-af52-12385c2f539b" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/df4dfbc1-ab61-472a-aa80-a95842b45dfb" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/7138e5f5-1694-4777-821b-1f0b0959802f" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/3b9f0575-d235-4d81-bca6-a54ec7a9ba3a" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/5b02e446-b8ab-43b6-9adf-185691372638" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/917b32c9-279e-4e79-93f3-5bce8e259581" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
-<img src="https://github.com/lonnik/spaces/assets/16211241/6f8f2f7c-dc41-4e20-b052-d5fec0935cc7" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/583e057e-f667-47bb-a789-649cc61bc7ae" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/37f1e8a6-f02b-47f4-bd45-f3c86de0ad8c" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/a4934596-fb74-4571-af52-12385c2f539b" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/df4dfbc1-ab61-472a-aa80-a95842b45dfb" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/7138e5f5-1694-4777-821b-1f0b0959802f" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/3b9f0575-d235-4d81-bca6-a54ec7a9ba3a" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/5b02e446-b8ab-43b6-9adf-185691372638" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/917b32c9-279e-4e79-93f3-5bce8e259581" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/6f8f2f7c-dc41-4e20-b052-d5fec0935cc7" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
 
 ## About
 
