@@ -1,57 +1,65 @@
 # Spaces (under development)
 
-## About
+<img src="https://github.com/lonnik/spaces/assets/16211241/583e057e-f667-47bb-a789-649cc61bc7ae" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/37f1e8a6-f02b-47f4-bd45-f3c86de0ad8c" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/a4934596-fb74-4571-af52-12385c2f539b" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/df4dfbc1-ab61-472a-aa80-a95842b45dfb" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/7138e5f5-1694-4777-821b-1f0b0959802f" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/3b9f0575-d235-4d81-bca6-a54ec7a9ba3a" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/5b02e446-b8ab-43b6-9adf-185691372638" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/917b32c9-279e-4e79-93f3-5bce8e259581" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/6f8f2f7c-dc41-4e20-b052-d5fec0935cc7" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
+
+## About "Spaces"
 
 "Spaces" is supposed to bring people together that are in physical proximity to each other but have never really interacted. You can create a "space" bound to a physical location and set a specific radius to it. Then, other people who open the app and find themselves within the radius of the space's location can access the space and communicate with other members of the space. Once you have accessed a space "on site", you can access it from anywhere anytime.
 
-One of the many use cases would be to create a space for your neighbors. Another one, to create a space for a Pingpong table in the local park so people who play there Pingpong regularly can meet up without having to know each others Whatsapp numbers. You only must have been there once and have accessed the Pingpong table space. People who regularly go play Pingpong in parks know what I am meaning :)
+### Use cases
 
-From a technical viewpoint, the application consists of a Golang backend with a Redis DB connected to it and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and will be split into microservices. I am aware that this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end. I will soon move most of the DB functionality from Redis to Postgres to take advantage of the benefits a relational database brings to me (foreign keys, schemas, complex queries etc.).
+One of the many use cases would be to create a space for your neighborhood. Another one is to create a space that is bound to a Pingpong table in the local park so people who play Pingpong there regularly can meet up without having to know each other's Whatsapp numbers. You only must have been there once and have accessed the space for the Pingpong table to be able to use the Pingpong table space from anywhere you want.
+
+### Techstack
+
+From a technical viewpoint, the application consists of a Golang backend with a Redis instance connected to it (that acts as the central data store) and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and split into microservices. I know this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end.
+
+I will soon move most of the DB functionality from Redis to Postgres to take advantage of a relational database's benefits (foreign keys, schemas, complex queries, etc.).
 
 ### Testing
 
-My testing strategy for the backend service puts an emphasis on end-to-end tests to avoid having brittle tests. This way, I can have fast running tests that cover the whole API from authentication to the DB layer implementation. External APIs (eg Firebase) are mocked and tested using separate integration tests. Important (util) functions are additionally tested using classic unit tests.
+My testing strategy for the backend service puts an emphasis on end-to-end tests to avoid having brittle tests. This way, I can have fast running tests that cover the whole API from authentication to the DB layer implementation. External APIs (eg Firebase) are mocked and tested using separate integration tests. Critical (util) functions are additionally tested using classic unit tests.
+
 The E2E tests fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
+
+#### How to run the backend service tests?
+
+In the `services/server` directory, run:
+
+* `make e2e` to run the E2E test
+* `make integration` to run the integration tests (The value of the TEST_FIREBASE_API_KEY environment variable must be set in the `services/server/.env.test`)
+* `make unit` to run all unit tests
+* `make test` to run all tests
 
 You are welcome to go through the code as you please. I'm happy about every bit of feedback!
 
-### Main Tasks before launch
+## Main Tasks before launch
 
 * <s>Create backend with Redis as the main DB</s>
 * <s>Create screen designs in Figma</s>
 * <s>Implement screen designs</s>
 * <s>Hook up screens to backend</s>
 * <s>Create custom navigator for React Navigation to take advantage of gestures</s>
-* <s>Create basic CI/CD pipeline</s>
+* <s>Create CI/CD pipeline</s>
 * Split backend into microservices with single API Gateway
 * Move from Redis to Postgresql as main DB
 * Add missing backend API functionality
 * Integrate Sentry
 * Submit app to Appstore and Playstore
 
-## Useful Commands
-
-`docker compose --profile dev up --build` to start the developer environment (Firebase service account key must be set)
-
-`docker exec -it server-redis-1 redis-cli` to access the Redis CLI from the Redis server started with the above command
-
-`ngrok http http://localhost:8080` to start a ngrok HTTP tunnel exposing the development server
-
-`kubectl port-forward -n test <database service> 5432:5432 &` 
-
-## Useful Links
-
-`http://localhost:8001/redis-stack/browser`
-
 ## Migrations
 
-Create a migration: `migrate create -ext sql -dir services/server/postgres/migrations -seq <migration name>`
+([golang-migrate](https://github.com/golang-migrate/migrate) must be installed locally)
 
-In case of dirty database version:
-
-1. Set version manually to previous version using `migrate force`
-
-2. push again
+`migrate create -ext sql -dir services/server/postgres/migrations -seq <migration name>` to create a migration
 
 ## Deploy a new instance
 
@@ -83,9 +91,14 @@ linode_token      = <Linode API token>
 
 * `DOCKERHUB_USERNAME` (f.e. `nteeeeed`)
 * `DOCKERHUB_REPO` (f.e. `spaces`)
+* `HELM_VERSION` (f.e. `3.14.3`)
 
 ### Github Action Secrets
 
 * `DOCKERHUB_TOKEN`
 * `FIREBASE_SERVICE_ACCOUNT_KEY_BASE64`
 * `LINODE_KUBECONFIG`
+* `POSTGRES_HOST`
+* `POSTGRES_PASSWORD`
+* `TEST_FIREBASE_API_KEY`
+* `TEST_FIREBASE_SERVICE_ACCOUNT_KEY_BASE64`
