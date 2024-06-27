@@ -1,7 +1,5 @@
 # Spaces (under development)
 
-TODO: use grammarly and hemmingway
-
 <img src="https://github.com/lonnik/spaces/assets/16211241/583e057e-f667-47bb-a789-649cc61bc7ae" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
 <img src="https://github.com/lonnik/spaces/assets/16211241/37f1e8a6-f02b-47f4-bd45-f3c86de0ad8c" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
 <img src="https://github.com/lonnik/spaces/assets/16211241/a4934596-fb74-4571-af52-12385c2f539b" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
@@ -12,22 +10,27 @@ TODO: use grammarly and hemmingway
 <img src="https://github.com/lonnik/spaces/assets/16211241/917b32c9-279e-4e79-93f3-5bce8e259581" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
 <img src="https://github.com/lonnik/spaces/assets/16211241/6f8f2f7c-dc41-4e20-b052-d5fec0935cc7" alt="Screenshot of the application" style="width: 160px; margin-right: 10px; margin-bottom: 20px;"/>
 
-## About
+## About "Spaces"
 
 "Spaces" is supposed to bring people together that are in physical proximity to each other but have never really interacted. You can create a "space" bound to a physical location and set a specific radius to it. Then, other people who open the app and find themselves within the radius of the space's location can access the space and communicate with other members of the space. Once you have accessed a space "on site", you can access it from anywhere anytime.
 
-One of the many use cases would be to create a space for your neighborhood. Another one, to create a space for a Pingpong table in the local park so people who play there Pingpong regularly can meet up without having to know each others Whatsapp numbers. You only must have been there once and have accessed the space for the Pingpong table.
+### Use cases
 
-TODO: above Pingpong table doesn't sound nice
+One of the many use cases would be to create a space for your neighborhood. Another one is to create a space that is bound to a Pingpong table in the local park so people who play Pingpong there regularly can meet up without having to know each other's Whatsapp numbers. You only must have been there once and have accessed the space for the Pingpong table to be able to use the Pingpong table space from anywhere you want.
 
-From a technical viewpoint, the application consists of a Golang backend with a Redis instance connected to it and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and will be split into microservices. I am aware that this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end. I will soon move most of the DB functionality from Redis to Postgres to take advantage of the benefits a relational database brings to me (foreign keys, schemas, complex queries etc.).
+### Techstack
 
-## Testing
+From a technical viewpoint, the application consists of a Golang backend with a Redis instance connected to it (that acts as the central data store) and a React Native frontend. The backend app will be deployed on a Kubernetes cluster (using Linode -> cheapest option) and split into microservices. I know this is a **total overkill** but this project is supposed to be a personal learning project, as a functional app at the end.
+
+I will soon move most of the DB functionality from Redis to Postgres to take advantage of a relational database's benefits (foreign keys, schemas, complex queries, etc.).
+
+### Testing
 
 My testing strategy for the backend service puts an emphasis on end-to-end tests to avoid having brittle tests. This way, I can have fast running tests that cover the whole API from authentication to the DB layer implementation. External APIs (eg Firebase) are mocked and tested using separate integration tests. Critical (util) functions are additionally tested using classic unit tests.
+
 The E2E tests fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
 
-### How to run the backend service tests?
+#### How to run the backend service tests?
 
 In the `services/server` directory, run:
 
@@ -56,13 +59,7 @@ You are welcome to go through the code as you please. I'm happy about every bit 
 
 ([golang-migrate](https://github.com/golang-migrate/migrate) must be installed locally)
 
-Create a migration: `migrate create -ext sql -dir services/server/postgres/migrations -seq <migration name>`
-
-In case of dirty database version:
-
-1. Set version manually to previous version using `migrate force`
-
-2. Push again
+`migrate create -ext sql -dir services/server/postgres/migrations -seq <migration name>` to create a migration
 
 ## Deploy a new instance
 
