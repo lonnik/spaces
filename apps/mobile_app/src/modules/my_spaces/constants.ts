@@ -5,28 +5,28 @@ export const lastVisitedSpaces: TSpaceListItem[] = [
   {
     icon: "🏠",
     lastActivity: {
-      sender: "nicknick",
-      message: "I'm back home",
+      sender: "luka",
+      message: "Get ready for the party",
     },
-    name: "Thule32",
+    name: "Thule45",
     themeColorHexaCode: template.colors.purple,
   },
   {
     icon: "🏓",
     lastActivity: {
-      sender: "nicknick",
-      message: "I'm back home",
+      sender: "luka",
+      message: "Have you seen my ping..",
     },
-    name: "Thule32",
+    name: "Pingpongparkparty",
     themeColorHexaCode: "#212078",
   },
   {
     icon: "🍺",
     lastActivity: {
-      sender: "nicknick",
-      message: "I'm back home",
+      sender: "pia",
+      message: "Let's meet here",
     },
-    name: "Thule32",
+    name: "beer garden",
     themeColorHexaCode: "#69701e",
   },
 ].map((data) => ({ type: "space", data, spaceType: "lastVisited" }));
@@ -35,7 +35,7 @@ export const subscribedSpaces: TSpaceListItem[] = [
   {
     icon: "🍺",
     lastActivity: {
-      sender: "nicknick",
+      sender: "niko",
       message: "I'm back home",
     },
     name: "Thule32",

@@ -14,7 +14,7 @@ import (
 
 var (
 	apiVersion = "v1"
-	serverPort = "8081"
+	serverPort = "8082"
 )
 
 func TestMain(m *testing.M) {
