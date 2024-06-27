@@ -4,7 +4,7 @@ TODO: use grammarly and hemmingway
 
 ## About
 
-<img src="https://github.com/lonnik/spaces/assets/16211241/583e057e-f667-47bb-a789-649cc61bc7ae" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px; border: 1px solid #ddd"/>
+<img src="https://github.com/lonnik/spaces/assets/16211241/583e057e-f667-47bb-a789-649cc61bc7ae" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px; border: 5px solid #f00"/>
 <img src="https://github.com/lonnik/spaces/assets/16211241/37f1e8a6-f02b-47f4-bd45-f3c86de0ad8c" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px; border: 1px solid #ddd"/>
 <img src="https://github.com/lonnik/spaces/assets/16211241/a4934596-fb74-4571-af52-12385c2f539b" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px; border: 1px solid #ddd"/>
 <img src="https://github.com/lonnik/spaces/assets/16211241/df4dfbc1-ab61-472a-aa80-a95842b45dfb" alt="Screenshot of the application" style="width: 150px; margin-right: 10px; margin-bottom: 20px; border: 1px solid #ddd"/>
