@@ -28,14 +28,16 @@ I will soon move most of the DB functionality from Redis to Postgres to take adv
 
 My testing strategy for the backend service puts an emphasis on end-to-end tests to avoid having brittle tests. This way, I can have fast running tests that cover the whole API from authentication to the DB layer implementation. External APIs (eg Firebase) are mocked and tested using separate integration tests. Critical (util) functions are additionally tested using classic unit tests.
 
-The E2E tests fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
+The E2E tests reflect a  fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
+
+The E2E tests reflect an incorrect implementation of the Redis DB layer. This is why the E2E tests fail in around 20% of the cases. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
 
 #### How to run the backend service tests?
 
 In the `services/server` directory, run:
 
 * `make e2e` to run the E2E test
-* `make integration` to run the integration tests (The value of the TEST_FIREBASE_API_KEY environment variable must be set in the `services/server/.env.test`)
+* `make integration` to run the integration tests (The value of the TEST_FIREBASE_API_KEY environment variable must be set in the `services/server/.env.test` file and the Firebase service account key must be stored as a JSON file named `services/server/firebase_service_account_key.json`)
 * `make unit` to run all unit tests
 * `make test` to run all tests
 
