@@ -27,8 +27,6 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
   // const { location } = useLocation();
   const location = { latitude: 52.554357, longitude: 13.420848 };
 
-  console.log("hello world");
-  console.log("location :>> ", location);
   const [
     { data: spaces, isLoading, refetch: refetchSpaces, status, error },
     { data: address, refetch: refetchAddress },
@@ -37,7 +35,6 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
       {
         queryKey: ["spaces by location", location],
         queryFn: () => {
-          console.log("hello world");
           return getSpacesByLocation(location as Location, maxNumberItems);
         },
         enabled: !!location,
@@ -49,9 +46,6 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
       },
     ],
   });
-
-  console.log("status :>> ", status);
-  console.log("error :>> ", error);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -87,8 +81,14 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
             onRefresh={onRefresh}
             refreshing={refreshing}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => {
-              return <SpaceItem data={item} navigation={navigation} />;
+            renderItem={({ item, index }) => {
+              return (
+                <SpaceItem
+                  data={item}
+                  navigation={navigation}
+                  emojy={emojies[index]}
+                />
+              );
             }}
             contentContainerStyle={{
               paddingHorizontal: (template.paddings.md * 2) / 3,
@@ -100,6 +100,8 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
     </View>
   );
 };
+
+const emojies = ["🏠", "🏢", "🏡", "🏣", "🏥", "🏦", "🏨", "🏪", "🏫", "🏬"];
 
 const HeaderCenterElement: FC<{ addressSmall?: string }> = ({
   addressSmall,
