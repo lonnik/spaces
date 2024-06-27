@@ -28,7 +28,7 @@ I will soon move most of the DB functionality from Redis to Postgres to take adv
 
 My testing strategy for the backend service puts an emphasis on end-to-end tests to avoid having brittle tests. This way, I can have fast running tests that cover the whole API from authentication to the DB layer implementation. External APIs (eg Firebase) are mocked and tested using separate integration tests. Critical (util) functions are additionally tested using classic unit tests.
 
-The E2E tests reflect a  fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
+The E2E tests reflect a fail in around 20% percent of the cases due to an incorrect implementation of the DB layer using Redis. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
 
 The E2E tests reflect an incorrect implementation of the Redis DB layer. This is why the E2E tests fail in around 20% of the cases. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
 
