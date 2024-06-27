@@ -58,7 +58,7 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
         </Section>
         <Section headingText="Location">
           <View style={{ gap: 10 }}>
-            <Text>Thulestr. 32, 131389 Berlin</Text>
+            <Text>Baumbachstr. 5, 13189 Berlin</Text>
             <Map
               style={{
                 width: "100%",
@@ -130,7 +130,7 @@ export const SpaceInfoScreen: FC<{ spaceId: Uuid }> = ({ spaceId }) => {
         <Section headingText="Admin">
           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
             <Avatar />
-            <Text style={{ fontWeight: template.fontWeight.bold }}>nikoko</Text>
+            <Text style={{ fontWeight: template.fontWeight.bold }}>niko</Text>
           </View>
         </Section>
         <Section headingText="Category">

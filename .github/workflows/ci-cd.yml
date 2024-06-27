@@ -55,7 +55,8 @@ jobs:
         run: |
           TEST_FIREBASE_API_KEY=${{ secrets.TEST_FIREBASE_API_KEY }} make test
 
-  ci:
+  build_and_deploy:
+    if: vars.BUILD_AND_DEPLOY == 'true'
     name: Build and Push Docker Image, Deploy to Linode K8s
     env:
       API_VERSION: v1

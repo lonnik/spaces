@@ -10,8 +10,6 @@ export const CardWithoutAnimation: FC<{
       style={{
         flex: 1,
         overflow: "hidden",
-        borderTopLeftRadius: template.borderRadius.screen,
-        borderTopRightRadius: template.borderRadius.screen,
         backgroundColor: "#fff",
       }}
     >
