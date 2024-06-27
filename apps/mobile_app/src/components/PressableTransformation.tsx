@@ -8,6 +8,7 @@ import Animated, {
 
 const duration = 100;
 
+// TODO: fix the width of the PressableTransformation component
 export const PressableTransformation: FC<
   {
     children: ReactNode;

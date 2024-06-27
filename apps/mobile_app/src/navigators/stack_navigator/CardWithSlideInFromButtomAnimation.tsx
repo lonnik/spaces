@@ -44,8 +44,6 @@ export const CardWithSlideInFromBotomAnimation: FC<{
       backdropComponent={renderBackdrop}
       handleStyle={{ display: "none" }}
       style={{
-        borderTopLeftRadius: template.borderRadius.screen,
-        borderTopRightRadius: template.borderRadius.screen,
         overflow: "hidden",
       }}
     >
