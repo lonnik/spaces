@@ -30,6 +30,7 @@ My testing strategy for the backend service puts an emphasis on end-to-end tests
 
 The E2E tests reflect an incorrect implementation of the Redis DB layer. This is why the E2E tests fail in around 20% of the cases. This will be fixed soon when replacing most of the Redis implementation with PostgreSQL.
 
+
 #### How to run the backend service tests?
 
 In the `services/server` directory, run:
