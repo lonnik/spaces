@@ -81,14 +81,8 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
             onRefresh={onRefresh}
             refreshing={refreshing}
             keyExtractor={(item) => item.id}
-            renderItem={({ item, index }) => {
-              return (
-                <SpaceItem
-                  data={item}
-                  navigation={navigation}
-                  emojy={emojies[index]}
-                />
-              );
+            renderItem={({ item }) => {
+              return <SpaceItem data={item} navigation={navigation} />;
             }}
             contentContainerStyle={{
               paddingHorizontal: (template.paddings.md * 2) / 3,
@@ -100,8 +94,6 @@ export const HereScreen: FC<BottomTabScreenProps<TabsParamList, "Here">> = ({
     </View>
   );
 };
-
-const emojies = ["🏠", "🏢", "🏡", "🏣", "🏥", "🏦", "🏨", "🏪", "🏫", "🏬"];
 
 const HeaderCenterElement: FC<{ addressSmall?: string }> = ({
   addressSmall,

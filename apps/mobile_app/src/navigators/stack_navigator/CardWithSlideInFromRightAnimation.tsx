@@ -73,8 +73,6 @@ export const CardWithSlideInFromRightAnimation: FC<{
               flex: 1,
               overflow: "hidden",
               backgroundColor: "#fff",
-              borderTopLeftRadius: template.borderRadius.screen,
-              borderTopRightRadius: template.borderRadius.screen,
             },
             animatedCardStyles,
           ]}
