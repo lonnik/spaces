@@ -6,11 +6,6 @@ import (
 )
 
 func GetEnv(key string) (string, error) {
-	port := "8080"
-	if os.Getenv("PORT") != "" {
-		port = os.Getenv("PORT")
-	}
-
 	envVars := map[string]string{
 		"DB_HOST":                os.Getenv("DB_HOST"),
 		"DB_USER":                os.Getenv("DB_USER"),
@@ -22,7 +17,7 @@ func GetEnv(key string) (string, error) {
 		"REDIS_PORT":             os.Getenv("REDIS_PORT"),
 		"GOOGLE_GEOCODE_API_KEY": os.Getenv("GOOGLE_GEOCODE_API_KEY"),
 		"HOST":                   os.Getenv("HOST"),
-		"PORT":                   port,
+		"PORT":                   os.Getenv("PORT"),
 	}
 
 	val, ok := envVars[key]
