@@ -6,7 +6,6 @@ on:
       - main
       - prod
       - feat-*
-      - test-*
     paths: 
       - 'services/**'
       - '.github/**'
