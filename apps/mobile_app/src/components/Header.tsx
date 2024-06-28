@@ -74,6 +74,7 @@ export const Header: FC<{
       style={{
         height: template.height.header,
         paddingHorizontal: template.paddings.md,
+        backgroundColor: template.colors.white,
       }}
     >
       <View
